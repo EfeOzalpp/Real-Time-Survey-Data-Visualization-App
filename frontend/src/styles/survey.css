@@ -1,0 +1,138 @@
+/* Survey Questions Styles */
+.survey-section-wrapper {
+  z-index: 3;
+  display: flex; /* Enable flexbox for centering */
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+  width: 100%; /* Ensure it spans the full viewport width */
+  position: absolute; /* Required for child positioning, if needed */
+  bottom: 35px;
+}
+  .survey-section {
+    min-width: 30%;
+    max-width: 30%;
+    min-height: 26vh;
+    max-height: 26vh;
+    display: flex;
+    justify-content: center;
+    align-content: flex-end;
+    flex-wrap: wrap;
+  }
+  .survey-section-2 {
+    min-width: 30%;
+    max-width: 30%;
+    min-height: 26vh;
+    max-height: 26vh;
+    padding-bottom: 5%;
+    display: flex;
+    justify-content: center;
+    align-content: flex-end;
+    flex-wrap: wrap;
+  }
+  /* onboarding beginning */
+   .begin-title1 {
+    font-weight: 400;
+    margin-bottom: -12px;
+   }
+   .begin-title2 {
+    padding-left: 3.6vh;
+    padding-right: 3.6vh;
+   }   
+  button.begin-button, button.begin-button2 {
+    color: #ffffff;
+    background-color: #292929;
+    padding-bottom: 1vh;
+    padding-top: 1vh;
+    border-radius: 6px; 
+    cursor: pointer;
+    border: none;
+    margin-bottom: 2.4em;
+  }
+  button.begin-button2 {
+    margin-top: 1em;
+    width: calc(100% - 4.8vh);
+  }
+  button.begin-button:hover {
+    transform: scale(1.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  }  
+  button.begin-button2:hover {
+    background-color: #495158;
+    transition: background-color 0.2s ease-in-out;   
+  }
+  .surveyStart {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    margin-top: 6%;
+    padding-right: 4.8vh;
+    padding-left: 4.8vh;
+    width: 100%;
+  }
+  /* Questionnaire */ 
+  .questionnaire {
+    display: flex;
+    flex-direction: column;
+    margin-top: 6%;
+    width: 100%;
+    padding-left: 4.8vh;
+    justify-content: flex-end; 
+  }
+  .question-section {
+    display: flex;
+    padding-bottom: 0.4em;
+  }
+  .number-part {
+    margin-top: -6px;
+  }
+  .fade-out {
+    animation: fadeOut 0.2s ease-in forwards;
+  }
+  
+  .fade-in {
+    animation: fadeIn 0.2s ease-in forwards;
+  }
+  
+  @keyframes fadeOut {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  /* Radio Button */
+  .lottie-option {
+    display: inline-flex;
+    cursor: pointer;
+  }
+  
+  .lottie-option.selected {
+    transform: scale(1.1); /* Slightly enlarge the selected option */
+    transition: transform 0.2s ease-in-out;
+  }
+  
+  .input-part-inside {
+    display: flex;
+    align-items: center; /* Center-align the Lottie animation and text */
+    gap: 10px; /* Space between animation and text */
+  }
+  
+  label {
+    font-size: 16px;
+    color: #333;
+    cursor: pointer;
+  }
+  
+  
+  

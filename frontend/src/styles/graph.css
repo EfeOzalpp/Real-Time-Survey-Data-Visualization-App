@@ -1,0 +1,10 @@
+/* graph styles */
+.graph-wrapper {z-index: 2; position: relative;}
+
+.graph-wrapper.visible {
+  display: block; /* Show when the visible class is applied */
+}
+
+.graph-wrapper.hidden {
+  display: none; /* Ensure it's hidden when toggled off */
+}
