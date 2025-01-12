@@ -1,15 +1,12 @@
 import React, { useState } from 'react';
 import '../styles/survey.css';
 import '../styles/global-styles.css';
-import '../styles/top-bar.css';
-import '../styles/RadialBackground.css';
 import '../styles/AnimationStyles.css';
 import RadialBackground from '../components/RadialBackground';
 import Survey from '../components/survey.jsx';
 import CenteredLogo from '../components/logo';
 import Canvas from '../components/Canvas';
 import Graph from '../components/graph';
-// import Graph from '../components/graph';
 
 const FrontPage = () => {
   const [animationVisible, setAnimationVisible] = useState(false);

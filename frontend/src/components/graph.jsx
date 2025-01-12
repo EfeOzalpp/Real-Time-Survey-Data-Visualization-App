@@ -1,3 +1,4 @@
+// Data visualization Canvas
 import React, { useState, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
 import GraphBars from './GraphBars';

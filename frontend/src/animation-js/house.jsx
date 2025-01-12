@@ -1,16 +1,16 @@
 import React, { useRef, useEffect } from 'react';
 import Lottie from 'lottie-react';
-import animationData from '../animations/grass.json'; // Ensure the path to your JSON is correct
+import animationData from '../lottie-animations-json/house.json'; // Ensure the path is correct
 
-const Grass = () => {
+const House = () => {
   const lottieInstanceRef = useRef();
 
   useEffect(() => {
     if (lottieInstanceRef.current) {
       const instance = lottieInstanceRef.current;
 
-      // Play the initial segment (e.g., frames 0 to 90)
-      instance.playSegments([0, 90], true); // Adjust frame numbers as needed
+      // Play the initial segment (0 to 90)
+      instance.playSegments([0, 90], true); // Play the first segment
     }
   }, []);
 
@@ -18,8 +18,8 @@ const Grass = () => {
     const instance = lottieInstanceRef.current;
 
     if (instance) {
-      // Loop the segment (e.g., frames 60 to 90)
-      instance.playSegments([60, 90], true); // Adjust frame numbers as needed
+      // Loop the segment from frame 60 to 90
+      instance.playSegments([60, 90], true);
     }
   };
 
@@ -29,8 +29,8 @@ const Grass = () => {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        height: '100%',
-        width: '100%',
+        height: '25%',
+        width: '25%',
       }}
     >
       <Lottie
@@ -44,4 +44,4 @@ const Grass = () => {
   );
 };
 
-export default Grass;
+export default House;

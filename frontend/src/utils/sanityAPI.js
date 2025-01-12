@@ -1,4 +1,5 @@
-import client from '../components/sanityClient'; // Adjust the path if sanityClient is in a different folder
+// Linearizing the corresponding values for each survey input for data visualizing
+import client from './sanityClient'; 
 
 export const fetchSurveyData = async () => {
     const query = `

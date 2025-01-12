@@ -1,6 +1,7 @@
+// Storytelling canvas main component
 import React, { useEffect, useState } from 'react';
-import House from './house'; // Ensure the path to the House component is correct
-import Grass from './grass'; // Ensure the path to the Grass component is correct
+import House from '../animation-js/house'; 
+import Grass from '../animation-js/grass'; 
 
 const Canvas = () => {
   const [housePosition, setHousePosition] = useState({ x: 0, y: 0 });

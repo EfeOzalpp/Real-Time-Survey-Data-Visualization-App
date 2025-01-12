@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import Lottie from 'lottie-react';
-import animationData from '../animations/radio-button.json';
+import animationData from './radio-button.json';
 
 const LottieOption = ({ onClick, selected }) => {
   const lottieRef = useRef();

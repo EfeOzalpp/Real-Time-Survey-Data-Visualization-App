@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import client from './sanityClient';
-import LottieOption from './lottieOption'; // Import the LottieOption component
+import client from '../utils/sanityClient';
+import LottieOption from '../lottie-for-UI/lottieOption'; // Import the LottieOption component
 
 const Questionnaire = ({ setAnimationVisible, setGraphVisible}) => {
   const [currentQuestion, setCurrentQuestion] = useState(0); // Start at 0 (no question shown)
@@ -144,7 +144,7 @@ const Questionnaire = ({ setAnimationVisible, setGraphVisible}) => {
       </div>
     );
   }
-
+  
   if (currentQuestion === 0) {
     return (
       <div className={`survey-section ${fadeState}`}>

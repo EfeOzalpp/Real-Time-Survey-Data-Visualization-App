@@ -1,6 +1,8 @@
+// Graph 
 import React, { useEffect, useState } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { Line, Text } from '@react-three/drei';
+import '../styles/graph.css';
 
 const GraphBars = ({ data = [] }) => {
   const [points, setPoints] = useState([]);
