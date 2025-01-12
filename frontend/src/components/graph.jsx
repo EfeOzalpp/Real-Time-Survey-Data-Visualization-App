@@ -1,4 +1,3 @@
-// Data visualization Canvas
 import React, { useState, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
 import GraphBars from './GraphBars';
@@ -10,49 +9,41 @@ const Graph = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        const data = await fetchSurveyData(); // Fetch data from Sanity
-        setSurveyData(data);
-      } catch (error) {
-        console.error('Error fetching survey data:', error);
-      } finally {
-        setLoading(false);
-      }
+    let unsubscribe;
+
+    const initializeData = async () => {
+      unsubscribe = fetchSurveyData((updatedData) => {
+        setSurveyData(updatedData);
+        setLoading(false); // Stop loading once the data is fetched
+      });
     };
 
-    // Initial load
-    loadData();
+    initializeData();
 
-    // Poll for updates every 10 seconds
-    const interval = setInterval(loadData, 100);
-
-    return () => clearInterval(interval); // Cleanup on unmount
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
   }, []);
 
   if (loading) {
-    return <p className="graph-loading"></p>; // Loading message styling
+    return <p className="graph-loading">Loading data...</p>;
   }
 
   return (
     <div className="graph-container" style={{ height: '100vh', width: '100%' }}>
       <Canvas camera={{ position: [0, 0, 15], fov: 33 }}>
-        {/* Ambient light for overall illumination */}
+        {/* Ambient light */}
         <ambientLight intensity={1} />
 
-        {/* Wider directional light */}
-        <directionalLight
-          position={[10, 10, 10]}
-          intensity={1.2}
-          castShadow
-        />
+        {/* Directional light */}
+        <directionalLight position={[10, 10, 10]} intensity={1.2} castShadow />
 
-        {/* Spot light with wider spread */}
+        {/* Spot light */}
         <spotLight
           position={[0, 10, 10]}
           intensity={1}
-          angle={Math.PI / 16} // Adjust the angle for a wider spread
-          penumbra={0.8} // Softer edges
+          angle={Math.PI / 16}
+          penumbra={0.8}
           castShadow
         />
 

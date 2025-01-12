@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import client from '../utils/sanityClient';
 import LottieOption from '../lottie-for-UI/lottieOption'; // Import the LottieOption component
 
@@ -50,12 +50,12 @@ const Questionnaire = ({ setAnimationVisible, setGraphVisible}) => {
 
     // Show the COMPLETE button immediately
     setShowCompleteButton(true);
-    setGraphVisible(true); // Make Graph visible
+    setGraphVisible(true); 
     setAnimationVisible(true);
 
     try {
       await client.create({
-        _type: 'userResponse',
+        _type: 'userResponseTest',
         ...answers,
         submittedAt: new Date().toISOString(),
       });
@@ -86,7 +86,7 @@ const Questionnaire = ({ setAnimationVisible, setGraphVisible}) => {
       setCurrentQuestion(1);
       setAnimationVisible(false); // Reset animation when starting over
       setFadeState('fade-in');
-    }, 500); // Match fade-out duration
+    }, 200); // Match fade-out duration
   };
 
   const questions = [

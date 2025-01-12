@@ -1,14 +1,13 @@
-// Graph 
 import React, { useEffect, useState } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { Line, Text } from '@react-three/drei';
 import '../styles/graph.css';
 
 const GraphBars = ({ data = [] }) => {
-  const [points, setPoints] = useState([]);
-  const [connections, setConnections] = useState([]);
-  const [rotationAngles, setRotationAngles] = useState({ x: 0, y: 0 }); // Rotation angles
-  const [parallaxOffset, setParallaxOffset] = useState({ x: 0, y: 0 }); // Parallax offset
+  const [points, setPoints] = useState([]); // Points for the graph
+  const [connections, setConnections] = useState([]); // Connections between points
+  const [rotationAngles, setRotationAngles] = useState({ x: 0, y: 0 }); // Camera rotation
+  const [parallaxOffset, setParallaxOffset] = useState({ x: 0, y: 0 }); // Parallax effect
   const { camera } = useThree();
 
   const interpolateColor = (weight) => {
@@ -27,64 +26,61 @@ const GraphBars = ({ data = [] }) => {
     return `rgb(${r}, ${g}, ${b})`;
   };
 
-  const generateNonOverlappingPosition = (existingPositions, minDistance = 0.6) => {
-    let position;
-    let overlapping;
+  const generatePositions = (numPoints, minDistance = 0.6) => {
+    const positions = [];
+    for (let i = 0; i < numPoints; i++) {
+      let position;
+      let overlapping;
 
-    do {
-      position = [
-        Math.random() * 20 - 10, // X-coordinate between -10 and 10
-        Math.random() * 20 - 10, // Y-coordinate between -10 and 10
-        Math.random() * 20 - 10, // Z-coordinate between -10 and 10
-      ];
+      do {
+        position = [
+          Math.random() * 20 - 10, // X-coordinate between -10 and 10
+          Math.random() * 20 - 10, // Y-coordinate between -10 and 10
+          Math.random() * 20 - 10, // Z-coordinate between -10 and 10
+        ];
 
-      // Check for overlap with existing positions
-      overlapping = existingPositions.some((existing) => {
-        const distance = Math.sqrt(
-          (position[0] - existing[0]) ** 2 +
-          (position[1] - existing[1]) ** 2 +
-          (position[2] - existing[2]) ** 2
-        );
-        return distance < minDistance;
-      });
-    } while (overlapping);
+        overlapping = positions.some((existing) => {
+          const distance = Math.sqrt(
+            (position[0] - existing[0]) ** 2 +
+            (position[1] - existing[1]) ** 2 +
+            (position[2] - existing[2]) ** 2
+          );
+          return distance < minDistance;
+        });
+      } while (overlapping);
 
-    return position;
+      positions.push(position);
+    }
+    return positions;
   };
 
   useEffect(() => {
+    // Recalculate points whenever `data` changes
     const calculatePoints = () => {
       const weightMap = { A: 0, B: 0.5, C: 1 };
-      const existingPositions = points.map((p) => p.originalPosition);
+      const positions = generatePositions(data.length);
 
-      const newPoints = data.slice(points.length).map((response, index) => {
+      const newPoints = data.map((response, index) => {
         const weights = [
-          weightMap[response.question1],
-          weightMap[response.question2],
-          weightMap[response.question3],
-          weightMap[response.question4],
-          weightMap[response.question5],
+          weightMap[response.question1] || 0,
+          weightMap[response.question2] || 0,
+          weightMap[response.question3] || 0,
+          weightMap[response.question4] || 0,
+          weightMap[response.question5] || 0,
         ];
 
         const averageWeight = weights.reduce((sum, w) => sum + w, 0) / weights.length;
 
-        // Place the latest point closer to the center
-        const position = index === 0 && data.length > points.length
-          ? [Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1] // Closer to the center
-          : generateNonOverlappingPosition(existingPositions, 0.6);
-
-        existingPositions.push(position);
-
         return {
-          originalPosition: position, // Save original position for parallax
-          position,
-          color: interpolateColor(averageWeight), // Color reflects the weight
-          averageWeight, // Store weight for debugging or further use
-          isLatest: index === 0 && data.length > points.length, // Mark as latest
+          position: positions[index],
+          originalPosition: positions[index], // For parallax
+          color: interpolateColor(averageWeight),
+          averageWeight,
+          isLatest: index === 0, // Mark the first point as the latest
         };
       });
 
-      setPoints((prev) => [...prev, ...newPoints]);
+      setPoints(newPoints);
     };
 
     calculatePoints();
@@ -93,21 +89,17 @@ const GraphBars = ({ data = [] }) => {
   useEffect(() => {
     const handleMouseMove = (event) => {
       const { innerWidth, innerHeight } = window;
-
-      // Calculate normalized mouse position relative to the center
       const normalizedX = (event.clientX / innerWidth) * 2 - 1; // Range [-1, 1]
       const normalizedY = -(event.clientY / innerHeight) * 2 + 1; // Range [-1, 1]
 
-      // Calculate rotation angles based on mouse position
       setRotationAngles({
-        x: normalizedY * Math.PI * 0.5, // Vertical rotation mapped to [-π/4, π/4]
-        y: normalizedX * Math.PI, // Horizontal rotation mapped to [-π/2, π/2]
+        x: normalizedY * Math.PI * 0.5,
+        y: normalizedX * Math.PI,
       });
 
-      // Calculate parallax offset
       setParallaxOffset({
-        x: normalizedX * 8, // Max parallax offset in x-direction
-        y: normalizedY * 8, // Max parallax offset in y-direction
+        x: normalizedX * 8,
+        y: normalizedY * 8,
       });
     };
 
@@ -116,54 +108,19 @@ const GraphBars = ({ data = [] }) => {
   }, []);
 
   useFrame(() => {
-    const radius = 16; // Distance from the center
+    const radius = 16;
     const { x, y } = rotationAngles;
 
-    // Update camera position based on rotation angles
     camera.position.x = radius * Math.sin(y) * Math.cos(x);
     camera.position.y = radius * Math.sin(x);
     camera.position.z = radius * Math.cos(y) * Math.cos(x);
 
     camera.lookAt(0, 0, 0);
-
-    // Apply parallax to both points and connections
-    const updatedPoints = points.map((point) => ({
-      ...point,
-      position: [
-        point.originalPosition[0] + parallaxOffset.x * point.originalPosition[2] * 0.1, // Parallax X
-        point.originalPosition[1] + parallaxOffset.y * point.originalPosition[2] * 0.1, // Parallax Y
-        point.originalPosition[2],
-      ],
-    }));
-
-    setPoints(updatedPoints);
-
-    const dynamicConnections = updatedPoints.map((point, i) => {
-      const distances = updatedPoints
-        .map((otherPoint, j) => {
-          if (i === j) return null;
-          const distance = Math.sqrt(
-            (point.position[0] - otherPoint.position[0]) ** 2 +
-            (point.position[1] - otherPoint.position[1]) ** 2 +
-            (point.position[2] - otherPoint.position[2]) ** 2
-          );
-          return { index: j, distance };
-        })
-        .filter(Boolean)
-        .sort((a, b) => a.distance - b.distance);
-
-      return distances.slice(0, 1).map((nearest) => [
-        point.position,
-        updatedPoints[nearest.index].position,
-      ]);
-    });
-
-    setConnections(dynamicConnections.flat());
   });
 
   return (
     <group>
-      {points?.map((point, index) => (
+      {points.map((point, index) => (
         <React.Fragment key={index}>
           <mesh position={point.position}>
             <sphereGeometry args={[0.3, 16, 16]} />
@@ -186,13 +143,8 @@ const GraphBars = ({ data = [] }) => {
           )}
         </React.Fragment>
       ))}
-      {connections?.map(([start, end], index) => (
-        <Line
-          key={index}
-          points={[start, end]}
-          color="gray"
-          lineWidth={0.2}
-        />
+      {connections.map(([start, end], index) => (
+        <Line key={index} points={[start, end]} color="gray" lineWidth={0.2} />
       ))}
     </group>
   );
