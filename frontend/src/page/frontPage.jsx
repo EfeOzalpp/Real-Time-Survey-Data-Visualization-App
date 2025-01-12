@@ -9,6 +9,7 @@ import Survey from '../components/survey.jsx';
 import CenteredLogo from '../components/logo';
 import Canvas from '../components/Canvas';
 import Graph from '../components/graph';
+// import Graph from '../components/graph';
 
 const FrontPage = () => {
   const [animationVisible, setAnimationVisible] = useState(false);
