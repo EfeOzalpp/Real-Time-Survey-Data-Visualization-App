@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
-import GraphBars from './GraphBars';
+import DotGraph from './dotGraph'; 
 import { fetchSurveyData } from '../utils/sanityAPI';
-import '../styles/graph.css'; // Graph-specific styles
+import '../styles/graph.css';
 
 const Graph = () => {
   const [surveyData, setSurveyData] = useState([]);
@@ -12,14 +12,17 @@ const Graph = () => {
     let unsubscribe;
 
     const initializeData = async () => {
+      // Fetch and subscribe to survey data
       unsubscribe = fetchSurveyData((updatedData) => {
+        console.log('Updated data received by Graph:', updatedData); // Debugging
         setSurveyData(updatedData);
-        setLoading(false); // Stop loading once the data is fetched
+        setLoading(false);
       });
     };
 
     initializeData();
 
+    // Cleanup subscription on unmount
     return () => {
       if (unsubscribe) unsubscribe();
     };
@@ -31,12 +34,12 @@ const Graph = () => {
 
   return (
     <div className="graph-container" style={{ height: '100vh', width: '100%' }}>
-      <Canvas camera={{ position: [0, 0, 15], fov: 33 }}>
+      <Canvas camera={{ position: [0, 0, 25], fov: 33 }}>
         {/* Ambient light */}
-        <ambientLight intensity={1} />
+        <ambientLight intensity={1.1} />
 
         {/* Directional light */}
-        <directionalLight position={[10, 10, 10]} intensity={1.2} castShadow />
+        <directionalLight position={[13, 13, 13]} intensity={1.3} castShadow />
 
         {/* Spot light */}
         <spotLight
@@ -46,8 +49,9 @@ const Graph = () => {
           penumbra={0.8}
           castShadow
         />
-
-        <GraphBars data={surveyData} />
+        
+        {/* Pass rewired surveyData to DotGraph */}
+        <DotGraph data={surveyData} />
       </Canvas>
     </div>
   );

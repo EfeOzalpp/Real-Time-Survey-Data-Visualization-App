@@ -55,7 +55,7 @@ const Questionnaire = ({ setAnimationVisible, setGraphVisible}) => {
 
     try {
       await client.create({
-        _type: 'userResponseTest',
+        _type: 'userResponse',
         ...answers,
         submittedAt: new Date().toISOString(),
       });
@@ -138,7 +138,7 @@ const Questionnaire = ({ setAnimationVisible, setGraphVisible}) => {
       <div className="survey-section">
         <div className="surveyStart">
           <button className="begin-button2" onClick={handleComplete}>
-            <h4>COMPLETE</h4>
+            <h4>I AM DONE</h4>
           </button>
         </div></div>
       </div>
