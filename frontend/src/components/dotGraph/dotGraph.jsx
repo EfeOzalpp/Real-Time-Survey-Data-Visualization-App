@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { Text } from '@react-three/drei';
-import '../styles/graph.css';
+import '../../styles/graph.css';
 
 const DotGraph = ({ data = [] }) => {
   const [points, setPoints] = useState([]);
@@ -90,9 +90,9 @@ const DotGraph = ({ data = [] }) => {
       // Generate positions with a larger minDistance for the latest point
       const positions = generatePositions(
         data.length,
-        0.6, // Default minDistance
+        2, // Default minDistance
         latestIndex, // Index of the latest point
-        2.5 // Larger minDistance for "Me" point
+        6 // Larger minDistance for "Me" point
       );
     
       const newPoints = data.map((response, index) => {
@@ -196,7 +196,7 @@ const DotGraph = ({ data = [] }) => {
           anchorX="center"
           anchorY="middle"
         >
-          Me
+          You
         </Text>
       )}
     </group>

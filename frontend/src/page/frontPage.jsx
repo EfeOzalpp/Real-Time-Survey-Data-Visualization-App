@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import '../styles/survey.css';
 import '../styles/global-styles.css';
 import '../styles/AnimationStyles.css';
-import RadialBackground from '../components/RadialBackground';
+import RadialBackground from '../components/static/radialBackground';
 import Survey from '../components/survey.jsx';
-import CenteredLogo from '../components/logo';
+import CenteredLogo from '../components/static/logo';
 import Canvas from '../components/Canvas';
-import Graph from '../components/graph';
+import DataVisualization from '../components/dataVisualization'; 
 
 const FrontPage = () => {
   const [animationVisible, setAnimationVisible] = useState(false);
@@ -22,7 +22,7 @@ const FrontPage = () => {
       </div>
       {/* Graph always renders, visibility controlled by class */}
       <div className={`graph-wrapper ${graphVisible ? 'visible' : 'hidden'}`}>
-        <Graph />
+        <DataVisualization />
       </div>
       <div className="survey-section-wrapper">
         <Survey

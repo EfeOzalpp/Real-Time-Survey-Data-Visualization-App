@@ -2,3 +2,94 @@
 .graph-wrapper {z-index: 2; position: relative;}
 .graph-wrapper.visible {display: block;} /* Show when visible */
 .graph-wrapper.hidden {display: none;} /* Hide when toggled off */
+
+.bar-graph-overlay {position: absolute; top: 0; right: 2.8em; width: 20%; height: 100%; z-index: 2; pointer-events: auto; user-select: text;
+display: flex; flex-direction: column; align-items: center;}
+
+.bar-graph-container {
+    display: flex;
+    justify-content: space-around; /* Space bars evenly across the row */
+    align-items: flex-end; /* Align bars to the bottom */
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+  }
+
+  .bar-graph-icons {
+    display: flex;
+    justify-content: space-around; /* Align icons horizontally */
+    width: 100%;
+    margin-top: 10px; /* Add some space above icons */
+    padding-bottom: 36%;
+    padding-top: 18px;
+  }
+      
+  .bar-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .bar-graph-bar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    height: 110%;
+  }
+  
+  .bar-graph-fill {
+    width: 100%; /* Fill the entire bar horizontally */
+    transition: height 0.3s ease; /* Smooth animation for height changes */
+    animation-duration: 3.6s; /* Duration of the color fluctuation */
+    animation-timing-function: ease-in-out; /* Smooth easing */
+    animation-iteration-count: infinite; /* Loop infinitely */
+    border-radius: 12px;
+  }
+  
+  .bar-graph-label {
+    margin-top: 5px;
+    color: #333;
+    text-align: center;
+    padding-bottom: 12px;
+  }
+
+  .green-animation {
+    animation-name: greenFluctuation;
+  }
+  
+  .yellow-animation {
+    animation-name: yellowFluctuation;
+  }
+  
+  .red-animation {
+    animation-name: redFluctuation;
+  }
+
+  @keyframes greenFluctuation {
+    0%, 100% {
+      background-color: rgb(0, 255, 0); /* Bright Green */
+    }
+    50% {
+      background-color: rgb(130, 200, 0); /* Dark Yellow */
+    }
+  }
+  
+  @keyframes yellowFluctuation {
+    0%, 100% {
+      background-color: rgb(206, 235, 39); /* Dark Yellow */
+    }
+    50% {
+      background-color: rgb(236, 236, 22); /* Bright Yellow */
+    }
+  }
+  
+  @keyframes redFluctuation {
+    0%, 100% {
+      background-color: rgb(136, 51, 6); /* Bright Red */
+    }
+    50% {
+      background-color: rgb(235, 43, 43); /* Darker Red */
+    }
+  }
+  

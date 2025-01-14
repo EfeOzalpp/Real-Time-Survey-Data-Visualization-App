@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
 import DotGraph from './dotGraph'; 
-import { fetchSurveyData } from '../utils/sanityAPI';
-import '../styles/graph.css';
+import { fetchSurveyData } from '../../utils/sanityAPI';
+import '../../styles/graph.css';
 
 const Graph = () => {
   const [surveyData, setSurveyData] = useState([]);
@@ -14,7 +14,6 @@ const Graph = () => {
     const initializeData = async () => {
       // Fetch and subscribe to survey data
       unsubscribe = fetchSurveyData((updatedData) => {
-        console.log('Updated data received by Graph:', updatedData); // Debugging
         setSurveyData(updatedData);
         setLoading(false);
       });
