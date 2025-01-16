@@ -79,48 +79,45 @@ const BarGraph = ({ isVisible }) => {
   }, [animationState]);
 
   if (loading) {
-    return <div>Loading bar graph...</div>;
+    return
   }
 
   return (
-    <div className="bar-graph-overlay">
-      <div className="bar-graph-container">
-        {Object.entries(categories).map(([color, count]) => {
-          const heightPercentage = (count / maxItems) * 100; // Calculate height as percentage
-          return (
-            <div className="bar-graph-bar" key={color}>
-              <span className="bar-graph-label">
-                <p>{count} People</p>
-              </span>
-              <div
-                className={`bar-graph-fill ${color}-animation`}
-                style={{
-                  height: `${heightPercentage}%`, // Use percentage for height
-                  backgroundColor: color,
-                }}
-              ></div>
-            </div>
-          );
-        })}
-      </div>
-      <div className="bar-graph-icons">
-        {/* Controlled Lottie animation for green */}
-        <div className="bar-icon">
-          <Lottie {...greenLottieOptions} lottieRef={lottieRef} />
-        </div>
-        {/* Placeholder SVGs for yellow and red */}
-        <div className="bar-icon">
-          <svg width="40" height="40" xmlns="http://www.w3.org/2000/svg">
-            <rect x="5" y="5" width="30" height="30" stroke="yellow" strokeWidth="4" fill="none" />
-          </svg>
-        </div>
-        <div className="bar-icon">
-          <svg width="40" height="40" xmlns="http://www.w3.org/2000/svg">
-            <polygon points="20,5 35,35 5,35" stroke="red" strokeWidth="4" fill="none" />
-          </svg>
-        </div>
-      </div>
-    </div>
+      <><div className="bar-graph-container">
+          {Object.entries(categories).map(([color, count]) => {
+              const heightPercentage = (count / maxItems) * 100; // Calculate height as percentage
+              return (
+                  <div className="bar-graph-bar" key={color}>
+                      <span className="bar-graph-label">
+                          <p>{count} People</p>
+                      </span>
+                      <div
+                          className={`bar-graph-fill ${color}-animation`}
+                          style={{
+                              height: `${heightPercentage}%`, // Use percentage for height
+                              backgroundColor: color,
+                          }}
+                      ></div>
+                  </div>
+              );
+          })}
+      </div><div className="bar-graph-icons">
+              {/* Controlled Lottie animation for green */}
+              <div className="bar-icon">
+                  <Lottie {...greenLottieOptions} lottieRef={lottieRef} />
+              </div>
+              {/* Placeholder SVGs for yellow and red */}
+              <div className="bar-icon">
+                  <svg width="40" height="40" xmlns="http://www.w3.org/2000/svg">
+                      <rect x="5" y="5" width="30" height="30" stroke="yellow" strokeWidth="4" fill="none" />
+                  </svg>
+              </div>
+              <div className="bar-icon">
+                  <svg width="40" height="40" xmlns="http://www.w3.org/2000/svg">
+                      <polygon points="20,5 35,35 5,35" stroke="red" strokeWidth="4" fill="none" />
+                  </svg>
+              </div>
+          </div></>
   );
 };
 

@@ -1,15 +1,15 @@
 /* Graph Styles */
-.graph-wrapper {z-index: 2; position: relative;}
+.graph-wrapper {position: relative;}
 .graph-wrapper.visible {display: block;}
 .graph-wrapper.hidden {display: none;}
 
-.bar-graph-overlay {
-  position: absolute; top: 0; right: 2.8em; width: 18%; height: 80%; z-index: 4; pointer-events: auto; user-select: text;
-  display: flex; flex-direction: column; align-items: center; margin-top: 4.8%; border-radius: 60px;
-  background-color: rgba(255, 255, 255, 0); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
-  border-image: linear-gradient(to right, #cae7f0, #4682b4); border-image-slice: 1; overflow: hidden;
-  box-shadow: inset 1px 1px 1px 0 rgba(0, 0, 0, 0.1), inset -1px -1px 1px 0 rgba(255, 255, 255, 0.2);
-}
+.draggable-container {height: 80%; width: 280px;}
+
+.draggable-bar-graph {height: 100%; z-index: 4; pointer-events: auto; user-select: text; cursor: grab;
+    display: flex; flex-direction: column; align-items: center; margin-top: 0.4em; border-radius: 42px;
+    background-color: rgba(255, 255, 255, 0.2); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    border-image: linear-gradient(to right, #cae7f0, #4682b4); border-image-slice: 1; overflow: hidden;
+    box-shadow: inset 1px 1px 1px 0 rgba(0, 0, 0, 0.1), inset -1px -1px 1px 0 rgba(255, 255, 255, 0.2);}
 
 .bar-graph-overlay::before {
   content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
@@ -27,16 +27,16 @@
 }
 
 .bar-icon {
-  display: flex; justify-content: center; align-items: center; width: 33%; padding-left: 6%; padding-right: 6%;
+  display: flex; justify-content: center; align-items: center; width: 33%; padding-left: 7%; padding-right: 7%;
 }
 
 .bar-graph-bar {
-  display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; padding-left: 0.4em; padding-right: 0.4em;
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-end; width: 28%; height: 100%; padding-left: 0.4em; padding-right: 0.4em;
 }
 
 .bar-graph-fill {
   width: 100%; transition: height 0.3s ease; animation-duration: 3.6s; animation-timing-function: ease-in-out;
-  animation-iteration-count: infinite; border-radius: 6px; border: 1px solid rgb(202, 202, 202);
+  animation-iteration-count: infinite; border-radius: 6px; 
 }
 
 .bar-graph-label {
@@ -54,32 +54,36 @@
 
 @keyframes yellowFluctuation {
   50% {background-color: rgb(194, 222, 35);}
-  0%, 100% {background-color: rgb(230, 209, 22);}
+  0%, 100% {background-color: rgb(240, 218, 22);}
 }
 
 @keyframes redFluctuation {
-  50% {background-color: rgb(136, 51, 6);}
+  50% {background-color: rgb(173, 86, 14);}
   0%, 100% {background-color: rgb(235, 43, 43);}
 }
 
 /* Toggle button for Bar Graph */
 .toggle-button {
-    padding: 10px;
+    padding: 10px 14px 10px 14px;
     background-color: #292929;
     color: white;
     border-radius: 5px;
     border: none;
     cursor: pointer;
     font-size: 16px;
-    position: absolute; top: 0; right: 14%; width: 6%; z-index: 4; margin-top: 1.6%;
     cursor: pointer;
     transition: all 0.3s ease;
+    position: relative;
+    width: fit-content;
   }
+  .toggle-button p {pointer-events: none; user-select: none;}
   
   .toggle-button:hover {
     background-color: #353B41;
-
   }
 
-  /* You can add other styles for the BarGraph here */
+  /* Dot Graph Z-index */
+  .graph-container {z-index: 4; position: relative;}
+
+
   
