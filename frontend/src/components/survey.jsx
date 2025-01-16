@@ -137,7 +137,7 @@ const Questionnaire = ({ setAnimationVisible, setGraphVisible}) => {
       <div className="survey-section-wrapper">
       <div className="survey-section">
         <div className="surveyStart">
-          <button className="begin-button2" onClick={handleComplete}>
+          <button className="begin-button3" onClick={handleComplete}>
             <h4>I AM DONE</h4>
           </button>
         </div></div>
@@ -181,12 +181,16 @@ const Questionnaire = ({ setAnimationVisible, setGraphVisible}) => {
         )}
 
         {questions[currentQuestion - 1].options.map((option, index) => (
-          <div className="input-part-inside" key={`${currentQuestion}-${option.value}`}>
+          <div className="input-part-inside" 
+          key={`${currentQuestion}-${option.value}`}
+          onClick={() => handleOptionChange(option.value)} 
+          style={{ cursor: 'pointer' }} // Optional: Make the whole area clickable
+          >
             <LottieOption
               onClick={() => handleOptionChange(option.value)}
               selected={answers[`question${currentQuestion}`] === option.value}
             />
-            <label><p>{option.label}</p></label> {/* Wrap label in <p> */} {/* Display the user-friendly label */}
+            <label><p>{option.label}</p></label> {/* Display the user-friendly label */}
           </div>
         ))}
 

@@ -1,10 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import Lottie from 'lottie-react';
 import { fetchSurveyData } from '../utils/sanityAPI';
 import '../styles/graph.css';
 
-const BarGraph = () => {
+// Import Lottie animation
+import tree1 from '../lottie-for-UI/tree1.json'; // Ensure the correct path to the JSON file
+
+const BarGraph = ({ isVisible }) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [animationState, setAnimationState] = useState(false); // Track the animation state
+
+  const lottieRef = useRef(null);
 
   useEffect(() => {
     // Fetch data from Sanity
@@ -22,12 +29,18 @@ const BarGraph = () => {
     fetchData();
   }, []);
 
+  // Directly set the speed of the Lottie animation
+  useEffect(() => {
+    if (lottieRef.current) {
+      lottieRef.current.setSpeed(0.4); // Directly set Lottie animation speed to 0.4
+    }
+  }, []); // This effect will run only once when the component mounts
+
   // Categorize data into groups
-  const maxItems = 75; // Max value for scaling bars
   const categories = { green: 0, yellow: 0, red: 0 };
   data.forEach((item) => {
     const averageWeight = Object.values(item.weights).reduce((sum, w) => sum + w, 0) / Object.values(item.weights).length;
-    if (averageWeight < 0.35) {
+    if (averageWeight <= 0.33) {
       categories.green++;
     } else if (averageWeight < 0.6) {
       categories.yellow++;
@@ -35,6 +48,35 @@ const BarGraph = () => {
       categories.red++;
     }
   });
+
+  // Find the highest group count and adjust maxItems
+  const highestGroupCount = Math.max(categories.green, categories.yellow, categories.red);
+  let maxItems = 500;
+
+  // Adjust maxItems based on the highest group count
+  if (highestGroupCount % 10 === 0) {
+    maxItems = highestGroupCount + 5; // Add 5 if the highest count ends in 0
+  } else {
+    maxItems = Math.ceil(highestGroupCount / 10) * 10; // Round up to the nearest multiple of 10
+  }
+
+  // Lottie Animation Options
+  const greenLottieOptions = {
+    loop: true,
+    autoplay: true,
+    animationData: tree1,
+    initialSegment: animationState ? [5, 55] : [0, 55], // Start at [0, 55], then switch to [5, 55]
+    rendererSettings: {
+      preserveAspectRatio: 'xMidYMid slice',
+    },
+  };
+
+  // Track when the first animation completes to switch segment
+  useEffect(() => {
+    if (!animationState) {
+      setTimeout(() => setAnimationState(true), 200); // After the first animation, switch to loop segment [5–55]
+    }
+  }, [animationState]);
 
   if (loading) {
     return <div>Loading bar graph...</div>;
@@ -62,11 +104,11 @@ const BarGraph = () => {
         })}
       </div>
       <div className="bar-graph-icons">
+        {/* Controlled Lottie animation for green */}
         <div className="bar-icon">
-          <svg width="40" height="40" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="20" cy="20" r="18" stroke="green" strokeWidth="4" fill="none" />
-          </svg>
+          <Lottie {...greenLottieOptions} lottieRef={lottieRef} />
         </div>
+        {/* Placeholder SVGs for yellow and red */}
         <div className="bar-icon">
           <svg width="40" height="40" xmlns="http://www.w3.org/2000/svg">
             <rect x="5" y="5" width="30" height="30" stroke="yellow" strokeWidth="4" fill="none" />

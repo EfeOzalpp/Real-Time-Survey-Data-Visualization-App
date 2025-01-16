@@ -7,7 +7,7 @@ const DotGraph = ({ data = [] }) => {
   const [points, setPoints] = useState([]);
   const [rotationAngles, setRotationAngles] = useState({ x: 0, y: 0 }); // Camera rotation
   const [parallaxOffset, setParallaxOffset] = useState({ x: 0, y: 0 }); // Parallax effect
-  const [radius, setRadius] = useState(36); // Camera distance
+  const [radius, setRadius] = useState(22); // Camera distance
   const { camera } = useThree();
 
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
