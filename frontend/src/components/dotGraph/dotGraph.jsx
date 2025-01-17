@@ -1,158 +1,166 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { Text } from '@react-three/drei';
 import '../../styles/graph.css';
 
-const DotGraph = ({ data = [] }) => {
+const DotGraph = ({ isDragging = false, data = [] }) => {
   const [points, setPoints] = useState([]);
-  const [rotationAngles, setRotationAngles] = useState({ x: 0, y: 0 }); // Camera rotation
-  const [parallaxOffset, setParallaxOffset] = useState({ x: 0, y: 0 }); // Parallax effect
-  const [radius, setRadius] = useState(22); // Camera distance
+  const [rotationAngles, setRotationAngles] = useState({ x: 0, y: 0 });
+  const [lastCursorPosition, setLastCursorPosition] = useState({ x: 0, y: 0 });
+  const [parallaxOffset, setParallaxOffset] = useState({ x: 0, y: 0 });
+  const [radius, setRadius] = useState(22);
   const { camera } = useThree();
+  const isDraggingRef = useRef(isDragging);
 
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
-  
-  // Color interpolation function
+
+  // Linear interpolation function
+  const lerp = (start, end, t) => start + (end - start) * t;
+
   const interpolateColor = (weight) => {
     let r, g, b;
-  
-    // Define clamped yellow color
-    const darkYellow = { r: 175, g: 200, b: 0 }; // Darker yellow
-  
+    const darkYellow = { r: 175, g: 200, b: 0 };
+
     if (weight <= 0.5) {
-      // Green to Dark Yellow (0 to 0.5)
-      const normalizedWeight = weight / 0.5; // Normalize weight to [0, 1]
-      r = Math.round(darkYellow.r * normalizedWeight); // Red increases to dark yellow
-      g = Math.round(255 - (255 - darkYellow.g) * normalizedWeight); // Green decreases slightly
-      b = 0; // Blue stays at 0
+      const normalizedWeight = weight / 0.5;
+      r = Math.round(darkYellow.r * normalizedWeight);
+      g = Math.round(255 - (255 - darkYellow.g) * normalizedWeight);
+      b = 0;
     } else {
-      // Dark Yellow to Red (0.5 to 1)
-      const normalizedWeight = (weight - 0.5) / 0.5; // Normalize weight to [0, 1]
-      r = Math.round(darkYellow.r + (255 - darkYellow.r) * normalizedWeight); // Red increases to max
-      g = Math.round(darkYellow.g * (1 - normalizedWeight)); // Green decreases to 0
-      b = 0; // Blue stays at 0
+      const normalizedWeight = (weight - 0.5) / 0.5;
+      r = Math.round(darkYellow.r + (255 - darkYellow.r) * normalizedWeight);
+      g = Math.round(darkYellow.g * (1 - normalizedWeight));
+      b = 0;
     }
-  
+
     return `rgb(${r}, ${g}, ${b})`;
   };
-  
-  // Generate random positions for dots
+
   const generatePositions = (numPoints, minDistance = 0.6, specialIndex = null, specialMinDistance = 1.5) => {
     const positions = [];
-    const maxRetries = 1000; // Limit retries
-    const bounds = 20; // Initial bounds
-    let expandedBounds = bounds; // Allow dynamic expansion
-  
+    const maxRetries = 1000;
+    const bounds = 20;
+    let expandedBounds = bounds;
+
     for (let i = 0; i < numPoints; i++) {
       let position;
       let overlapping;
       let retries = 0;
-  
+
       const currentMinDistance = i === specialIndex ? specialMinDistance : minDistance;
-  
+
       do {
         if (retries > maxRetries) {
           console.warn(`Failed to place point ${i} with minDistance ${currentMinDistance}. Expanding bounds.`);
-          retries = 0; // Reset retries
-          expandedBounds += 5; // Expand bounds
+          retries = 0;
+          expandedBounds += 5;
         }
-  
+
         position = [
-          Math.random() * expandedBounds - expandedBounds / 2, // X-coordinate
-          Math.random() * expandedBounds - expandedBounds / 2, // Y-coordinate
-          Math.random() * expandedBounds - expandedBounds / 2, // Z-coordinate
+          Math.random() * expandedBounds - expandedBounds / 2,
+          Math.random() * expandedBounds - expandedBounds / 2,
+          Math.random() * expandedBounds - expandedBounds / 2,
         ];
-  
+
         overlapping = positions.some((existing) => {
           const distance = Math.sqrt(
             (position[0] - existing[0]) ** 2 +
-            (position[1] - existing[1]) ** 2 +
-            (position[2] - existing[2]) ** 2
+              (position[1] - existing[1]) ** 2 +
+              (position[2] - existing[2]) ** 2
           );
           return distance < currentMinDistance;
         });
-  
+
         retries++;
       } while (overlapping && retries <= maxRetries);
-  
+
       positions.push(position);
     }
-  
-    return positions;
-  };  
 
-  // In DotGraph
+    return positions;
+  };
+
+  useEffect(() => {
+    isDraggingRef.current = isDragging;
+  }, [isDragging]);
+
   useEffect(() => {
     const calculatePoints = () => {
-      const latestEntryId = data[0]?._id; // Assume data is sorted by `submittedAt`
-      const latestIndex = data.findIndex((response) => response._id === latestEntryId); // Find the index of the latest entry
-    
-      // Generate positions with a larger minDistance for the latest point
-      const positions = generatePositions(
-        data.length,
-        2, // Default minDistance
-        latestIndex, // Index of the latest point
-        6 // Larger minDistance for "Me" point
-      );
-    
+      const latestEntryId = data[0]?._id;
+      const latestIndex = data.findIndex((response) => response._id === latestEntryId);
+
+      const positions = generatePositions(data.length, 2, latestIndex, 6);
+
       const newPoints = data.map((response, index) => {
         const weights = Object.values(response.weights);
         const averageWeight = weights.reduce((sum, w) => sum + w, 0) / weights.length;
-    
+
         return {
           position: positions[index],
-          originalPosition: positions[index], // For parallax
+          originalPosition: positions[index],
           color: interpolateColor(averageWeight),
           averageWeight,
           _id: response._id,
         };
       });
-    
+
       setPoints(newPoints);
-    };    
-    
+    };
+
     calculatePoints();
   }, [data]);
 
   useEffect(() => {
     const handleMouseMove = (event) => {
+      if (isDraggingRef.current) return;
+
       const { innerWidth, innerHeight } = window;
-      const normalizedX = (event.clientX / innerWidth) * 2 - 1; // Range [-1, 1]
-      const normalizedY = -(event.clientY / innerHeight) * 2 + 1; 
-  
+      const normalizedX = (event.clientX / innerWidth) * 2 - 1;
+      const normalizedY = -(event.clientY / innerHeight) * 2 + 1;
+
       setRotationAngles({
         x: normalizedY * Math.PI * 0.5,
         y: normalizedX * Math.PI,
       });
 
       setParallaxOffset({
-        x: normalizedX * 9, // Adjust parallax strength
-        y: normalizedY * 5, 
+        x: normalizedX * 4,
+        y: normalizedY * 2,
       });
+
+      setLastCursorPosition({ x: normalizedX, y: normalizedY });
     };
 
     const handleScroll = (event) => {
       setRadius((prevRadius) => clamp(prevRadius - event.deltaY * 0.1, 20, 200));
     };
-  
+
     window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('wheel', handleScroll); // Add scroll listener
+    window.addEventListener('wheel', handleScroll);
+
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('wheel', handleScroll); // Cleanup scroll listener
+      window.removeEventListener('wheel', handleScroll);
     };
   }, []);
-  
+
   useFrame(() => {
+    if (isDraggingRef.current) return;
+
+    // Smoothly transition to the target rotationAngles using lerp
+    setRotationAngles((prev) => ({
+      x: lerp(prev.x, lastCursorPosition.y * Math.PI * 0.5, 0.1), // Adjust the 0.1 for slower/faster transition
+      y: lerp(prev.y, lastCursorPosition.x * Math.PI, 0.1), // Adjust the 0.1 for slower/faster transition
+    }));
+
     const { x, y } = rotationAngles;
-  
+
     camera.position.x = radius * Math.sin(y) * Math.cos(x);
     camera.position.y = radius * Math.sin(x);
     camera.position.z = radius * Math.cos(y) * Math.cos(x);
-  
+
     camera.lookAt(0, 0, 0);
 
-    // Apply parallax to points
     setPoints((currentPoints) =>
       currentPoints.map((point) => ({
         ...point,
@@ -165,13 +173,7 @@ const DotGraph = ({ data = [] }) => {
     );
   });
 
-  // Find the top-most point (based on y-coordinate)
-  const topMostPoint = points.reduce((max, point) => {
-    return point.position[1] > max.position[1] ? point : max;
-  }, points[0] || { position: [0, 0, 0] }); // Default in case points are empty
-
-    // Find the latest point based on the latest data entry
-  const latestEntryId = data[0]?._id; // Assume data is sorted by `submittedAt` in descending order
+  const latestEntryId = data[0]?._id;
   const latestPoint = points.find((point) => point._id === latestEntryId);
 
   return (
@@ -183,12 +185,11 @@ const DotGraph = ({ data = [] }) => {
         </mesh>
       ))}
 
-      {/* Add "Me" text next to the top-most point */}
       {latestPoint && (
         <Text
           position={[
-            latestPoint.position[0] + 1.1, // Offset slightly on the x-axis
-            latestPoint.position[1] + 0.1, // Offset slightly above the point
+            latestPoint.position[0] + 1.1,
+            latestPoint.position[1] + 0.1,
             latestPoint.position[2],
           ]}
           fontSize={0.6}

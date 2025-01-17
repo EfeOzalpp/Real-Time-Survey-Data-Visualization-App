@@ -53,11 +53,16 @@ const BarGraph = ({ isVisible }) => {
   const highestGroupCount = Math.max(categories.green, categories.yellow, categories.red);
   let maxItems = 500;
 
+  // Helper function to round up to the nearest step
+  const roundUpToStep = (value, step) => {
+    return Math.ceil(value / step) * step;
+  };
+
   // Adjust maxItems based on the highest group count
   if (highestGroupCount % 10 === 0) {
-    maxItems = highestGroupCount + 5; // Add 5 if the highest count ends in 0
+    maxItems = highestGroupCount + 15; // Add 15 if the highest count ends in 0
   } else {
-    maxItems = Math.ceil(highestGroupCount / 10) * 10; // Round up to the nearest multiple of 10
+    maxItems = roundUpToStep(highestGroupCount, 20); // Round up to the nearest multiple of 20
   }
 
   // Lottie Animation Options

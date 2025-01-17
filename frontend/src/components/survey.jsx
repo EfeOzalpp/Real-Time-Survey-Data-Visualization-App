@@ -86,7 +86,7 @@ const Questionnaire = ({ setAnimationVisible, setGraphVisible}) => {
       setCurrentQuestion(1);
       setAnimationVisible(false); // Reset animation when starting over
       setFadeState('fade-in');
-    }, 200); // Match fade-out duration
+    }, 100); // Match fade-out duration
   };
 
   const questions = [
