@@ -1,0 +1,19 @@
+/* Personalized Gamification */
+.personalized-result {
+    background-color: #f4fdfc; padding: 12px; border-radius: 6px; 
+    color: rgb(51, 51, 51); text-align: center;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.1), inset -1px -1px 1px rgba(255, 255, 255, 0.2);
+}
+
+.personalized-result::after {
+    content: '';
+    position: absolute;
+    top: 50%; /* Center the arrow vertically */
+    left: -18px; /* Position the arrow outside the box */
+    transform: translateY(-50%) rotate(90deg); /* Adjust for centering */
+    border-width: 10px; /* Arrow size */
+    border-style: solid;
+    border-color: #f4fdfc transparent transparent transparent; /* Arrow color */
+  }

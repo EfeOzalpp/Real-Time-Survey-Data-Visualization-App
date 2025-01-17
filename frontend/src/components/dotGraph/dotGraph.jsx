@@ -1,22 +1,62 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
-import { Text } from '@react-three/drei';
+import { Html } from '@react-three/drei';
+import GamificationPersonalized from './gamificationPersonalized'; // Import your component
 import '../../styles/graph.css';
+import { useDynamicOffset } from '../../utils/dynamicOffset.ts';
 
 const DotGraph = ({ isDragging = false, data = [] }) => {
   const [points, setPoints] = useState([]);
   const [rotationAngles, setRotationAngles] = useState({ x: 0, y: 0 });
   const [lastCursorPosition, setLastCursorPosition] = useState({ x: 0, y: 0 });
-  const [parallaxOffset, setParallaxOffset] = useState({ x: 0, y: 0 });
-  const [radius, setRadius] = useState(22);
+  const [radius, setRadius] = useState(50);
   const { camera } = useThree();
   const isDraggingRef = useRef(isDragging);
 
-  const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+  const spreadFactor = 75; // Default spread factor
+  const minRadius = 20; // Calculating zoomed in and out states to adjust gamification offset
+  const maxRadius = 400; // Zoomed out
+
+  // Use the dynamic offset hook
+  const dynamicOffset = useDynamicOffset();
+  // Nonlinear interpolation function with clamping
+
+  const nonlinearLerp = (start, end, t) => {
+  // Apply an easing function (ease-in)
+  const easedT = 1 - Math.pow(1 - t, 5); // Adjust this function for different skew effects
+
+  // Perform the interpolation
+  const value = start + (end - start) * easedT;
+
+  // Clamp the result to stay within [start, end]
+  return Math.min(Math.max(value, Math.min(start, end)), Math.max(start, end));
+  };
 
   // Linear interpolation function
   const lerp = (start, end, t) => start + (end - start) * t;
 
+  // Map radius to a 0..1 range for gamification offset
+  const zoomFactor = (radius - minRadius) / (maxRadius - minRadius);
+
+  // Get current viewport dimensions
+  const currentWidth = window.innerWidth;
+  const currentHeight = window.innerHeight;
+
+  // Check the current aspect ratio
+  const isPortrait = currentHeight > currentWidth;
+
+  let offsetOne;
+
+  if (isPortrait) {
+    offsetOne = 160;
+  } else {
+    offsetOne = 120;
+  }
+
+  // Use the dynamicOffset in the lerp function
+  const offsetPx = nonlinearLerp(offsetOne, dynamicOffset, zoomFactor);
+
+  // Weight to color range
   const interpolateColor = (weight) => {
     let r, g, b;
     const darkYellow = { r: 175, g: 200, b: 0 };
@@ -36,49 +76,60 @@ const DotGraph = ({ isDragging = false, data = [] }) => {
     return `rgb(${r}, ${g}, ${b})`;
   };
 
-  const generatePositions = (numPoints, minDistance = 0.6, specialIndex = null, specialMinDistance = 1.5) => {
+  const generatePositions = (numPoints, minDistance = 20, spreadFactor = 75) => {
     const positions = [];
     const maxRetries = 1000;
-    const bounds = 20;
-    let expandedBounds = bounds;
-
+  
     for (let i = 0; i < numPoints; i++) {
       let position;
       let overlapping;
       let retries = 0;
-
-      const currentMinDistance = i === specialIndex ? specialMinDistance : minDistance;
-
+  
       do {
         if (retries > maxRetries) {
-          console.warn(`Failed to place point ${i} with minDistance ${currentMinDistance}. Expanding bounds.`);
-          retries = 0;
-          expandedBounds += 5;
+          console.warn(`Failed to place point ${i} after ${maxRetries} retries.`);
+          break;
         }
-
+  
         position = [
-          Math.random() * expandedBounds - expandedBounds / 2,
-          Math.random() * expandedBounds - expandedBounds / 2,
-          Math.random() * expandedBounds - expandedBounds / 2,
+          (Math.random() - 0.5) * spreadFactor,
+          (Math.random() - 0.5) * spreadFactor,
+          (Math.random() - 0.5) * spreadFactor,
         ];
-
+  
         overlapping = positions.some((existing) => {
           const distance = Math.sqrt(
             (position[0] - existing[0]) ** 2 +
-              (position[1] - existing[1]) ** 2 +
-              (position[2] - existing[2]) ** 2
+            (position[1] - existing[1]) ** 2 +
+            (position[2] - existing[2]) ** 2
           );
-          return distance < currentMinDistance;
+          return distance < minDistance;
         });
-
+  
         retries++;
-      } while (overlapping && retries <= maxRetries);
-
-      positions.push(position);
+      } while (overlapping);
+  
+      if (!overlapping) {
+        positions.push(position);
+      }
     }
-
+  
+    // Validation step
+    for (let i = 0; i < positions.length; i++) {
+      for (let j = i + 1; j < positions.length; j++) {
+        const distance = Math.sqrt(
+          (positions[i][0] - positions[j][0]) ** 2 +
+          (positions[i][1] - positions[j][1]) ** 2 +
+          (positions[i][2] - positions[j][2]) ** 2
+        );
+        if (distance < minDistance) {
+          console.error(`Points ${i} and ${j} are too close! Distance: ${distance}`);
+        }
+      }
+    }
+  
     return positions;
-  };
+  };  
 
   useEffect(() => {
     isDraggingRef.current = isDragging;
@@ -86,15 +137,13 @@ const DotGraph = ({ isDragging = false, data = [] }) => {
 
   useEffect(() => {
     const calculatePoints = () => {
-      const latestEntryId = data[0]?._id;
-      const latestIndex = data.findIndex((response) => response._id === latestEntryId);
-
-      const positions = generatePositions(data.length, 2, latestIndex, 6);
-
+      const positions = generatePositions(data.length, 2, spreadFactor);
+  
+      // Map data to points
       const newPoints = data.map((response, index) => {
         const weights = Object.values(response.weights);
         const averageWeight = weights.reduce((sum, w) => sum + w, 0) / weights.length;
-
+  
         return {
           position: positions[index],
           originalPosition: positions[index],
@@ -103,12 +152,23 @@ const DotGraph = ({ isDragging = false, data = [] }) => {
           _id: response._id,
         };
       });
-
+  
+      // Ensure latest point is at the center
+      const latestEntryId = data[0]?._id;
+      if (latestEntryId) {
+        const latestPointIndex = newPoints.findIndex((point) => point._id === latestEntryId);
+        if (latestPointIndex !== -1) {
+          newPoints[latestPointIndex].position = [0, 0, 0]; // Move latest point to the center
+          newPoints[latestPointIndex].originalPosition = [0, 0, 0]; // Update its original position as well
+        }
+      }
+  
       setPoints(newPoints);
     };
-
+  
     calculatePoints();
   }, [data]);
+
 
   useEffect(() => {
     const handleMouseMove = (event) => {
@@ -123,16 +183,14 @@ const DotGraph = ({ isDragging = false, data = [] }) => {
         y: normalizedX * Math.PI,
       });
 
-      setParallaxOffset({
-        x: normalizedX * 4,
-        y: normalizedY * 2,
-      });
-
       setLastCursorPosition({ x: normalizedX, y: normalizedY });
     };
 
     const handleScroll = (event) => {
-      setRadius((prevRadius) => clamp(prevRadius - event.deltaY * 0.1, 20, 200));
+      setRadius((prevRadius) => {
+        const newRadius = prevRadius - event.deltaY * 0.1;
+        return Math.max(minRadius, Math.min(maxRadius, newRadius));
+      });
     };
 
     window.addEventListener('mousemove', handleMouseMove);
@@ -149,8 +207,8 @@ const DotGraph = ({ isDragging = false, data = [] }) => {
 
     // Smoothly transition to the target rotationAngles using lerp
     setRotationAngles((prev) => ({
-      x: lerp(prev.x, lastCursorPosition.y * Math.PI * 0.5, 0.1), // Adjust the 0.1 for slower/faster transition
-      y: lerp(prev.y, lastCursorPosition.x * Math.PI, 0.1), // Adjust the 0.1 for slower/faster transition
+      x: lerp(prev.x, lastCursorPosition.y * Math.PI * 0.5, 0.1),
+      y: lerp(prev.y, lastCursorPosition.x * Math.PI, 0.1),
     }));
 
     const { x, y } = rotationAngles;
@@ -160,45 +218,46 @@ const DotGraph = ({ isDragging = false, data = [] }) => {
     camera.position.z = radius * Math.cos(y) * Math.cos(x);
 
     camera.lookAt(0, 0, 0);
-
-    setPoints((currentPoints) =>
-      currentPoints.map((point) => ({
-        ...point,
-        position: [
-          point.originalPosition[0] + parallaxOffset.x,
-          point.originalPosition[1] + parallaxOffset.y,
-          point.originalPosition[2],
-        ],
-      }))
-    );
   });
 
   const latestEntryId = data[0]?._id;
   const latestPoint = points.find((point) => point._id === latestEntryId);
+  const latestEntry = data.find((entry) => entry._id === latestEntryId);
+
+  let percentage = 0;
+  // Did better than % of users calculation
+  if (latestEntry) {
+    const latestWeight =
+      Object.values(latestEntry.weights).reduce((sum, w) => sum + w, 0) /
+      Object.keys(latestEntry.weights).length;
+  
+    const usersWithHigherWeight = data.filter((entry) => {
+      const averageWeight =
+        Object.values(entry.weights).reduce((sum, w) => sum + w, 0) /
+        Object.keys(entry.weights).length;
+      return averageWeight > latestWeight;
+    });
+  
+    percentage = Math.round(
+      (usersWithHigherWeight.length / data.length) * 100
+    );
+  }
 
   return (
     <group>
       {points.map((point, index) => (
         <mesh key={index} position={point.position}>
-          <sphereGeometry args={[0.5, 32, 32]} />
+          <sphereGeometry args={[1, 32, 32]} />
           <meshStandardMaterial color={point.color} />
         </mesh>
       ))}
 
       {latestPoint && (
-        <Text
-          position={[
-            latestPoint.position[0] + 1.1,
-            latestPoint.position[1] + 0.1,
-            latestPoint.position[2],
-          ]}
-          fontSize={0.6}
-          color="black"
-          anchorX="center"
-          anchorY="middle"
-        >
-          You
-        </Text>
+        <Html position={latestPoint.position} center>
+      <div style={{ transform: `translateX(${offsetPx}px)` }}>
+        <GamificationPersonalized userData={latestEntry} percentage={percentage} />
+        </div>
+      </Html>
       )}
     </group>
   );
