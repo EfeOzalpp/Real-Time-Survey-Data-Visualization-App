@@ -7,7 +7,8 @@
 .begin-title1 {font-weight: 400; margin-bottom: -12px;}
 .begin-title2 {padding: 0 3.6vh;}
 button.begin-button, button.begin-button2, button.begin-button3 {color: #fff; background-color: #292929; padding: 1vh 0; border-radius: 6px; cursor: pointer; border: none; margin-bottom: 2.4em; z-index: 10;}
-button.begin-button2, button.begin-button3 {margin-top: 1em; width: calc(100% - 4.8vh);} button.begin-button2 {padding-top: 0.8em; padding-bottom: 0.8em;}
+button.begin-button2 {margin-top: 1em; width: calc(100% - 4.8vh);} button.begin-button2 {padding-top: 0.8em; padding-bottom: 0.8em;}
+button.begin-button3 {margin-top: 1em; width: 50%; margin-bottom: 0em !important;}
 button.begin-button, button.begin-button3 {box-shadow: 0 8px 20px rgba(41, 41, 41, 0.3); padding-top: 0.9em; padding-bottom: 0.9em;} 
 button.begin-button:hover {transform: scale(1.1); transition: transform 0.3s ease, box-shadow 0.3s ease; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);}
 button.begin-button2:hover, button.begin-button3:hover {background-color: #353b41; transition: background-color 0.2s ease-in-out;}
@@ -16,6 +17,8 @@ button.begin-button2:hover, button.begin-button3:hover {background-color: #353b4
 .questionnaire {justify-content: flex-end;}
 .question-section {display: flex; padding-bottom: 0.4em;}
 .number-part {margin-top: -6px;}
+.begin-title1 {padding-bottom: 0.2em;}
+.begin-title2 {padding-bottom: 0.4em;}
 .fade-out {animation: fadeOut 0.1s ease-in forwards;}
 .fade-in {animation: fadeIn 0.1s ease-in forwards;}
 @keyframes fadeOut {from {opacity: 1;} to {opacity: 0;}}

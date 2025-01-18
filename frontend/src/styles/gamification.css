@@ -1,19 +1,53 @@
 /* Personalized Gamification */
 .personalized-result {
-    background-color: #f4fdfc; padding: 12px; border-radius: 6px; 
+    background-color: #f4fdfcf3; padding: 12px; border-radius: 24px; 
     color: rgb(51, 51, 51); text-align: center;
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
-    box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.1), inset -1px -1px 1px rgba(255, 255, 255, 0.2);
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    position: relative;
+    width: 280px;
+    max-width: 280px;
+    min-width: 280px;
+    box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.1), inset -1px -1px 1px rgba(255, 255, 255, 0.6);
 }
 
 .personalized-result::after {
     content: '';
     position: absolute;
     top: 50%; /* Center the arrow vertically */
-    left: -18px; /* Position the arrow outside the box */
+    left: -20px; /* Position the arrow outside the box */
     transform: translateY(-50%) rotate(90deg); /* Adjust for centering */
-    border-width: 10px; /* Arrow size */
+    border-width: 11px; /* Arrow size */
     border-style: solid;
-    border-color: #f4fdfc transparent transparent transparent; /* Arrow color */
+    border-color: #f4fdfcec transparent transparent transparent; /* Arrow color */
   }
+.gamification-text {width: 75%; max-width: 75%; min-width: 75%; text-align: left; padding-left: 9px; padding-top: 9px;}
+.gam-title {padding-bottom: 0.3em;} .personal-title {padding-bottom: 0.5em; padding-left: 0.1em;}
+.gamification-knob {
+    position: relative;
+    width: 10%;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+  }
+.percentage-knob {height: 100%; width: 10px; position: relative; background: none;}
+.knob-arrow {
+    position: absolute;
+    bottom: 0; /* Start at the bottom */
+    left: 2%; /* Center the arrow horizontally */
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-bottom: 15px solid rgb(79, 79, 79); /* Color of the arrow */
+    border-radius: 2px;
+    transition: bottom 0.3s ease; /* Smooth transition if percentage changes for any reason */
+    transform: rotate(90deg);
+  }
+.gamification-bar {width: 15%}
+.percentage-bar {width: 75%; height: 100%; background: linear-gradient(to bottom, rgb(0, 255, 0), rgb(175, 200, 0), rgb(255, 0, 0)); border-radius: 3px;}
+
