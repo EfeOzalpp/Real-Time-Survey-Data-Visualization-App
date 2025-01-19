@@ -2,7 +2,7 @@
 .graph-wrapper {position: relative;}
 .graph-wrapper.visible {display: block;}
 .graph-wrapper.hidden {display: none;}
-.draggable-container {height: 80%; width: 280px;}
+.draggable-container {height: 80%; width: 280px; pointer-events: none;}
 .draggable-bar-graph {
   height: 100%; z-index: 4; pointer-events: auto; user-select: text; cursor: grab; display: flex;
   flex-direction: column; align-items: center; margin-top: 0.4em; border-radius: 42px;
@@ -40,8 +40,23 @@
 @keyframes redFluctuation {50% {background-color: rgb(173, 86, 14);} 0%, 100% {background-color: rgb(235, 43, 43);}}
 .toggle-button {
   padding: 10px 14px; background-color: #292929; color: white; border-radius: 5px; border: none; cursor: pointer;
-  font-size: 16px; transition: all 0.3s ease; position: relative; width: fit-content;
+  font-size: 16px; transition: all 0.2s ease; position: relative; width: fit-content; pointer-events: all;
 }
 .toggle-button p {pointer-events: none; user-select: none;}
 .toggle-button:hover {background-color: #353B41;}
 .graph-container {z-index: 4; position: relative;}
+
+.fade-in {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 0.2s ease-in, transform 0.2s ease-in; /* Faster transition */
+}
+
+.fade-out {
+  opacity: 0;
+  transform: scale(0.95);
+  transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+  pointer-events: none; /* Prevent interaction during fade-out */
+}
+
+

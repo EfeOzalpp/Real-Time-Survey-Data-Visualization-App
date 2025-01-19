@@ -14,9 +14,8 @@ const DotGraph = ({ isDragging = false, data = [] }) => {
   const [lastCursorPosition, setLastCursorPosition] = useState({ x: 0, y: 0 });
   const [radius, setRadius] = useState(100);
   const [hoveredDot, setHoveredDot] = useState(null);
-  const [noHoverStartTime, setNoHoverStartTime] = useState(null); // Track when "no-hover" starts
   const hoverCheckInterval = useRef(null); // Store interval or requestAnimationFrame for periodic checks
-
+  const [viewportClass, setViewportClass] = useState(''); // Track proximity to edges to add class
   const { camera } = useThree();
   const isDraggingRef = useRef(isDragging);
 
@@ -261,43 +260,42 @@ const DotGraph = ({ isDragging = false, data = [] }) => {
     
   
   
-const handleHoverStart = (dot) => {
-  if (hoverCheckInterval.current) {
-    clearInterval(hoverCheckInterval.current);
-    hoverCheckInterval.current = null;
-  }
+// Helper to determine proximity to viewport edges
+const calculateViewportProximity = (x, y) => {
+  const edgeThreshold = 100; // Adjust threshold as needed
+  const width = window.innerWidth;
+  const height = window.innerHeight;
 
-  if (hoveredDot?._id !== dot._id) {
-    const percentage = calculatePercentage(dot.averageWeight); // Correctly calculate percentage
-    setHoveredDot({ ...dot, percentage }); // Pass percentage as part of hoveredDot
-    setNoHoverStartTime(null);
-  }
+  const isTop = y < edgeThreshold;
+  const isBottom = y > height - edgeThreshold;
+  const isLeft = x < edgeThreshold;
+  const isRight = x > width - edgeThreshold;
+
+  let newClass = '';
+  if (isTop) newClass += ' is-top';
+  if (isBottom) newClass += ' is-bottom';
+  if (isLeft) newClass += ' is-left';
+  if (isRight) newClass += ' is-right';
+
+  return newClass.trim();
 };
-  
-  
-  const handleHoverEnd = (dot) => {
-    // Start tracking the "no-hover" time
-    setNoHoverStartTime(Date.now());
-  
-    // Periodically check if the pointer has remained off for more than 1 second
-    if (!hoverCheckInterval.current) {
-      hoverCheckInterval.current = setInterval(() => {
-        // Only clear the hover state if no other dot is hovered
-        if (
-          noHoverStartTime &&
-          Date.now() - noHoverStartTime >= 1000 &&
-          hoveredDot?._id === dot._id
-        ) {
-          console.log(`Hover no longer detected for dot with ID: ${dot._id}`);
-          setHoveredDot(null); // Remove hover state after sustained "no-hover"
-          clearInterval(hoverCheckInterval.current); // Stop further checks
-          hoverCheckInterval.current = null;
-        }
-      }, 100); // Check every 100ms
-    }
-  };
-  
-  
+
+const handleHoverStart = (dot, event) => {
+  const { clientX, clientY } = event.nativeEvent; // Access native DOM event for coordinates
+  const proximityClass = calculateViewportProximity(clientX, clientY);
+  setViewportClass(proximityClass);
+  console.log(`Viewport Class Added: ${proximityClass}`);
+
+  const percentage = calculatePercentage(dot.averageWeight); // Assuming `calculatePercentage` exists
+  setHoveredDot({ ...dot, percentage });
+};
+
+const handleHoverEnd = () => {
+  setHoveredDot(null);
+  setViewportClass(''); // Reset the class on hover end
+};
+      
+
   useEffect(() => {
     // Cleanup interval or animation frame on component unmount
     return () => {
@@ -318,18 +316,26 @@ const handleHoverStart = (dot) => {
             position={point.position}
             onPointerOver={(event) => {
               event.stopPropagation();
-  
+    
               // Trigger hover start logic only if it is not the latest point
               if (!isLatestPoint) {
-                handleHoverStart(point);
+                handleHoverStart(point, event);
               }
             }}
             onPointerOut={(event) => {
               event.stopPropagation();
-  
+    
               // Trigger hover end logic only if it is not the latest point
               if (!isLatestPoint) {
                 handleHoverEnd(point);
+              }
+            }}
+            onClick={(event) => {
+              event.stopPropagation();
+    
+              // Simulate hover start logic on click for touch-based devices
+              if (!isLatestPoint) {
+                handleHoverStart(point, event);
               }
             }}
           >
@@ -354,19 +360,23 @@ const handleHoverStart = (dot) => {
         </Html>
       )}
   
-      {hoveredDot && (
-        <Html position={hoveredDot.position} 
-          center
-          zIndexRange={[120, 180]} 
-          style={{
-            pointerEvents: 'none',
-          }}
-        >
-          <div style={{ transform: `translateX(${offsetPx}px)` }}>
-            <GamificationGeneral hoveredDot={hoveredDot} />
-          </div>
-        </Html>
-      )}
+          {hoveredDot && (
+          <Html
+            position={hoveredDot.position}
+            center
+            zIndexRange={[120, 180]} // Adjust the z-index range for the popup
+            style={{
+              pointerEvents: "none",
+              transition: "opacity 0.2s ease-in-out",
+              '--offset-px': `${offsetPx}px` // Set the CSS variable // Ensures smoother transitions
+            }}
+            className={`${hoveredDot ? "fade-in" : "fade-out"} ${viewportClass}`}
+          >
+            <div>
+              <GamificationGeneral hoveredDot={hoveredDot} />
+            </div>
+          </Html>
+          )}
           {/* Add CompleteButton */}
           <Html zIndexRange={[12, 12]} style={{
            pointerEvents: 'none', 
