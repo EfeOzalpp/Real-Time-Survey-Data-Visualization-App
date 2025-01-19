@@ -60,9 +60,9 @@ const BarGraph = ({ isVisible }) => {
 
   // Adjust maxItems based on the highest group count
   if (highestGroupCount % 10 === 0) {
-    maxItems = highestGroupCount + 15; // Add 15 if the highest count ends in 0
+    maxItems = highestGroupCount + 40; // Add 15 if the highest count ends in 0
   } else {
-    maxItems = roundUpToStep(highestGroupCount, 20); // Round up to the nearest multiple of 20
+    maxItems = roundUpToStep(highestGroupCount, 35); // Round up to the nearest multiple of 20
   }
 
   // Lottie Animation Options

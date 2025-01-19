@@ -11,6 +11,7 @@ import DataVisualization from '../components/dataVisualization';
 const FrontPage = () => {
   const [animationVisible, setAnimationVisible] = useState(false);
   const [graphVisible, setGraphVisible] = useState(false); // Controls visibility, not rendering
+  const [surveyWrapperClass, setSurveyWrapperClass] = useState(''); // Class state for moving Three/Drei related survey-section-wrapper3 styling changes
 
   return (
     <div className="main-section">
@@ -24,10 +25,11 @@ const FrontPage = () => {
       <div className={`graph-wrapper ${graphVisible ? 'visible' : 'hidden'}`}>
         <DataVisualization />
       </div>
-      <div className="survey-section-wrapper">
+      <div className={`survey-section-wrapper3 ${surveyWrapperClass}`}>
         <Survey
           setAnimationVisible={setAnimationVisible}
           setGraphVisible={setGraphVisible}
+          setSurveyWrapperClass={setSurveyWrapperClass}
         />
       </div>
       <RadialBackground />

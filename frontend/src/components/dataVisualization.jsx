@@ -12,7 +12,7 @@ const VisualizationPage = () => {
   const [isBarGraphVisible, setIsBarGraphVisible] = useState(true);
   const [position, setPosition] = useState(() => ({
     x: window.innerWidth * 0.8,
-    y: window.innerHeight * 0.1,
+    y: window.innerHeight * 0.06,
   }));
   const [dragState, setDragState] = useState(false);
 
@@ -103,8 +103,9 @@ const VisualizationPage = () => {
 
   return (
     <div>
-      <DotGraph />
-
+      <DotGraph 
+      />
+      
       <div
         ref={dragRef}
         className="draggable-container"

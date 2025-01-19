@@ -10,11 +10,11 @@
 }
 @media only screen and (min-width: 1024px) {
   h1, h2, h3, h4, p {font-family: Heebo, sans-serif; padding: 0; margin: 0;}
-  h1 {font-size: 1.8vw; line-height: 1.224em; font-weight: 500; letter-spacing: -0.4px;}
-  h2 {font-size: 1.6vw; font-weight: 500; line-height: 1.4em;}
+  h1 {font-size: 1.8vw; line-height: 1.224em; font-weight: 500; letter-spacing: -0.2px;}
+  h2 {font-size: 1.6vw; font-weight: 500; line-height: 1.1em;}
   .number-part h2 {line-height: 1.6em;}
   h3 {font-size: 1.4vw; font-weight: 200;}
-  h4 {font-family: Poppins, sans-serif; font-size: 1.1vw; font-weight: 500; letter-spacing: -0.2px;}
+  h4 {font-family: Poppins, sans-serif; font-size: 1.1vw; font-weight: 500; letter-spacing: -0.2px; line-height: 1.2em;}
   p {font-family: Poppins, sans-serif; font-size: 1vw; font-weight: 400;}
   .bar-graph-label p {font-weight: 600; line-height: 1.2em; font-size: 0.9vw;}
 }
@@ -35,8 +35,8 @@ button {padding-inline: 0; padding-block: 0;}
 
 /* Top Bar */
 .logo-container {
-  position: absolute; width: 10%; display: flex; z-index: 15; justify-content: center; align-items: center;
-  height: 65px; margin: 20px 0;
+  position: absolute; width: 7%; justify-content: flex-start; display: flex; z-index: 15; justify-content: center; align-items: center;
+  height: 56px; margin: 16px 0 0 9px;
 }
 .logo-divider {pointer-events: none;}
 .logo-image {

@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import client from '../utils/sanityClient';
 import LottieOption from '../lottie-for-UI/lottieOption'; // Import the LottieOption component
+import { Canvas } from '@react-three/fiber';
+import { Html } from '@react-three/drei';
 
-const Questionnaire = ({ setAnimationVisible, setGraphVisible}) => {
+const Questionnaire = ({ setAnimationVisible, setGraphVisible, setSurveyWrapperClass }) => {
   const [currentQuestion, setCurrentQuestion] = useState(0); // Start at 0 (no question shown)
   const [answers, setAnswers] = useState({
     question1: '',
@@ -53,6 +55,8 @@ const Questionnaire = ({ setAnimationVisible, setGraphVisible}) => {
     setGraphVisible(true); 
     setAnimationVisible(true);
 
+    setSurveyWrapperClass('complete-active');
+
     try {
       await client.create({
         _type: 'userResponse',
@@ -62,21 +66,6 @@ const Questionnaire = ({ setAnimationVisible, setGraphVisible}) => {
     } catch (error) {
       console.error('Error saving response to Sanity:', error);
     }
-  };
-
-  const handleComplete = () => {
-    // Reset the form and start over
-    setShowCompleteButton(false);
-    setGraphVisible(false); // Hide Graph
-    setCurrentQuestion(0);
-    setAnswers({
-      question1: '',
-      question2: '',
-      question3: '',
-      question4: '',
-      question5: '',
-    });
-    setAnimationVisible(false);
   };
 
   const handleStart = () => {
@@ -132,16 +121,44 @@ const Questionnaire = ({ setAnimationVisible, setGraphVisible}) => {
     },
   ];
 
+  const handleComplete = () => {
+    try {
+      setShowCompleteButton(false);
+      setGraphVisible(false);
+      setCurrentQuestion(0);
+      setAnswers({
+        question1: '',
+        question2: '',
+        question3: '',
+        question4: '',
+        question5: '',
+      });
+      setAnimationVisible(false);
+      setSurveyWrapperClass('');
+    } catch (error) {
+      console.error('Error in handleComplete:', error);
+    }
+  };
+
   if (showCompleteButton) {
     return (
-      <div className="survey-section-wrapper">
-      <div className="survey-section">
-        <div className="surveyStart">
-          <button className="begin-button3" onClick={handleComplete}>
-            <h4>I AM DONE</h4>
-          </button>
-        </div></div>
-      </div>
+      <Canvas
+      style={{ width: '100%', height: '100%', pointerEvents: 'none' }} // Full-screen canvas styling
+    >
+      {/* Use Three.js's world coordinates for positioning */}
+      <Html zIndexRange={[22, 22]}>
+      <div className="z-index-respective" style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', height: '100vh', pointerEvents: 'none'}}>
+        <div className="survey-section-wrapper2">
+          <div className="survey-section">
+            <div className="surveyStart">
+              <button className="begin-button4" onClick={handleComplete}>
+                <h4>I AM DONE</h4>
+              </button>
+            </div></div>
+          </div>
+        </div>
+      </Html>
+    </Canvas>
     );
   }
   
@@ -161,6 +178,14 @@ const Questionnaire = ({ setAnimationVisible, setGraphVisible}) => {
 
   return (
     <div className={`survey-section ${fadeState}`}>
+
+    {error && (
+              <div className={`error-container ${fadeState}`}>
+                <h2>None of these options fit?</h2>
+                <p className="email-tag">Mail: eozalp@massart.edu</p>
+              </div>
+            )}
+
       <div className="questionnaire">
         <div className="question-section">
           <div className="number-part">
@@ -172,13 +197,6 @@ const Questionnaire = ({ setAnimationVisible, setGraphVisible}) => {
             </h4>
           </div>
         </div>
-
-        {error && (
-          <div>
-            <p><strong>None of these options fit?</strong></p>
-            <p style={{ color: 'red', paddingBottom: '8px' }}>Mail: eozalp@massart.edu</p>
-          </div>
-        )}
 
         {questions[currentQuestion - 1].options.map((option, index) => (
           <div className="input-part-inside" 

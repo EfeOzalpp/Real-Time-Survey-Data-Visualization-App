@@ -3,6 +3,7 @@ import '../../styles/gamification.css';
 
 const GamificationPersonalized = ({ userData, percentage }) => {
   const [selectedTitle, setSelectedTitle] = useState('');
+  const [secondaryText, setSecondaryText] = useState('');
 
   // Ensure the useEffect hook is always called
   useEffect(() => {
@@ -12,39 +13,39 @@ const GamificationPersonalized = ({ userData, percentage }) => {
           "0-20": [
             "Carbon Culprit",
             "Planet Polluter",
-            "Eco Enemy",
-            "Environmental Hazard",
-            "Earth’s Burden",
+            "Sustainability Enemy",
+            "I thrive in environmental hazard",
+            "I'm a burden for Earth",
             "Sustainability Sinner",
-            "Nature’s Nemesis",
+            "Green isn't my favorite color",
           ],
           "21-40": [
-            "Eco Explorer",
-            "Carbon Challenger",
-            "Sustainability Seeker",
-            "Environment Advocate",
-            "Green Learner",
+            "I have a backup planet!",
+            "Nature? Is it edible?",
+            "Sustainability, Who?",
+            "Comfort seeker, nature is fine too...",
+            "Sry, I just got aware of my bad-nature",
           ],
           "41-60": [
-            "Eco Ally",
-            "Carbon Reducer",
-            "Planet Ally",
-            "Conscious Contributor",
-            "Nature Friend",
+            "Average-Eco Loverzz",
+            "Is it trendy to like nature?",
+            "Luv Nature <3, (ok, where's my award)",
+            "At least, I was honest",
+            "Great, I love mediocrity",
           ],
           "61-80": [
-            "Eco Advocate",
-            "Sustainability Supporter",
-            "Planet Partner",
-            "Green Guardian",
-            "Climate Champion",
+            "Green-Blue Superhero",
+            "Sustainability Trifecta (Love, nature, life)",
+            "Planet Partner-in-crime",
+            "A cool person, and a cooling agent",
+            "Piece-o-cake, I run this planet",
           ],
           "81-100": [
-            "Nature Savior",
-            "Carbon Neutralizer",
-            "Eco Warrior",
-            "Planet Protector",
-            "Sustainability Champion",
+            "Nature's Holy Savior",
+            "Damn! Larger than life habits",
+            "The most precious butterfly award goes to...",
+            "A reminder to reward yourself",
+            "Simply, outstanding...",
           ],
         };
 
@@ -61,8 +62,53 @@ const GamificationPersonalized = ({ userData, percentage }) => {
         }
       };
 
+      const getRandomSecondaryText = (percentage) => {
+        const secondaryText = {
+          "0-20": [
+            "Earth would've needed you, You're ahead of only",
+            "Go hug a tree. Effortlessly higher than",
+            "Wow, congratz, you accelerated planetary evacuation =). You're ahead of only",
+          ],
+          "21-40": [
+            "Not amazing but not a crime, you're ahead of only",
+            "Low-key effort gives low-key results, you're ahead of",
+            "Humble beginnings, you're higher than",
+          ],
+          "41-60": [
+            "You're getting there! -Ahead of",
+            "Caring is free. You're ahead of",
+            "Kind of in the middle, huh? You're higher than",
+          ],
+          "61-80": [
+            "You are doing frenzy! You're higher",
+            "Breathing, thriving, ahead of",
+            "Right on the spot! You're higher than",
+          ],
+          "81-100": [
+            "You're ahead of almost everyone, higher than",
+            "Hi, I'm Nature, I appreciate you. You're higher than",
+            "WOW, that's rad. You're ahead of",
+          ],
+        };
+
+        if (percentage <= 20) {
+          return secondaryText["0-20"][Math.floor(Math.random() * secondaryText["0-20"].length)];
+        } else if (percentage <= 40) {
+          return secondaryText["21-40"][Math.floor(Math.random() * secondaryText["21-40"].length)];
+        } else if (percentage <= 60) {
+          return secondaryText["41-60"][Math.floor(Math.random() * secondaryText["41-60"].length)];
+        } else if (percentage <= 80) {
+          return secondaryText["61-80"][Math.floor(Math.random() * secondaryText["61-80"].length)];
+        } else {
+          return secondaryText["81-100"][Math.floor(Math.random() * secondaryText["81-100"].length)];
+        }
+      };
+
       const title = getRandomTitle(percentage);
+      const secondary = getRandomSecondaryText(percentage);
+
       setSelectedTitle(title);
+      setSecondaryText(secondary);
     }
   }, [percentage, userData]); // Include userData in dependencies
 
@@ -83,7 +129,7 @@ const GamificationPersonalized = ({ userData, percentage }) => {
         <h4 className="gam-title">Based on your habits, you're:</h4>
         <h1 className="personal-title">{selectedTitle}</h1>
         <p>
-          You did better than <strong>{percentage}%</strong> of people!
+        {secondaryText} <strong>{percentage}%</strong> people!
         </p>
       </div>
 
