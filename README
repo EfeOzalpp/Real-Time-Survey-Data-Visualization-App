@@ -1,0 +1,4 @@
+Bridging the gap between Three.js 3D Dom context and React Dom context. A dynamic offset value helps to anchor to a 3D object enhancing functionality of Three/Drei HTML Hook. 
+The position property within the OpenGL rendering is immensely useful to anchor 2D components to 3D objects but they fall short in some cases like zooming in and out the 3D visualization.
+Because sometimes we want the 2D element to stay the same size during zooming in and out of a Three.js canvas, alwhile wanting to ensure it visually looks anchored to its 3D datapoint... 
+More will come. 
