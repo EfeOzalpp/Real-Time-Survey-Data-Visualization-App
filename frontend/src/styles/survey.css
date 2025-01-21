@@ -31,7 +31,7 @@ button.begin-button2:hover, button.begin-button3:hover {background-color: #353b4
 .question-section {display: flex; padding-bottom: 0.4em;}
 .input-part-inside {pointer-events: all;}
 .number-part {margin-top: -6px;}
-.error-container {background-color: rgba(235, 235, 235, 0.589); padding: 0.6em 3.2em; border-radius: 12px;
+.error-container {background-color: rgb(246, 246, 246); padding: 1em 3.2em; border-radius: 12px;
 backdrop-filter: blur(6px);
 -webkit-backdrop-filter: blur(6px);}
 .error-container h2 {color: rgb(241, 84, 60);}

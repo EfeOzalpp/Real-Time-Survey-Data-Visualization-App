@@ -18,6 +18,7 @@ const DotGraph = ({ isDragging = false, data = [] }) => {
   const [viewportClass, setViewportClass] = useState(''); // Track proximity to edges to add class
   const { camera } = useThree();
   const isDraggingRef = useRef(isDragging);
+  const touchStartDistance = useRef(null);
 
   const spreadFactor = 75; // Default spread factor
   const minRadius = 20; // Calculating zoomed in and out states to adjust gamification offset
@@ -179,34 +180,97 @@ const DotGraph = ({ isDragging = false, data = [] }) => {
   useEffect(() => {
     const handleMouseMove = (event) => {
       if (isDraggingRef.current) return;
-
+  
       const { innerWidth, innerHeight } = window;
       const normalizedX = (event.clientX / innerWidth) * 2 - 1;
       const normalizedY = -(event.clientY / innerHeight) * 2 + 1;
-
-      setRotationAngles({
-        x: normalizedY * Math.PI * 0.25,
-        y: normalizedX * Math.PI * 0.5,
-      });
-
+  
+      setRotationAngles((prev) => ({
+        x: prev.x + (normalizedY - lastCursorPosition.y) * Math.PI * 0.1,
+        y: prev.y + (normalizedX - lastCursorPosition.x) * Math.PI * 0.1,
+      }));
+  
       setLastCursorPosition({ x: normalizedX, y: normalizedY });
     };
-
+  
     const handleScroll = (event) => {
       setRadius((prevRadius) => {
         const newRadius = prevRadius - event.deltaY * 0.1;
         return Math.max(minRadius, Math.min(maxRadius, newRadius));
       });
     };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('wheel', handleScroll);
-
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('wheel', handleScroll);
+  
+    const handleTouchStart = (event) => {
+      if (event.touches.length === 1) {
+        // Single finger touch for rotation
+        const touch = event.touches[0];
+        setLastCursorPosition({
+          x: (touch.clientX / window.innerWidth) * 2 - 1,
+          y: -(touch.clientY / window.innerHeight) * 2 + 1,
+        });
+      } else if (event.touches.length === 2) {
+        // Two fingers touch for pinch-to-zoom
+        const [touch1, touch2] = event.touches;
+        const distance = Math.sqrt(
+          Math.pow(touch2.clientX - touch1.clientX, 2) +
+          Math.pow(touch2.clientY - touch1.clientY, 2)
+        );
+        touchStartDistance.current = distance; // Save initial pinch distance
+      }
     };
-  }, []);
+  
+    const handleTouchMove = (event) => {
+      if (event.touches.length === 1) {
+        // Rotate camera using single finger drag
+        const touch = event.touches[0];
+        const normalizedX = (touch.clientX / window.innerWidth) * 2 - 1;
+        const normalizedY = -(touch.clientY / window.innerHeight) * 2 + 1;
+  
+        setRotationAngles((prev) => ({
+          x: prev.x + (normalizedY - lastCursorPosition.y) * Math.PI * 0.1,
+          y: prev.y + (normalizedX - lastCursorPosition.x) * Math.PI * 0.1,
+        }));
+  
+        setLastCursorPosition({ x: normalizedX, y: normalizedY });
+      } else if (event.touches.length === 2) {
+        // Zoom in/out using pinch gesture
+        const [touch1, touch2] = event.touches;
+        const distance = Math.sqrt(
+          Math.pow(touch2.clientX - touch1.clientX, 2) +
+          Math.pow(touch2.clientY - touch1.clientY, 2)
+        );
+  
+        const pinchDelta = distance - touchStartDistance.current;
+        setRadius((prevRadius) => {
+          const newRadius = prevRadius - pinchDelta * 0.01; // Adjust zoom sensitivity
+          return Math.max(minRadius, Math.min(maxRadius, newRadius));
+        });
+  
+        touchStartDistance.current = distance; // Update the pinch distance
+      }
+    };
+  
+    const handleTouchEnd = () => {
+      touchStartDistance.current = null; // Reset pinch distance
+    };
+  
+    // Add event listeners
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("wheel", handleScroll);
+    window.addEventListener("touchstart", handleTouchStart);
+    window.addEventListener("touchmove", handleTouchMove);
+    window.addEventListener("touchend", handleTouchEnd);
+  
+    return () => {
+      // Cleanup event listeners
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("wheel", handleScroll);
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, [lastCursorPosition, minRadius, maxRadius]);
+
 
   useFrame(() => {
     if (isDraggingRef.current) return;
@@ -262,20 +326,27 @@ const DotGraph = ({ isDragging = false, data = [] }) => {
   
 // Helper to determine proximity to viewport edges
 const calculateViewportProximity = (x, y) => {
-  const edgeThreshold = 100; // Adjust threshold as needed
+  const verticalEdgeThreshold = 150; // Adjust threshold for top and bottom
+  const horizontalEdgeThreshold = 300; // Wider threshold for left and right edges
+  const isLeftThreshold = window.innerWidth * 0.4; // 40% of viewport width (40vw) for is-right
   const width = window.innerWidth;
   const height = window.innerHeight;
+  const midLeftThreshold = window.innerWidth * 0.4; // Start of 40%-60% range
+  const midRightThreshold = window.innerWidth * 0.6; // End of 40%-60% range
+  
 
-  const isTop = y < edgeThreshold;
-  const isBottom = y > height - edgeThreshold;
-  const isLeft = x < edgeThreshold;
-  const isRight = x > width - edgeThreshold;
+  const isTop = y < verticalEdgeThreshold;
+  const isBottom = y > height - verticalEdgeThreshold;
+  const isLeft = x < isLeftThreshold;
+  const isRight = x > width - horizontalEdgeThreshold;
+  const isMidHorizontal = x >= midLeftThreshold && x <= midRightThreshold; // Between 40% and 60% of viewport width
 
   let newClass = '';
   if (isTop) newClass += ' is-top';
   if (isBottom) newClass += ' is-bottom';
   if (isLeft) newClass += ' is-left';
   if (isRight) newClass += ' is-right';
+  if (isMidHorizontal) newClass += ' is-mid';
 
   return newClass.trim();
 };
@@ -286,7 +357,7 @@ const handleHoverStart = (dot, event) => {
   setViewportClass(proximityClass);
   console.log(`Viewport Class Added: ${proximityClass}`);
 
-  const percentage = calculatePercentage(dot.averageWeight); // Assuming `calculatePercentage` exists
+  const percentage = calculatePercentage(dot.averageWeight);
   setHoveredDot({ ...dot, percentage });
 };
 
@@ -316,7 +387,7 @@ const handleHoverEnd = () => {
             position={point.position}
             onPointerOver={(event) => {
               event.stopPropagation();
-    
+          
               // Trigger hover start logic only if it is not the latest point
               if (!isLatestPoint) {
                 handleHoverStart(point, event);
@@ -324,7 +395,7 @@ const handleHoverEnd = () => {
             }}
             onPointerOut={(event) => {
               event.stopPropagation();
-    
+          
               // Trigger hover end logic only if it is not the latest point
               if (!isLatestPoint) {
                 handleHoverEnd(point);
@@ -332,7 +403,7 @@ const handleHoverEnd = () => {
             }}
             onClick={(event) => {
               event.stopPropagation();
-    
+          
               // Simulate hover start logic on click for touch-based devices
               if (!isLatestPoint) {
                 handleHoverStart(point, event);
