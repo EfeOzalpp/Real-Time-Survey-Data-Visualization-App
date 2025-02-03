@@ -3,15 +3,22 @@ import Lottie from 'lottie-react';
 import { fetchSurveyData } from '../utils/sanityAPI';
 import '../styles/graph.css';
 
-// Import Lottie animation
-import tree1 from '../lottie-for-UI/tree1.json'; // Ensure the correct path to the JSON file
+// Import Lottie animation files
+import tree1 from '../lottie-for-UI/tree1.json'; 
+import tree2 from '../lottie-for-UI/tree2.json'; 
+import tree3 from '../lottie-for-UI/tree3.json'; 
 
 const BarGraph = ({ isVisible }) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [animationState, setAnimationState] = useState(false); // Track the animation state
+  const [animateBars, setAnimateBars] = useState(false); 
 
-  const lottieRef = useRef(null);
+
+  // Refs for Lottie animations
+  const greenLottieRef = useRef(null);
+  const yellowLottieRef = useRef(null);
+  const redLottieRef = useRef(null);
 
   useEffect(() => {
     // Fetch data from Sanity
@@ -19,6 +26,7 @@ const BarGraph = ({ isVisible }) => {
       const unsubscribe = fetchSurveyData((updatedData) => {
         setData(updatedData);
         setLoading(false); // Set loading to false when data is fetched
+        setTimeout(() => setAnimateBars(true), 10);
       });
 
       return () => {
@@ -28,13 +36,6 @@ const BarGraph = ({ isVisible }) => {
 
     fetchData();
   }, []);
-
-  // Directly set the speed of the Lottie animation
-  useEffect(() => {
-    if (lottieRef.current) {
-      lottieRef.current.setSpeed(0.4); // Directly set Lottie animation speed to 0.4
-    }
-  }, []); // This effect will run only once when the component mounts
 
   // Categorize data into groups
   const categories = { green: 0, yellow: 0, red: 0 };
@@ -49,80 +50,91 @@ const BarGraph = ({ isVisible }) => {
     }
   });
 
-  // Find the highest group count and adjust maxItems
-  const highestGroupCount = Math.max(categories.green, categories.yellow, categories.red);
-  let maxItems = 500;
+  // Determine maxItems for graph scaling
+  const maxItems = Math.max(categories.green, categories.yellow, categories.red) + 15;
 
-  // Helper function to round up to the nearest step
-  const roundUpToStep = (value, step) => {
-    return Math.ceil(value / step) * step;
+
+  // Function to apply animation speed
+  const applySpeed = () => {
+    if (greenLottieRef.current) greenLottieRef.current.setSpeed(0.2);
+    if (yellowLottieRef.current) yellowLottieRef.current.setSpeed(0.2);
+    if (redLottieRef.current) redLottieRef.current.setSpeed(0.2);
   };
 
-  // Adjust maxItems based on the highest group count
-  if (highestGroupCount % 10 === 0) {
-    maxItems = highestGroupCount + 40; // Add 15 if the highest count ends in 0
-  } else {
-    maxItems = roundUpToStep(highestGroupCount, 35); // Round up to the nearest multiple of 20
-  }
+  // Apply speed on component mount (Fixes F5 refresh issue)
+  useEffect(() => {
+    const timeout = setTimeout(applySpeed, 100);
+    return () => clearTimeout(timeout);
+  }, []);
 
-  // Lottie Animation Options
-  const greenLottieOptions = {
-    loop: true,
-    autoplay: true,
-    animationData: tree1,
-    initialSegment: animationState ? [5, 55] : [0, 55], // Start at [0, 55], then switch to [5, 55]
-    rendererSettings: {
-      preserveAspectRatio: 'xMidYMid slice',
-    },
-  };
+  // Apply speed when `BarGraph` becomes visible
+  useEffect(() => {
+    if (isVisible) {
+      setTimeout(applySpeed, 50);
+    }
+  }, [isVisible]);
 
   // Track when the first animation completes to switch segment
   useEffect(() => {
     if (!animationState) {
-      setTimeout(() => setAnimationState(true), 200); // After the first animation, switch to loop segment [5–55]
+      setTimeout(() => setAnimationState(true), 200); // After first play, switch to loop segment [5–55]
     }
   }, [animationState]);
 
-  if (loading) {
-    return
-  }
+  if (loading) return null;
 
   return (
-      <><div className="bar-graph-container">
-          {Object.entries(categories).map(([color, count]) => {
-              const heightPercentage = (count / maxItems) * 100; // Calculate height as percentage
-              return (
-                  <div className="bar-graph-bar" key={color}>
-                      <span className="bar-graph-label">
-                          <p>{count} People</p>
-                      </span>
-                      <div
-                          className={`bar-graph-fill ${color}-animation`}
-                          style={{
-                              height: `${heightPercentage}%`, // Use percentage for height
-                              backgroundColor: color,
-                          }}
-                      ></div>
-                  </div>
-              );
-          })}
-      </div><div className="bar-graph-icons">
-              {/* Controlled Lottie animation for green */}
-              <div className="bar-icon">
-                  <Lottie {...greenLottieOptions} lottieRef={lottieRef} />
-              </div>
-              {/* Placeholder SVGs for yellow and red */}
-              <div className="bar-icon">
-                  <svg width="40" height="40" xmlns="http://www.w3.org/2000/svg">
-                      <rect x="5" y="5" width="30" height="30" stroke="yellow" strokeWidth="4" fill="none" />
-                  </svg>
-              </div>
-              <div className="bar-icon">
-                  <svg width="40" height="40" xmlns="http://www.w3.org/2000/svg">
-                      <polygon points="20,5 35,35 5,35" stroke="red" strokeWidth="4" fill="none" />
-                  </svg>
-              </div>
-          </div></>
+    <>
+      <div className="bar-graph-container">
+        {Object.entries(categories).map(([color, count]) => {
+          const heightPercentage = (count / maxItems) * 100;
+          return (
+            <div className="bar-graph-bar" key={color}>
+              <span className="bar-graph-label">
+                <p>{count} People</p>
+              </span>
+              <div
+                className={`bar-graph-fill ${color}-animation`}
+                style={{ height: animateBars ? `${heightPercentage}%` : '0%', backgroundColor: color }}
+              ></div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="bar-graph-icons">
+        {/* Lottie animation for green */}
+        <div className="bar-icon">
+          <Lottie
+            animationData={tree1}
+            loop
+            autoplay
+            lottieRef={greenLottieRef}
+            initialSegment={animationState ? [5, 55] : [0, 55]}
+          />
+        </div>
+        {/* Lottie animation for yellow */}
+        <div className="bar-icon">
+          <Lottie
+            animationData={tree2}
+            loop
+            autoplay
+            lottieRef={yellowLottieRef}
+            initialSegment={animationState ? [5, 55] : [0, 55]}
+          />
+        </div>
+        {/* Lottie animation for red */}
+        <div className="bar-icon">
+          <Lottie
+            animationData={tree3}
+            loop
+            autoplay
+            lottieRef={redLottieRef}
+            initialSegment={animationState ? [5, 55] : [0, 55]}
+          />
+        </div>
+      </div>
+    </>
   );
 };
 

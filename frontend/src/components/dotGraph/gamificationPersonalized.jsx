@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import '../../styles/gamification.css';
 
-const GamificationPersonalized = ({ userData, percentage }) => {
+const GamificationPersonalized = ({ userData, percentage, color }) => {
   const [selectedTitle, setSelectedTitle] = useState('');
   const [secondaryText, setSecondaryText] = useState('');
 
@@ -138,7 +138,7 @@ const GamificationPersonalized = ({ userData, percentage }) => {
         <div className="percentage-knob">
           <div
             className="knob-arrow"
-            style={{ bottom: `${percentage}%` }} // Move the arrow based on percentage
+            style={{ bottom: `${percentage}%`, borderBottom: `18px solid ${color}` }} // Move the arrow based on percentage
           />
         </div>
       </div>

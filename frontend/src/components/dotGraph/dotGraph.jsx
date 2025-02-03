@@ -64,24 +64,34 @@ const DotGraph = ({ isDragging = false, data = [] }) => {
   const offsetPx = nonlinearLerp(offsetOne, dynamicOffset, zoomFactor);
 
   // Weight to color range
-  const interpolateColor = (weight) => {
-    let r, g, b;
-    const darkYellow = { r: 175, g: 200, b: 0 };
+const interpolateColor = (weight) => {
+  // Define colors at key points
+  const startColor = { r: 235, g: 0, b: 0 }; // Red at 0
+  const middleColor = { r: 255, g: 235, b: 0 }; // Yellow at 50%
+  const endColor = { r: 0, g: 255, b: 0 }; // Green at 100%
 
-    if (weight <= 0.5) {
-      const normalizedWeight = weight / 0.5;
-      r = Math.round(darkYellow.r * normalizedWeight);
-      g = Math.round(255 - (255 - darkYellow.g) * normalizedWeight);
-      b = 0;
-    } else {
-      const normalizedWeight = (weight - 0.5) / 0.5;
-      r = Math.round(darkYellow.r + (255 - darkYellow.r) * normalizedWeight);
-      g = Math.round(darkYellow.g * (1 - normalizedWeight));
-      b = 0;
-    }
+  let r, g, b;
 
-    return `rgb(${r}, ${g}, ${b})`;
-  };
+  // Flip weight to match the CSS direction (bottom-to-top)
+  const flippedWeight = 1 - weight;
+
+  if (flippedWeight <= 0.5) {
+    // Interpolate between red and yellow
+    const normalizedWeight = flippedWeight / 0.5; // Normalize for 0–50%
+    r = Math.round(startColor.r + (middleColor.r - startColor.r) * normalizedWeight);
+    g = Math.round(startColor.g + (middleColor.g - startColor.g) * normalizedWeight);
+    b = Math.round(startColor.b + (middleColor.b - startColor.b) * normalizedWeight);
+  } else {
+    // Interpolate between yellow and green
+    const normalizedWeight = (flippedWeight - 0.5) / 0.5; // Normalize for 50–100%
+    r = Math.round(middleColor.r + (endColor.r - middleColor.r) * normalizedWeight);
+    g = Math.round(middleColor.g + (endColor.g - middleColor.g) * normalizedWeight);
+    b = Math.round(middleColor.b + (endColor.b - middleColor.b) * normalizedWeight);
+  }
+
+  return `rgb(${r}, ${g}, ${b})`;
+};
+
 
   const generatePositions = (numPoints, minDistance = 20, spreadFactor = 75) => {
     const positions = [];
@@ -426,7 +436,7 @@ const handleHoverEnd = () => {
           }}
         >
           <div style={{ transform: `translateX(${offsetPx}px)` }}>
-            <GamificationPersonalized userData={latestEntry} percentage={percentage} />
+            <GamificationPersonalized userData={latestEntry} percentage={percentage} color={latestPoint.color}/>
           </div>
         </Html>
       )}

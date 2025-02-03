@@ -28,10 +28,10 @@
   display: flex; flex-direction: column; align-items: center; justify-content: flex-end; width: 28%; height: 100%; padding: 0 0.4em;
 }
 .bar-graph-fill {
-  width: 100%; transition: height 0.3s ease; animation-duration: 3.6s; animation-timing-function: ease-in-out;
-  animation-iteration-count: infinite; border-radius: 6px;
+  width: 100%;  height: 0; transition: height 0.1s ease; animation-duration: 3.6s; animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite; border-radius: 6px; border: 0.2px solid rgb(212, 212, 212);
 }
-.bar-graph-label {margin-top: 5px; color: #333; text-align: center; padding-bottom: 12px;}
+.bar-graph-label {color: #333; text-align: center; padding-bottom: 8px;}
 .green-animation {animation-name: greenFluctuation;}
 .yellow-animation {animation-name: yellowFluctuation;}
 .red-animation {animation-name: redFluctuation;}
