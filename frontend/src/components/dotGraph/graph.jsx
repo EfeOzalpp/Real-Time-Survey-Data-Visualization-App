@@ -33,12 +33,12 @@ const Graph = () => {
   }
 
   return (
-    <div className="graph-container" style={{ height: '100vh', width: '100%' }}>
+    <div className="graph-container" style={{ height: '100svh',  width: '100%' }}>
       <Canvas camera={{ position: [0, 0, 25], fov: 20 }}>
         <ambientLight intensity={1.1} />
         <directionalLight
           position={[13, 13, 13]}
-          intensity={1.3}
+          intensity={1.2}
           castShadow
           shadow-mapSize-width={2048}
           shadow-mapSize-height={2048}

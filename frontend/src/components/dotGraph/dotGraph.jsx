@@ -63,39 +63,51 @@ const DotGraph = ({ isDragging = false, data = [] }) => {
   // Use the dynamicOffset in the lerp function
   const offsetPx = nonlinearLerp(offsetOne, dynamicOffset, zoomFactor);
 
-  // Weight to color range
-const interpolateColor = (weight) => {
-  // Define colors at key points
-  const startColor = { r: 235, g: 0, b: 0 }; // Red at 0
-  const middleColor = { r: 255, g: 235, b: 0 }; // Yellow at 50%
-  const endColor = { r: 0, g: 255, b: 0 }; // Green at 100%
+  const interpolateColor = (weight) => {
+    // Flip weight first to match the original logic
+    const flippedWeight = 1 - weight; 
+  
+    // Define color stops (Red → Orange → Yellow → Lime-Yellow → Green)
+    const colorStops = [
+      { stop: 0.0, color: { r: 255, g: 0, b: 0 } },       // Red
+      { stop: 0.45, color: { r: 241, g: 142, b: 4 } },   // Orange
+      { stop: 0.5, color: { r: 241, g: 233, b: 4 } },    // Yellow
+      { stop: 0.70, color: { r: 186, g: 241, b: 4 } },   // Lime-Yellow
+      { stop: 1.0, color: { r: 0, g: 255, b: 0 } }       // Green
+    ];
+  
+    // Find two closest color stops
+    let lower = colorStops[0], upper = colorStops[colorStops.length - 1];
+  
+    for (let i = 0; i < colorStops.length - 1; i++) {
+      if (flippedWeight >= colorStops[i].stop && flippedWeight <= colorStops[i + 1].stop) {
+        lower = colorStops[i];
+        upper = colorStops[i + 1];
+        break;
+      }
+    }
+  
+    // Normalize weight between lower and upper stops
+    const range = upper.stop - lower.stop;
+    const normalizedWeight = range === 0 ? 0 : (flippedWeight - lower.stop) / range;
+  
+    // Interpolate RGB values linearly
+    const r = Math.round(lower.color.r + (upper.color.r - lower.color.r) * normalizedWeight);
+    const g = Math.round(lower.color.g + (upper.color.g - lower.color.g) * normalizedWeight);
+    const b = Math.round(lower.color.b + (upper.color.b - lower.color.b) * normalizedWeight);
+  
+    return `rgb(${r}, ${g}, ${b})`;
+  };  
+  
 
-  let r, g, b;
-
-  // Flip weight to match the CSS direction (bottom-to-top)
-  const flippedWeight = 1 - weight;
-
-  if (flippedWeight <= 0.5) {
-    // Interpolate between red and yellow
-    const normalizedWeight = flippedWeight / 0.5; // Normalize for 0–50%
-    r = Math.round(startColor.r + (middleColor.r - startColor.r) * normalizedWeight);
-    g = Math.round(startColor.g + (middleColor.g - startColor.g) * normalizedWeight);
-    b = Math.round(startColor.b + (middleColor.b - startColor.b) * normalizedWeight);
-  } else {
-    // Interpolate between yellow and green
-    const normalizedWeight = (flippedWeight - 0.5) / 0.5; // Normalize for 50–100%
-    r = Math.round(middleColor.r + (endColor.r - middleColor.r) * normalizedWeight);
-    g = Math.round(middleColor.g + (endColor.g - middleColor.g) * normalizedWeight);
-    b = Math.round(middleColor.b + (endColor.b - middleColor.b) * normalizedWeight);
-  }
-
-  return `rgb(${r}, ${g}, ${b})`;
-};
-
-
-  const generatePositions = (numPoints, minDistance = 20, spreadFactor = 75) => {
+  const generatePositions = (numPoints, minDistance = 24) => {
     const positions = [];
     const maxRetries = 1000;
+  
+    // Dynamically adjust spreadFactor based on number of points
+    const baseSpread = 76; // Minimum spread
+    const scalingFactor = 0.26; // Spread increases by 0.26 per point
+    const spreadFactor = baseSpread + numPoints * scalingFactor;
   
     for (let i = 0; i < numPoints; i++) {
       let position;
@@ -146,7 +158,8 @@ const interpolateColor = (weight) => {
     }
   
     return positions;
-  };  
+  };
+  
 
   useEffect(() => {
     isDraggingRef.current = isDragging;
@@ -328,54 +341,52 @@ const interpolateColor = (weight) => {
       return Math.round((usersWithHigherWeight.length / points.length) * 100);
     };
     
-    const latestPercentage = latestEntry
-      ? calculatePercentage(latestWeight)
-      : 0;
-    
   
   
-// Helper to determine proximity to viewport edges
-const calculateViewportProximity = (x, y) => {
-  const verticalEdgeThreshold = 150; // Adjust threshold for top and bottom
-  const horizontalEdgeThreshold = 300; // Wider threshold for left and right edges
-  const isLeftThreshold = window.innerWidth * 0.4; // 40% of viewport width (40vw) for is-right
-  const width = window.innerWidth;
-  const height = window.innerHeight;
-  const midLeftThreshold = window.innerWidth * 0.4; // Start of 40%-60% range
-  const midRightThreshold = window.innerWidth * 0.6; // End of 40%-60% range
-  
-
-  const isTop = y < verticalEdgeThreshold;
-  const isBottom = y > height - verticalEdgeThreshold;
-  const isLeft = x < isLeftThreshold;
-  const isRight = x > width - horizontalEdgeThreshold;
-  const isMidHorizontal = x >= midLeftThreshold && x <= midRightThreshold; // Between 40% and 60% of viewport width
-
-  let newClass = '';
-  if (isTop) newClass += ' is-top';
-  if (isBottom) newClass += ' is-bottom';
-  if (isLeft) newClass += ' is-left';
-  if (isRight) newClass += ' is-right';
-  if (isMidHorizontal) newClass += ' is-mid';
-
-  return newClass.trim();
-};
-
-const handleHoverStart = (dot, event) => {
-  const { clientX, clientY } = event.nativeEvent; // Access native DOM event for coordinates
-  const proximityClass = calculateViewportProximity(clientX, clientY);
-  setViewportClass(proximityClass);
-  console.log(`Viewport Class Added: ${proximityClass}`);
-
-  const percentage = calculatePercentage(dot.averageWeight);
-  setHoveredDot({ ...dot, percentage });
-};
-
-const handleHoverEnd = () => {
-  setHoveredDot(null);
-  setViewportClass(''); // Reset the class on hover end
-};
+    // Helper to determine proximity to viewport edges
+    const calculateViewportProximity = (x, y) => {
+      const verticalEdgeThreshold = 150; // Adjust threshold for top and bottom
+      const horizontalEdgeThreshold = 300; // Wider threshold for left and right edges
+      const isLeftThreshold = window.innerWidth * 0.4; // 40% of viewport width (40vw) for is-right
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      const midLeftThreshold = window.innerWidth * 0.4; // Start of 40%-60% range
+      const midRightThreshold = window.innerWidth * 0.6; // End of 40%-60% range
       
+      const isTop = y < verticalEdgeThreshold;
+      const isBottom = y > height - verticalEdgeThreshold;
+      const isLeft = x < isLeftThreshold;
+      const isRight = x > width - horizontalEdgeThreshold;
+      const isMidHorizontal = x >= midLeftThreshold && x <= midRightThreshold; // Between 40% and 60% of viewport width
+
+      let newClass = '';
+      if (isTop) newClass += ' is-top';
+      if (isBottom) newClass += ' is-bottom';
+      if (isLeft) newClass += ' is-left';
+      if (isRight) newClass += ' is-right';
+      if (isMidHorizontal) newClass += ' is-mid';
+
+      return newClass.trim();
+    };
+
+    const handleHoverStart = (dot, event) => {
+      const { clientX, clientY } = event.nativeEvent;
+      const proximityClass = calculateViewportProximity(clientX, clientY);
+      setViewportClass(proximityClass);
+    
+      // ✅ Ensure we store full dot details (including dotId)
+      setHoveredDot({
+        dotId: dot._id, // ✅ Store unique dot identifier
+        percentage: calculatePercentage(dot.averageWeight),
+        color: dot.color,
+      });
+    };
+    
+    const handleHoverEnd = () => {
+      setHoveredDot(null);
+      setViewportClass(''); // Reset the class on hover end
+    };
+          
 
   useEffect(() => {
     // Cleanup interval or animation frame on component unmount
@@ -441,23 +452,32 @@ const handleHoverEnd = () => {
         </Html>
       )}
   
-          {hoveredDot && (
-          <Html
-            position={hoveredDot.position}
-            center
-            zIndexRange={[120, 180]} // Adjust the z-index range for the popup
-            style={{
-              pointerEvents: "none",
-              transition: "opacity 0.2s ease-in-out",
-              '--offset-px': `${offsetPx}px` // Set the CSS variable // Ensures smoother transitions
-            }}
-            className={`${hoveredDot ? "fade-in" : "fade-out"} ${viewportClass}`}
-          >
-            <div>
-              <GamificationGeneral hoveredDot={hoveredDot} />
-            </div>
-          </Html>
-          )}
+          {hoveredDot && (() => {
+          const hoveredData = points.find(dot => dot._id === hoveredDot.dotId);
+          if (!hoveredData) return null;
+
+          return (
+            <Html
+              position={hoveredData.position}
+              center
+              zIndexRange={[120, 180]}
+              style={{
+                pointerEvents: "none",
+                transition: "opacity 0.2s ease-in-out",
+                '--offset-px': `${offsetPx}px`,
+              }}
+              className={`fade-in ${viewportClass}`}
+            >
+              <div>
+                <GamificationGeneral 
+                  dotId={hoveredDot.dotId} // ✅ Pass dotId for unique caching
+                  percentage={hoveredDot.percentage} 
+                  color={hoveredDot.color} 
+                />
+              </div>
+            </Html>
+          );
+        })()}
           {/* Add CompleteButton */}
           <Html zIndexRange={[12, 12]} style={{
            pointerEvents: 'none', 

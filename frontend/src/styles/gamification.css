@@ -65,7 +65,7 @@
 .gam-description-text {padding-top: 0.3em; padding-bottom: 0.4em;}
 .gam-visualization {width: 30%; display: flex; position: relative; right: 0.4em; flex-wrap: nowrap; justify-content: flex-end;}
 .gam-percentage-knob {position: relative; width: 10px; height: 100%;}
-.gam-percentage-bar {width: 30%; height: 106%; margin-top: -15%; background: linear-gradient(to bottom, rgba(0, 255, 0, 0.9) 0%, #b7e903e6 40%, #e9e103e6 55%, #e9b303e6 70%, #e99503e6 80%, rgba(255, 0, 0, 0.9)) 100%;
+.gam-percentage-bar {width: 30%; height: 106%; margin-top: -15%; background: linear-gradient(to bottom, rgba(0, 255, 0, 0.9) 0%, #baf104 25%, #f1e904 50%, #f18e04 75%, rgba(255, 0, 0, 0.9)) 100%;
  border-radius: 3px;}
 .gam-knob-arrow {
   position: absolute;
@@ -139,7 +139,7 @@
 }
 
 .is-bottom .generalized-result, .is-left.is-bottom .generalized-result {transform: translateY(calc(-1 * var(--offset-px))); 
-  position: relative; left: 0; top: -45px; height: 200px !important;}
+  position: relative; left: 0; top: -40px; height: 200px !important;}
 .is-bottom .generalized-result::after, .is-left.is-bottom .generalized-result::after  {
   content: '';
   position: absolute;

@@ -119,8 +119,6 @@ const GamificationPersonalized = ({ userData, percentage, color }) => {
 
   const { weights } = userData;
 
-  const averageWeight =
-    Object.values(weights).reduce((sum, w) => sum + w, 0) / Object.keys(weights).length;
 
   return (
     <div className="personalized-result">
