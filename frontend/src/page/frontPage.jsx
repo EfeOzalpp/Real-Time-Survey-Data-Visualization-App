@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../styles/survey.css';
 import '../styles/global-styles.css';
 import '../styles/AnimationStyles.css';
@@ -12,6 +12,31 @@ const FrontPage = () => {
   const [animationVisible, setAnimationVisible] = useState(false);
   const [graphVisible, setGraphVisible] = useState(false); // Controls visibility, not rendering
   const [surveyWrapperClass, setSurveyWrapperClass] = useState(''); // Class state for moving Three/Drei related survey-section-wrapper3 styling changes
+
+  // Dsiable trackpad and touch device pinch UI zoom in functionality to avoid clashing zoom-in function of dot graph
+  useEffect(() => {
+    const preventZoom = (event) => {
+      if (event.ctrlKey || event.touches?.length > 1) {
+        event.preventDefault();
+      }
+    };
+
+    // Disable pinch-zoom and Ctrl+scroll globally
+    document.addEventListener("wheel", preventZoom, { passive: false });
+    document.addEventListener("gesturestart", preventZoom);
+    document.addEventListener("gesturechange", preventZoom);
+    document.addEventListener("gestureend", preventZoom);
+    document.addEventListener("touchmove", preventZoom, { passive: false });
+
+    return () => {
+      // Cleanup when component unmounts
+      document.removeEventListener("wheel", preventZoom);
+      document.removeEventListener("gesturestart", preventZoom);
+      document.removeEventListener("gesturechange", preventZoom);
+      document.removeEventListener("gestureend", preventZoom);
+      document.removeEventListener("touchmove", preventZoom);
+    };
+  }, []); // Runs only once when the component mounts
 
   return (
     <div className="main-section">

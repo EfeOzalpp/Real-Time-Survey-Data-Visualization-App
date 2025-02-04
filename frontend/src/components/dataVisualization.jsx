@@ -9,7 +9,7 @@ export let isDragging = false;
 export let setIsDragging = () => {};
 
 const VisualizationPage = () => {
-  const [isBarGraphVisible, setIsBarGraphVisible] = useState(true);
+  const [isBarGraphVisible, setIsBarGraphVisible] = useState(false);
   const [position, setPosition] = useState(() => ({
     x: window.innerWidth * 0.8,
     y: window.innerHeight * 0.06,
@@ -88,16 +88,29 @@ const VisualizationPage = () => {
     const handleMouseUp = () => handleDragEnd();
     const handleTouchEnd = () => handleDragEnd();
 
+    const preventTextSelection = (event) => event.preventDefault();
+
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('touchmove', handleTouchMove);
     window.addEventListener('mouseup', handleMouseUp);
     window.addEventListener('touchend', handleTouchEnd);
+
+    if (isDragging) {
+      document.addEventListener("selectstart", preventTextSelection); // Prevents text selection
+      document.body.style.userSelect = "none";
+    } else {
+      document.removeEventListener("selectstart", preventTextSelection);
+      document.body.style.userSelect = "auto"; // Restore selection
+    }
 
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('touchmove', handleTouchMove);
       window.removeEventListener('mouseup', handleMouseUp);
       window.removeEventListener('touchend', handleTouchEnd);
+
+      document.removeEventListener("selectstart", preventTextSelection);
+      document.body.style.userSelect = "auto"; // Clean up when unmounting
     };
   }, [isDragging]);
 
@@ -105,7 +118,6 @@ const VisualizationPage = () => {
     <div>
       <DotGraph 
       />
-      
       <div
         ref={dragRef}
         className="draggable-container"
@@ -114,6 +126,7 @@ const VisualizationPage = () => {
           left: `${position.x}px`,
           top: `${position.y}px`,
           zIndex: 10,
+          cursor: isDragging ? "grabbing" : "grab",
         }}
         onMouseDown={handleDragStart}
         onTouchStart={handleDragStart}

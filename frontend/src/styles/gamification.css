@@ -30,7 +30,7 @@
     border-color: #f3ffffe0 transparent transparent transparent; /* Arrow color */
   }
 
-.gamification-text {width: 75%; max-width: 75%; padding-bottom: 0.4em; padding-top: 0.1em; min-width: 75%; text-align: left; padding-left: 9px; padding-top: 9px;}
+.gamification-text {pointer-events: none; width: 75%; max-width: 75%; padding-bottom: 0.4em; padding-top: 0.1em; min-width: 75%; text-align: left; padding-left: 9px; padding-top: 9px;}
 .gam-title {padding-bottom: 0.3em; color: rgba(24, 24, 24, 0.874);} .personal-title {padding-bottom: 0.5em; padding-left: 0.1em; padding-top: 0.2em;}
 .gamification-knob {
     position: relative;

@@ -12,7 +12,6 @@ const DotGraph = ({ isDragging = false, data = [] }) => {
   const [points, setPoints] = useState([]);
   const [rotationAngles, setRotationAngles] = useState({ x: 0, y: 0 });
   const [lastCursorPosition, setLastCursorPosition] = useState({ x: 0, y: 0 });
-  const [radius, setRadius] = useState(100);
   const [hoveredDot, setHoveredDot] = useState(null);
   const hoverCheckInterval = useRef(null); // Store interval or requestAnimationFrame for periodic checks
   const [viewportClass, setViewportClass] = useState(''); // Track proximity to edges to add class
@@ -21,8 +20,17 @@ const DotGraph = ({ isDragging = false, data = [] }) => {
   const touchStartDistance = useRef(null);
 
   const spreadFactor = 75; // Default spread factor
+
   const minRadius = 20; // Calculating zoomed in and out states to adjust gamification offset
   const maxRadius = 300; // Zoomed out
+
+  const [radius, setRadius] = useState(() => {
+    const baseRadius = 100; // Default starting radius
+    const scalingFactor = 0.5; // Adjust based on desired spread
+    const dynamicRadius = baseRadius + data.length * scalingFactor;
+    // Clamp within min/max range
+    return Math.max(minRadius, Math.min(maxRadius, dynamicRadius));
+  });
 
   // Use the dynamic offset hook
   const dynamicOffset = useDynamicOffset();
@@ -217,11 +225,22 @@ const DotGraph = ({ isDragging = false, data = [] }) => {
     };
   
     const handleScroll = (event) => {
-      setRadius((prevRadius) => {
-        const newRadius = prevRadius - event.deltaY * 0.1;
-        return Math.max(minRadius, Math.min(maxRadius, newRadius));
-      });
-    };
+      if (event.ctrlKey) {
+        // Likely a pinch gesture
+        console.log("Pinch detected!");
+        setRadius((prevRadius) => {
+          const newRadius = prevRadius - event.deltaY * 0.9; // Adjust for pinch sensitivity
+          return Math.max(minRadius, Math.min(maxRadius, newRadius));
+        });
+      } else {
+        // Regular scroll wheel
+        console.log("Mouse wheel detected!");
+        setRadius((prevRadius) => {
+          const newRadius = prevRadius - event.deltaY * 0.15; // Keep this lower for smooth scrolling
+          return Math.max(minRadius, Math.min(maxRadius, newRadius));
+        });
+      }
+    };    
   
     const handleTouchStart = (event) => {
       if (event.touches.length === 1) {
@@ -265,7 +284,7 @@ const DotGraph = ({ isDragging = false, data = [] }) => {
   
         const pinchDelta = distance - touchStartDistance.current;
         setRadius((prevRadius) => {
-          const newRadius = prevRadius - pinchDelta * 0.01; // Adjust zoom sensitivity
+          const newRadius = prevRadius - pinchDelta * 0.9; // Adjust zoom sensitivity
           return Math.max(minRadius, Math.min(maxRadius, newRadius));
         });
   
@@ -342,7 +361,6 @@ const DotGraph = ({ isDragging = false, data = [] }) => {
     };
     
   
-  
     // Helper to determine proximity to viewport edges
     const calculateViewportProximity = (x, y) => {
       const verticalEdgeThreshold = 150; // Adjust threshold for top and bottom
@@ -374,9 +392,9 @@ const DotGraph = ({ isDragging = false, data = [] }) => {
       const proximityClass = calculateViewportProximity(clientX, clientY);
       setViewportClass(proximityClass);
     
-      // ✅ Ensure we store full dot details (including dotId)
+      // Ensure we store full dot details (including dotId)
       setHoveredDot({
-        dotId: dot._id, // ✅ Store unique dot identifier
+        dotId: dot._id, // Store unique dot identifier
         percentage: calculatePercentage(dot.averageWeight),
         color: dot.color,
       });
@@ -431,7 +449,7 @@ const DotGraph = ({ isDragging = false, data = [] }) => {
               }
             }}
           >
-            <sphereGeometry args={[1, 32, 32]} />
+            <sphereGeometry args={[1.1, 48, 48]} />
             <meshStandardMaterial color={point.color} />
           </mesh>
         );
