@@ -17,7 +17,7 @@ const getPositionByViewport = () => {
   const width = window.innerWidth;
 
   if (width < 768) {
-    return { x: window.innerWidth * 0.5, y: window.innerHeight * 0.1 };
+    return { x: window.innerWidth * 0.3, y: window.innerHeight * 0.1 };
   } else if (width >= 768 && width < 1024) {
     return { x: window.innerWidth * 0.7, y: window.innerHeight * 0.08 };
   } else {

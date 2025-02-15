@@ -26,12 +26,15 @@ const DotGraph = ({ isDragging = false, data = [] }) => {
   const maxRadius = 300; // Zoomed out
 
   const [radius, setRadius] = useState(() => {
-    const baseRadius = 36; // Default starting radius
+    const isSmallScreen = window.innerWidth < 768;
+    const baseRadius = isSmallScreen ? 72 : 36; // Smaller base radius for screens below 768px
     const scalingFactor = 0.5; // Adjust based on desired spread
     const dynamicRadius = baseRadius + data.length * scalingFactor;
+    
     // Clamp within min/max range
     return Math.max(minRadius, Math.min(maxRadius, dynamicRadius));
   });
+  
 
   // Use the dynamic offset hook
   const dynamicOffset = useDynamicOffset();
@@ -193,16 +196,19 @@ const DotGraph = ({ isDragging = false, data = [] }) => {
         };
       });
   
-      // Ensure latest point is at the center
+      // Ensure latest point is at the center (adjust for small screens)
       const latestEntryId = data[0]?._id;
       if (latestEntryId) {
         const latestPointIndex = newPoints.findIndex((point) => point._id === latestEntryId);
         if (latestPointIndex !== -1) {
-          newPoints[latestPointIndex].position = [0, 0, 0]; // Move latest point to the center
-          newPoints[latestPointIndex].originalPosition = [0, 0, 0]; // Update its original position as well
+          const isSmallScreen = window.innerWidth < 768;
+          const yOffset = isSmallScreen ? 9 : 0; // Shift upwards for small screens
+
+          newPoints[latestPointIndex].position = [0, yOffset, 0]; // Adjusted center
+          newPoints[latestPointIndex].originalPosition = [0, yOffset, 0]; // Update original position as well
         }
       }
-  
+
       setPoints(newPoints);
     };
   

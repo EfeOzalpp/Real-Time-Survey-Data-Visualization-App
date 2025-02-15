@@ -152,7 +152,7 @@ const Questionnaire = ({ setAnimationVisible, setGraphVisible, setSurveyWrapperC
           <div className="survey-section">
             <div className="surveyStart">
               <button className="begin-button4" onClick={handleComplete}>
-                <h4>I AM DONE</h4>
+                <h4>I'M DONE</h4>
               </button>
             </div></div>
           </div>

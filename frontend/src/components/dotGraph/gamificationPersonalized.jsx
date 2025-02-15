@@ -35,9 +35,9 @@ const GamificationPersonalized = ({ userData, percentage, color }) => {
           ],
           "61-80": [
             "Green-Blue Superhero",
-            "Sustainability Trifecta (Love, nature, life)",
-            "Planet Partner-in-crime",
-            "A cool person, and a cooling agent",
+            "Sustainability Trifecta Love-Nature-Life",
+            "Planet Partner in Crime",
+            "A cool person, and a cooling agent =)",
             "Piece of cake, I run this planet",
           ],
           "81-100": [
