@@ -69,7 +69,16 @@ export const useDynamicOffset = (): number => {
             1
           );
           offset = minOffset + (maxOffset - minOffset) * normalizedWidth;
-          } else if (currentWidth > 900 && currentWidth <= 1350) {
+        } else if (currentWidth > 675 && currentWidth <= 900) {
+          // NEW: Second range 675px to 900px width (SAME AS 66px to 675px)
+          const minOffset = 30;
+          const maxOffset = 200;
+          const normalizedWidth = Math.min(
+            Math.max((currentWidth - 675) / (900 - 675), 0),
+            1
+          );
+          offset = minOffset + (maxOffset - minOffset) * normalizedWidth;
+        } else if (currentWidth > 900 && currentWidth <= 1350) {
           // Second range: 675px to 1350px width
           const minOffset = 75;
           const maxOffset = 85;

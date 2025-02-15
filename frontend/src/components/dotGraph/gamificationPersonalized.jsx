@@ -30,22 +30,22 @@ const GamificationPersonalized = ({ userData, percentage, color }) => {
             "Average-Eco Loverzz",
             "Is it trendy to like nature?",
             "Luv Nature <3, (ok, where's my award)",
-            "At least, I was honest",
-            "Great, I love mediocrity",
+            "The least I can do is honesty",
+            "I like mediocrity..:)",
           ],
           "61-80": [
             "Green-Blue Superhero",
             "Sustainability Trifecta (Love, nature, life)",
             "Planet Partner-in-crime",
             "A cool person, and a cooling agent",
-            "Piece-o-cake, I run this planet",
+            "Piece of cake, I run this planet",
           ],
           "81-100": [
-            "Nature's Holy Savior",
+            "Nature's Humble Savior",
             "Damn! Larger than life habits",
-            "The most precious butterfly award goes to...",
-            "A reminder to reward yourself",
-            "Simply, outstanding...",
+            "The Most Precious Award Goes to...",
+            "A Reminder to Reward Yourself",
+            "Simply, Outstanding...",
           ],
         };
 
@@ -66,8 +66,8 @@ const GamificationPersonalized = ({ userData, percentage, color }) => {
         const secondaryText = {
           "0-20": [
             "Earth would've needed you, You're ahead of only",
-            "Go hug a tree. Effortlessly higher than",
-            "Wow, congratz, you accelerated planetary evacuation =). You're ahead of only",
+            "Go hug a tree. Effortlessly higher than only",
+            "You accelerated planetary evacuation =). You're ahead of only",
           ],
           "21-40": [
             "Not amazing but not a crime, you're ahead of only",
@@ -127,7 +127,15 @@ const GamificationPersonalized = ({ userData, percentage, color }) => {
         <h4 className="gam-title">Based on your habits, you're:</h4>
         <h1 className="personal-title">{selectedTitle}</h1>
         <p>
-        {secondaryText} <strong>{percentage}%</strong> people!
+          {secondaryText}{" "}
+          <strong 
+            style={{ 
+              textShadow: `0px 0px 12px ${color}, 0px 0px 22px ${color}`
+            }}
+          >
+            {percentage}%
+          </strong>{" "}
+          people!
         </p>
       </div>
 

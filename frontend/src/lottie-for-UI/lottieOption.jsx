@@ -39,11 +39,6 @@ const LottieOption = ({ onClick, selected }) => {
       onClick={handleClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      style={{
-        cursor: 'pointer',
-        width: '2em',
-        height: '2em',
-      }}
     >
       <Lottie
         lottieRef={lottieRef}

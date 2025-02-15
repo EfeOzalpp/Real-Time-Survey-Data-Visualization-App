@@ -47,21 +47,13 @@ const Graph = () => {
         />
         <spotLight   
           position={[0, 0, 0]} 
-          intensity={2.2} // Keep it bright
+          intensity={2.1} // Keep it bright
           angle={Math.PI / 1} // Widen the beam (increase from Math.PI / 16)
           penumbra={7.5} 
           distance={10000} 
           decay={0.2} // No intensity falloff with distance
           shadow-mapSize-width={2048}
           shadow-mapSize-height={2048}
-          castShadow />
-
-        <spotLight   
-          position={[0, 30, 30]} 
-          intensity={1500} // Keep it bright
-          angle={Math.PI / 16} // Widen the beam (increase from Math.PI / 16)
-          penumbra={1.5} 
-          distance={40} 
           castShadow />
 
         <meshStandardMaterial metalness={0.8} roughness={0} />

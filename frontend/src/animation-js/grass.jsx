@@ -24,15 +24,6 @@ const Grass = () => {
   };
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100%',
-        width: '100%',
-      }}
-    >
       <Lottie
         lottieRef={lottieInstanceRef}
         animationData={animationData}
@@ -40,8 +31,7 @@ const Grass = () => {
         autoplay // Start automatically
         onComplete={handleComplete} // Trigger looping when the animation completes
       />
-    </div>
-  );
-};
+    );
+   };
 
 export default Grass;

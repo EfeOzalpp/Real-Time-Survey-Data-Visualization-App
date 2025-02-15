@@ -24,23 +24,13 @@ const House = () => {
   };
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '25%',
-        width: '25%',
-      }}
-    >
-      <Lottie
+      <Lottie className="house"
         lottieRef={lottieInstanceRef}
         animationData={animationData}
         loop={false} // Disable automatic looping
         autoplay // Start automatically
         onComplete={handleComplete} // Trigger looping when the animation completes
       />
-    </div>
   );
 };
 

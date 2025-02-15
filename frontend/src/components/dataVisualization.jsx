@@ -9,12 +9,50 @@ export let isDragging = false;
 export let setIsDragging = () => {};
 
 const VisualizationPage = () => {
-  const [isBarGraphVisible, setIsBarGraphVisible] = useState(false);
-  const [position, setPosition] = useState(() => ({
-    x: window.innerWidth * 0.8,
-    y: window.innerHeight * 0.06,
-  }));
+  const [isBarGraphVisible, setIsBarGraphVisible] = useState(true);
   const [dragState, setDragState] = useState(false);
+  
+// Get initial position based on viewport size
+const getPositionByViewport = () => {
+  const width = window.innerWidth;
+
+  if (width < 768) {
+    return { x: window.innerWidth * 0.5, y: window.innerHeight * 0.1 };
+  } else if (width >= 768 && width < 1024) {
+    return { x: window.innerWidth * 0.7, y: window.innerHeight * 0.08 };
+  } else {
+    return { x: window.innerWidth * 0.3, y: window.innerHeight * 0.1 };
+  }
+};
+
+const [position, setPosition] = useState(getPositionByViewport);
+const currentMediaQuery = useRef(getPositionByViewport()); // Stores the last known media query
+
+useEffect(() => {
+  // Run on mount to ensure correct initial positioning
+  const initialPosition = getPositionByViewport();
+  setPosition(initialPosition);
+  currentMediaQuery.current = initialPosition; // Sync with media query reference
+
+  const handleResize = () => {
+    const newPosition = getPositionByViewport();
+
+    // Update only if the media query threshold is crossed
+    if (
+      newPosition.x !== currentMediaQuery.current.x ||
+      newPosition.y !== currentMediaQuery.current.y
+    ) {
+      setPosition(newPosition);
+      currentMediaQuery.current = newPosition; // Update stored media query state
+    }
+  };
+
+  window.addEventListener('resize', handleResize);
+
+  return () => {
+    window.removeEventListener('resize', handleResize);
+  };
+}, []); // Runs once on mount
 
   // Assign the state and setter to exports
   isDragging = dragState;
@@ -24,17 +62,15 @@ const VisualizationPage = () => {
   const buttonRef = useRef(null);
   const dragOffset = useRef({ x: 0, y: 0 });
   const hasMoved = useRef(false); // Tracks whether significant movement occurred
+  const dragAnimationRef = useRef(null); // Store animation frame ID
 
   const toggleBarGraph = (e) => {
     if (hasMoved.current) {
-      // Prevent toggling if a drag occurred
       e.preventDefault();
       e.stopPropagation();
-      hasMoved.current = false; // Reset movement tracking
+      hasMoved.current = false;
       return;
     }
-
-    // Toggle the bar graph visibility
     setIsBarGraphVisible((prevState) => !prevState);
   };
 
@@ -48,7 +84,7 @@ const VisualizationPage = () => {
       y: clientY - rect.top,
     };
 
-    hasMoved.current = false; // Reset movement tracking
+    hasMoved.current = false;
     setIsDragging(true);
   };
 
@@ -65,16 +101,24 @@ const VisualizationPage = () => {
     let newX = clientX - dragOffset.current.x;
     let newY = clientY - dragOffset.current.y;
 
-    // Check if movement exceeds a small threshold (to detect dragging)
+    // Detect if drag is happening
     if (Math.abs(newX - position.x) > 5 || Math.abs(newY - position.y) > 5) {
-      hasMoved.current = true; // Mark as a drag
+      hasMoved.current = true;
     }
 
-    const horizontalOffset = 24; // Offset to counteract left: 24px
+    const horizontalOffset = 24;
     newX = Math.max(-horizontalOffset, Math.min(newX, viewportWidth - buttonRect.width - horizontalOffset));
     newY = Math.max(0, Math.min(newY, viewportHeight - buttonRect.height));
 
-    setPosition({ x: newX, y: newY });
+    // Cancel previous animation frame to prevent unnecessary renders
+    if (dragAnimationRef.current) {
+      cancelAnimationFrame(dragAnimationRef.current);
+    }
+
+    // Smooth movement
+    dragAnimationRef.current = requestAnimationFrame(() => {
+      setPosition({ x: newX, y: newY });
+    });
   };
 
   const handleDragEnd = () => {
@@ -96,11 +140,11 @@ const VisualizationPage = () => {
     window.addEventListener('touchend', handleTouchEnd);
 
     if (isDragging) {
-      document.addEventListener("selectstart", preventTextSelection); // Prevents text selection
+      document.addEventListener("selectstart", preventTextSelection);
       document.body.style.userSelect = "none";
     } else {
       document.removeEventListener("selectstart", preventTextSelection);
-      document.body.style.userSelect = "auto"; // Restore selection
+      document.body.style.userSelect = "auto";
     }
 
     return () => {
@@ -108,16 +152,14 @@ const VisualizationPage = () => {
       window.removeEventListener('touchmove', handleTouchMove);
       window.removeEventListener('mouseup', handleMouseUp);
       window.removeEventListener('touchend', handleTouchEnd);
-
       document.removeEventListener("selectstart", preventTextSelection);
-      document.body.style.userSelect = "auto"; // Clean up when unmounting
+      document.body.style.userSelect = "auto";
     };
   }, [isDragging]);
 
   return (
     <div>
-      <DotGraph 
-      />
+      <DotGraph />
       <div
         ref={dragRef}
         className="draggable-container"
@@ -139,10 +181,10 @@ const VisualizationPage = () => {
             left: '24px',
             position: 'relative',
           }}
-          onClick={toggleBarGraph} // Prevent click if dragging occurred
-        ><p>
-          {isBarGraphVisible ? '- Close' : '+ Open'}
-          </p></div>
+          onClick={toggleBarGraph}
+        >
+          <p>{isBarGraphVisible ? '- Close' : '+ Open'}</p>
+        </div>
 
         {isBarGraphVisible && (
           <div className="draggable-bar-graph">

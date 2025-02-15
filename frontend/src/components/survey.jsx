@@ -167,7 +167,7 @@ const Questionnaire = ({ setAnimationVisible, setGraphVisible, setSurveyWrapperC
       <div className={`survey-section ${fadeState}`}>
         <div className="surveyStart">
           <h3 className="begin-title1">Welcome</h3>
-          <h1 className="begin-title2">Butterfly Habits</h1>
+          <h1 className="begin-title2">Butterfly Effect</h1>
           <button className="begin-button" onClick={handleStart}>
             <h4>BEGIN</h4>
           </button>
@@ -192,7 +192,7 @@ const Questionnaire = ({ setAnimationVisible, setGraphVisible, setSurveyWrapperC
             <h2>{currentQuestion}.</h2>
           </div>
           <div className="question-part">
-            <h4 style={{ marginLeft: '8px' }}>
+            <h4>
               {questions[currentQuestion - 1].question}
             </h4>
           </div>

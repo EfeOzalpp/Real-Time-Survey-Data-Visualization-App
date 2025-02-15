@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
+import { throttle } from 'lodash'; 
 import GamificationPersonalized from './gamificationPersonalized'; 
 import GamificationGeneral from './gamificationGeneral'; 
 import '../../styles/graph.css';
@@ -25,7 +26,7 @@ const DotGraph = ({ isDragging = false, data = [] }) => {
   const maxRadius = 300; // Zoomed out
 
   const [radius, setRadius] = useState(() => {
-    const baseRadius = 100; // Default starting radius
+    const baseRadius = 36; // Default starting radius
     const scalingFactor = 0.5; // Adjust based on desired spread
     const dynamicRadius = baseRadius + data.length * scalingFactor;
     // Clamp within min/max range
@@ -62,6 +63,7 @@ const DotGraph = ({ isDragging = false, data = [] }) => {
 
   let offsetOne;
 
+  // Fully zoomed in offset value for Dynamic Offset variable
   if (isPortrait) {
     offsetOne = 160;
   } else {
@@ -209,20 +211,20 @@ const DotGraph = ({ isDragging = false, data = [] }) => {
 
 
   useEffect(() => {
-    const handleMouseMove = (event) => {
+    const handleMouseMove = throttle((event) => {
       if (isDraggingRef.current) return;
   
       const { innerWidth, innerHeight } = window;
       const normalizedX = (event.clientX / innerWidth) * 2 - 1;
       const normalizedY = -(event.clientY / innerHeight) * 2 + 1;
   
-      setRotationAngles((prev) => ({
+      setRotationAngles(prev => ({
         x: prev.x + (normalizedY - lastCursorPosition.y) * Math.PI * 0.1,
         y: prev.y + (normalizedX - lastCursorPosition.x) * Math.PI * 0.1,
       }));
   
       setLastCursorPosition({ x: normalizedX, y: normalizedY });
-    };
+    }, 50); // Adjust debounce time (50ms)
   
     const handleScroll = (event) => {
       if (event.ctrlKey) {
@@ -462,9 +464,10 @@ const DotGraph = ({ isDragging = false, data = [] }) => {
           zIndexRange={[110, 130]} // fixed z-index for components
           style={{
             pointerEvents: 'none',
+            '--offset-px': `${offsetPx}px`,
           }}
         >
-          <div style={{ transform: `translateX(${offsetPx}px)` }}>
+          <div>
             <GamificationPersonalized userData={latestEntry} percentage={percentage} color={latestPoint.color}/>
           </div>
         </Html>
@@ -481,10 +484,9 @@ const DotGraph = ({ isDragging = false, data = [] }) => {
               zIndexRange={[120, 180]}
               style={{
                 pointerEvents: "none",
-                transition: "opacity 0.2s ease-in-out",
                 '--offset-px': `${offsetPx}px`,
               }}
-              className={`fade-in ${viewportClass}`}
+              className={`${viewportClass}`}
             >
               <div>
                 <GamificationGeneral 

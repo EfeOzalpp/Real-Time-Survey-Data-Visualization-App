@@ -41,7 +41,7 @@ const GamificationGeneral = ({ dotId, percentage, color }) => {
     const getRandomPrimaryTitle = (percentage) => {
       const titles = {
         "0-20": ["Climate Clueless", "Eco-Absentee", "Melting-Ice Enthusiast", "Carbon Profiter", "Asphalt Enjoyer", "Unworthy Commuter", "UV Enjoyer"],
-        "21-40": ["Footprint Fumbler", "Eco Dabbler", "You Exhaust Me", "Red Velvet Cake", "Semi-Villain"],
+        "21-40": ["Footprint Fumbler", "Eco Dabbler", "You Exhaust Earth", "Red Velvet Cake", "Semi-Villain"],
         "41-60": ["Uncertain Datapoint", "Balanced Dude", "Null Responder", "Realistic Answerer", "Booring", "Must Be Fun"],
         "61-80": ["Planet Ally", "Animal Protector", "Nature Carer", "Ecological Warrior", "Sustainable King"],
         "81-100": ["Planet Guardian", "Sustainability Superhero", "Earth's Best Friend", "Green MVP", "Utopian Hardworker"],
