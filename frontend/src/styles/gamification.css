@@ -5,15 +5,16 @@
   /* =============================================
      Personalized Gamification
      ============================================= */
-     .personalized-result { transform: translateY(calc(-1 * var(--offset-px))); background-color: #f4fdfcc6; padding: 12px; border-radius: 24px; height: 215px; max-height: 245px; min-height: 210px; color: rgb(51, 51, 51); text-align: center; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: flex; flex-direction: row; flex-wrap: nowrap; position: relative; width: 70vw; max-width: 70vw; min-width: 70vw; bottom: 16px; pointer-events: all; z-index: 10; box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.1), inset -1px -1px 1px rgba(255, 255, 255, 0.6); }
+     .personalized-result { transform: translateY(calc(-1 * var(--offset-px))); background-color: #f4fdfcc6; padding: 12px; border-radius: 24px; height: 235px; max-height: 245px; min-height: 210px; color: rgb(51, 51, 51); text-align: center; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: flex; flex-direction: row; flex-wrap: nowrap; position: relative; width: 70vw; max-width: 70vw; min-width: 70vw; bottom: 16px; pointer-events: all; z-index: 10; box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.1), inset -1px -1px 1px rgba(255, 255, 255, 0.6); }
      .personalized-result::after { content: ''; position: absolute; transform: rotate(180deg) !important; border-width: 14px; left: calc(50% - 13px) !important; top: 100% !important; border-style: solid; border-color: transparent transparent #f7ffffd6 transparent;  }
+     .personalized-result p {padding-bottom: 0.4em;}
      
      .gamification-text { pointer-events: none; width: 75%; max-width: 75%; min-width: 75%; text-align: left; padding: 9px 0 0.4em 9px; display: flex; flex-direction: column; justify-content: space-between; }
      .gam-title { padding-bottom: 0.3em; color: rgba(24, 24, 24, 0.874); } .personal-title { padding: 0.1em 0 0.3em 0.02em; }
      
      .gamification-knob { position: relative; width: 10%; display: flex; align-items: flex-end; justify-content: flex-end; }
      .percentage-knob { height: 94%; position: relative; background: none; }
-     .knob-arrow { position: absolute; bottom: 0; left: -50%; transform: translateX(-78%) rotate(90deg); width: 0; height: 0; border-left: 16px solid transparent; border-right: 16px solid transparent; border-radius: 2px; transition: bottom 0.3s ease; }
+     .knob-arrow { position: absolute; bottom: 0; left: -50%; transform: translateX(-78%) rotate(90deg); width: 0; height: 0; border-left: 12px solid transparent; border-right: 12px solid transparent; border-radius: 2px; transition: bottom 0.3s ease; }
      .gamification-bar { width: 15%; }
      .percentage-bar { width: 75%; height: 100%; background: linear-gradient(to bottom, rgba(0, 255, 0, 0.9), #e9e103e6, rgba(255, 0, 0, 0.9)); border-radius: 3px; }
      
@@ -62,7 +63,7 @@
    .personalized-result::after { content: ''; position: absolute; top: 50%; left: -20px; transform: translateY(-50%) rotate(90deg); border-width: 11px; border-style: solid; border-color: #f3ffffe0 transparent transparent transparent; }
    
    .gamification-text { pointer-events: none; width: 75%; max-width: 75%; min-width: 75%; text-align: left; padding: 9px 0 0.4em 9px; }
-   .gam-title { padding-bottom: 0.3em; color: rgba(24, 24, 24, 0.874); } .personal-title { padding: 0.4em 0 0.2em 0.06em; }
+   .gam-title { padding-bottom: 0.3em; color: rgba(24, 24, 24, 0.874); } .personal-title { padding: 0.5em 0 0.4em 0.03em; }
    
    .gamification-knob { position: relative; width: 10%; display: flex; justify-content: center; align-items: flex-end; }
    .percentage-knob { height: 94%; width: 10px; position: relative; background: none; }
