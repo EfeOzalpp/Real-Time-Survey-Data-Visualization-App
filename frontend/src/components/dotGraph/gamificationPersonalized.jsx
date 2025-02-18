@@ -20,22 +20,22 @@ const GamificationPersonalized = ({ userData, percentage, color }) => {
             "Green isn't my favorite color",
           ],
           "21-40": [
-            "I have a backup planet!",
+            "I have a Backup Planet!",
             "Nature? Is it edible?",
             "Sustainability, Who?",
-            "Comfort seeker, nature is fine too...",
-            "Sry, I just got aware of my bad-nature",
+            "Comfort Seeker, Nature is ok...",
+            "I am Aware of my Bad-nature",
           ],
           "41-60": [
             "Average-Eco Loverzz",
             "Is it trendy to like nature?",
-            "Luv Nature <3, (ok, where's my award)",
+            "Nature <3 (ok, where's my award?)",
             "The least I can do is honesty",
             "I like mediocrity..:)",
           ],
           "61-80": [
             "Green-Blue Superhero",
-            "Sustainability Trifecta Love-Nature-Life",
+            "Sustainability, Love-Nature-Life",
             "Planet Partner in Crime",
             "A cool person, and a cooling agent =)",
             "Piece of cake, I run this planet",
@@ -65,28 +65,28 @@ const GamificationPersonalized = ({ userData, percentage, color }) => {
       const getRandomSecondaryText = (percentage) => {
         const secondaryText = {
           "0-20": [
-            "Earth would've needed you, You're ahead of only",
-            "Go hug a tree. Effortlessly higher than only",
-            "You accelerated planetary evacuation =). You're ahead of only",
+            "Earth would've needed you, You're surpass only",
+            "Hug a tree. Effortlessly higher than only",
+            "Planetary evacuation! You're ahead of only",
           ],
           "21-40": [
-            "Not amazing but not a crime, you're ahead of only",
-            "Low-key effort gives low-key results, you're ahead of",
+            "Hands down, it's not a crime, you surpass only",
+            "Low-effort gives-key results, you're ahead of",
             "Humble beginnings, you're higher than",
           ],
           "41-60": [
             "You're getting there! -Ahead of",
-            "Caring is free. You're ahead of",
+            "I mean... You do you. You're ahead of",
             "Kind of in the middle, huh? You're higher than",
           ],
           "61-80": [
-            "You are doing frenzy! You're higher",
-            "Breathing, thriving, ahead of",
-            "Right on the spot! You're higher than",
+            "Spectacular and frenzy! You're higher",
+            "Breathing, thriving, cooking. Ahead of",
+            "Right on, left off, You're higher than",
           ],
           "81-100": [
             "You're ahead of almost everyone, higher than",
-            "Hi, I'm Nature, I appreciate you. You're higher than",
+            "I'm Nature, appreciate ya' You're higher than",
             "WOW, that's rad. You're ahead of",
           ],
         };

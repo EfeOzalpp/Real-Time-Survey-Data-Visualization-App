@@ -27,7 +27,7 @@
 
 .bar-graph-bar:nth-child(3)::after { content: ""; position: absolute; top: 0; bottom: 0; right: -2px; width: 1px; background: linear-gradient(to bottom, transparent 0%, rgba(50, 50, 50, 0) 6%, rgba(108, 121, 122, 0.3) 15%, rgba(30, 30, 30, 0) 40%, transparent 100%); }
 
-.bar-graph-bar:nth-child(3)::before { content: ""; position: absolute; top: 0; bottom: 0; left: -1px; width: 1px; background: linear-gradient(to bottom, transparent 0%, rgba(50, 50, 50, 0) 6%, rgba(108, 121, 122, 0.3) 15%, rgba(30, 30, 30, 0) 40%, transparent 100%); }
+.bar-graph-bar:nth-child(3)::before { content: ""; position: absolute; top: 0; bottom: 0; left: -2px; width: 1px; background: linear-gradient(to bottom, transparent 0%, rgba(50, 50, 50, 0) 6%, rgba(108, 121, 122, 0.3) 15%, rgba(30, 30, 30, 0) 40%, transparent 100%); }
 
 /* Mobile */
 @media screen and (max-width: 768px) { 
@@ -41,12 +41,12 @@
 .bar-graph-fill { width: 100%; height: 0; transition: height 0.1s ease; animation-duration: 3.6s; animation-timing-function: ease-in-out; animation-iteration-count: infinite; border-radius: 6px; border: 0.2px solid rgb(212, 212, 212); }
 .bar-graph-label { position: relative; top: 24px; color: #333; text-align: center; padding-bottom: 8px; }
 .toggle-button { padding: 10px 16px; background-color: #292929; color: white; border-radius: 5px; border: none; cursor: pointer; font-size: 16px; transition: all 0.2s ease; position: relative; width: fit-content; pointer-events: all; }
-.toggle-button p { pointer-events: none; user-select: none; }
+.toggle-button p { pointer-events: none; user-select: none; font-size: clamp(2.4vw, 2.8vw, 3.4vw)}
 .toggle-button:hover { background-color: #353B41; }
 .graph-container { z-index: 4; position: relative; }
-.percentage-section { position: absolute; width: 84%; background: linear-gradient(to bottom, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0) 60%); color: white; border-top: 3px solid rgba(0, 0, 0, 0.427); font-size: 1rem; font-weight: bold; border-radius: 4px; z-index: 10; pointer-events: none; text-align: center; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 4px; transition: height 0.3s ease-in-out, opacity 0.3s ease-in-out; }
-.percentage-indicator { position: absolute; top: calc(-4.4vw - 15px); left: -25%; transform: translateX(-50%); background-color: rgba(0, 0, 0, 0.941); color: rgb(255, 255, 255); padding: 5px 10px; border-radius: 5px; font-size: 12px; font-weight: bold; display: flex; flex-direction: column; align-items: center; white-space: nowrap; }
-.percentage-indicator::before { content: ''; position: absolute; bottom: -5px; left: 100%; top: 50%; transform: translateX(-32%) rotate(-90deg); width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 5px solid black; }
+.percentage-section { position: absolute; width: 78%; background: linear-gradient(to bottom, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0) 60%); color: white; border-top: 3px solid rgba(0, 0, 0, 0.427); font-size: 1rem; font-weight: bold; border-radius: 4px; z-index: 10; pointer-events: none; text-align: center; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 4px; transition: height 0.3s ease-in-out, opacity 0.3s ease-in-out; }
+.percentage-indicator { position: absolute; top: calc(-4.4vw - 37px); left: 50%; transform: translateX(-50%); background-color: rgba(0, 0, 0, 0.82); color: rgb(255, 255, 255); padding: 5px 10px; border-radius: 5px; font-size: 12px; font-weight: bold; display: flex; flex-direction: column; align-items: center; white-space: nowrap; }
+.percentage-indicator::before { content: ''; position: absolute; bottom: -5px; left: 50%; top: 100%; transform: translateX(-32%) rotate(0deg); width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 5px solid black; }
 }
 
   /* Desktop */ 
@@ -64,7 +64,7 @@
 .toggle-button p { pointer-events: none; user-select: none; font-size: 0.8vw;}
 .toggle-button:hover { background-color: #353B41; }
 .graph-container { z-index: 4; position: relative; }
-.percentage-section { position: absolute; width: 82%; background: linear-gradient(to bottom, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0) 20%); color: white; border-top: 3px solid rgba(0, 0, 0, 0.445); font-size: 1rem; font-weight: bold; border-radius: 4px; z-index: 10; pointer-events: none; text-align: center; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 4px; transition: height 0.3s ease-in-out, opacity 0.3s ease-in-out; }
+.percentage-section { position: absolute; width: 78%; background: linear-gradient(to bottom, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0) 20%); color: white; border-top: 3px solid rgba(0, 0, 0, 0.445); font-size: 1rem; font-weight: bold; border-radius: 4px; z-index: 10; pointer-events: none; text-align: center; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 4px; transition: height 0.3s ease-in-out, opacity 0.3s ease-in-out; }
 .percentage-indicator { position: absolute; top: calc(-1.1vw - 14px); left: -25%; transform: translateX(-50%); background-color: rgba(0, 0, 0, 0.941); color: rgb(255, 255, 255); padding: 5px 10px; border-radius: 5px; font-size: 12px; font-weight: bold; display: flex; flex-direction: column; align-items: center; white-space: nowrap; }
 .percentage-indicator::before { content: ''; position: absolute; bottom: -5px; left: 100%; top: 50%; transform: translateX(-32%) rotate(-90deg); width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 5px solid black; }
 }

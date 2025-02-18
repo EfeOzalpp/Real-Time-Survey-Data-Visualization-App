@@ -231,18 +231,26 @@ const DotGraph = ({ isDragging = false, data = [] }) => {
   
       setLastCursorPosition({ x: normalizedX, y: normalizedY });
     }, 50); // Adjust debounce time (50ms)
-  
+
+      if (!isDragging) {
+        window.addEventListener("mousemove", handleMouseMove);
+      }
+    
+      return () => {
+        window.removeEventListener("mousemove", handleMouseMove);
+      };
+    }, [isDragging, lastCursorPosition]); // ✅ React re-runs this when `isDragging` changes
+    
+  useEffect(() => {
     const handleScroll = (event) => {
       if (event.ctrlKey) {
         // Likely a pinch gesture
-        console.log("Pinch detected!");
         setRadius((prevRadius) => {
           const newRadius = prevRadius - event.deltaY * 0.9; // Adjust for pinch sensitivity
           return Math.max(minRadius, Math.min(maxRadius, newRadius));
         });
       } else {
         // Regular scroll wheel
-        console.log("Mouse wheel detected!");
         setRadius((prevRadius) => {
           const newRadius = prevRadius - event.deltaY * 0.15; // Keep this lower for smooth scrolling
           return Math.max(minRadius, Math.min(maxRadius, newRadius));
@@ -305,7 +313,6 @@ const DotGraph = ({ isDragging = false, data = [] }) => {
     };
   
     // Add event listeners
-    window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("wheel", handleScroll);
     window.addEventListener("touchstart", handleTouchStart);
     window.addEventListener("touchmove", handleTouchMove);
@@ -313,7 +320,6 @@ const DotGraph = ({ isDragging = false, data = [] }) => {
   
     return () => {
       // Cleanup event listeners
-      window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("wheel", handleScroll);
       window.removeEventListener("touchstart", handleTouchStart);
       window.removeEventListener("touchmove", handleTouchMove);
