@@ -46,7 +46,7 @@ button { padding-inline: 0; padding-block: 0; }
   h1 { font-size: 1.8vw; line-height: 1.204em; font-weight: 500; letter-spacing: -0.23px; }
   h2 { font-size: 1.6vw; font-weight: 500; line-height: 1.2em; }
   .number-part h2 { line-height: 1.6em; }
-  h3 { font-size: 1.4vw; font-weight: 200; }
+  h3 { font-size: 1.22vw; font-weight: 200; }
   h4, p { font-family: Poppins, sans-serif; }
   h4 { font-size: 1.05vw; font-weight: 500; letter-spacing: -0.2px; line-height: 1.2em; }
   p { font-size: 0.95vw; font-weight: 400; }
@@ -56,7 +56,7 @@ button { padding-inline: 0; padding-block: 0; }
   .radial-gradient { background: radial-gradient(circle at center bottom, rgb(238,239,240) 0%, rgba(243,243,243,0.75) 40%, rgba(0,0,0,0) 60%); }
 
   .logo-container {
-    position: absolute; width: 56px; height: 56px; margin: 24px 0 0 32px;
+    position: absolute; width: 46px; height: 46px; margin: 24px 0 0 32px;
     display: flex; justify-content: center; align-items: center; z-index: 15;
   }
   .logo-divider, .logo-image { pointer-events: none; user-select: none; }
