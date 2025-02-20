@@ -3,9 +3,8 @@ import { Canvas } from '@react-three/fiber';
 import DotGraph from './dotGraph'; 
 import { fetchSurveyData } from '../../utils/sanityAPI';
 import '../../styles/graph.css';
-import { isDragging } from '../../components/dataVisualization'; 
 
-const Graph = () => {
+const Graph = ({ isDragging }) => {
   const [surveyData, setSurveyData] = useState([]);
   const [loading, setLoading] = useState(true);
 

@@ -1,12 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import DotGraph from './dotGraph/graph';
+import Graph from './dotGraph/graph';
 import BarGraph from './barGraph';
 import '../styles/global-styles.css';
 import '../styles/graph.css';
-
-// Export these variables
-export let isDragging = false;
-export let setIsDragging = () => {};
 
 const VisualizationPage = () => {
   const [isBarGraphVisible, setIsBarGraphVisible] = useState(true);
@@ -17,7 +13,7 @@ const getPositionByViewport = () => {
   const width = window.innerWidth;
 
   if (width < 768) {
-    return { x: window.innerWidth * 0.06, y: window.innerHeight * 0.34 };
+    return { x: window.innerWidth * 0.1, y: window.innerHeight * 0.35 };
   } else if (width >= 768 && width < 1024) {
     return { x: window.innerWidth * 0.7, y: window.innerHeight * 0.08 };
   } else {
@@ -54,10 +50,6 @@ useEffect(() => {
   };
 }, []); // Runs once on mount
 
-  // Assign the state and setter to exports
-  isDragging = dragState;
-  setIsDragging = setDragState;
-
   const dragRef = useRef(null);
   const buttonRef = useRef(null);
   const dragOffset = useRef({ x: 0, y: 0 });
@@ -85,11 +77,11 @@ useEffect(() => {
     };
 
     hasMoved.current = false;
-    setIsDragging(true);
+    setDragState(true);
   };
 
   const handleDrag = (e) => {
-    if (!isDragging) return;
+    if (!dragState) return;
 
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
@@ -122,7 +114,7 @@ useEffect(() => {
   };
 
   const handleDragEnd = () => {
-    setIsDragging(false);
+    setDragState(false);
   };
 
   useEffect(() => {
@@ -139,7 +131,7 @@ useEffect(() => {
     window.addEventListener('mouseup', handleMouseUp);
     window.addEventListener('touchend', handleTouchEnd);
 
-    if (isDragging) {
+    if (dragState) {
       document.addEventListener("selectstart", preventTextSelection);
       document.body.style.userSelect = "none";
     } else {
@@ -155,11 +147,11 @@ useEffect(() => {
       document.removeEventListener("selectstart", preventTextSelection);
       document.body.style.userSelect = "auto";
     };
-  }, [isDragging]);
+  }, [dragState]);
 
   return (
     <div>
-      <DotGraph />
+     <Graph isDragging={dragState}/>
       <div
         ref={dragRef}
         className="draggable-container"
@@ -168,7 +160,7 @@ useEffect(() => {
           left: `${position.x}px`,
           top: `${position.y}px`,
           zIndex: 10,
-          cursor: isDragging ? "grabbing" : "grab",
+          cursor: dragState ? "grabbing" : "grab",
         }}
         onMouseDown={handleDragStart}
         onTouchStart={handleDragStart}
@@ -177,7 +169,7 @@ useEffect(() => {
           ref={buttonRef}
           className="toggle-button"
           style={{
-            cursor: isDragging ? 'grabbing' : 'grab',
+            cursor: dragState ? "grabbing" : "grab",
             left: '24px',
             position: 'relative',
           }}
