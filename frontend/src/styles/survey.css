@@ -61,8 +61,8 @@ label:hover {background-color: rgba(128, 128, 128, 0.05); padding: 5px 8px 5px 8
 @media (min-width: 1024px) {
 /* Main survey component */
 .survey-section-wrapper, .survey-section-wrapper3 {z-index: 6; user-select: none; pointer-events: none; display: flex; justify-content: center; align-items: center; width: 100%; position: absolute;}
-.survey-section-wrapper {bottom: 2px;} .survey-section-wrapper3 {bottom: 20px;}
-.survey-section, .survey-section-2 {min-width: 30%; max-width: 30%; min-height: 26vh; max-height: 26vh; display: flex; justify-content: flex-start; align-content: flex-end; flex-wrap: wrap;}
+.survey-section-wrapper {bottom: 2px;} .survey-section-wrapper3 {bottom: 20px;} .survey-section-wrapper3 {bottom: 0px !important;}
+.survey-section, .survey-section-2 {min-width: 30%; max-width: 30%; min-height: 26vh; max-height: 26vh; display: flex; justify-content: flex-start; align-content: flex-end; flex-wrap: wrap; position: relative;}
 .survey-section-2 {padding-bottom: 5%;}
 
 /* Onboarding Beginning */
@@ -108,7 +108,7 @@ label:hover {background-color: rgba(128, 128, 128, 0.05); padding: 4px 8px 4px 8
 .z-index-respective .survey-section-wrapper .survey-section .surveyStart .begin-button3, .z-index-respective .survey-section-wrapper2 .survey-section .surveyStart .begin-button4 {width: 50%; pointer-events: all;}
 
 /* Overlay component */ 
-.survey-section-wrapper2 {z-index: 6; pointer-events: none; display: flex; justify-content: center; align-items: center; width: 100%; position: absolute; bottom: 0px;}
+.survey-section-wrapper2 {z-index: 6; pointer-events: none; display: flex; justify-content: center; align-items: center; width: 100%; position: absolute; bottom: 2px;}
 .begin-button4 {width: 50%; margin-bottom: 0em !important; color: #ffffff00; background-color: #29292900; padding: 1em 0; border-radius: 6px; cursor: pointer; border: none; margin-bottom: 2.4em; z-index: 10; pointer-events: all;}
 .begin-button4:hover {background-color: rgba(128, 128, 128, 0.114); transition: 0.2s ease-in;}
 .survey-section-wrapper3.complete-active {height: 100%;}

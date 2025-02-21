@@ -35,8 +35,10 @@ export const useDynamicMargin = (): void => {
 
     // Update on resize
     window.addEventListener("resize", calculateMargin);
+    window.addEventListener("load", calculateMargin);
     return () => {
       window.removeEventListener("resize", calculateMargin);
+      window.removeEventListener("load", calculateMargin);
     };
   }, []);
 };

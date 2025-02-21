@@ -47,13 +47,34 @@ const DotGraph = ({ isDragging = false, data = [] }) => {
   const maxRadius = 400; // Maximum allowed zoomed out
 
 // First load zoom position for a planned initial appearance 
-const [radius, setRadius] = useState(() => {
-const baseRadius = isSmallScreen ? 110 : 150; // Smaller base radius for screens below 768px
-const scalingFactor = 0.5; // Adjust based on desired spread
-const dynamicRadius = baseRadius + data.length * scalingFactor;
-// Clamp within min/max range
-return Math.max(minRadius, Math.min(maxRadius, dynamicRadius));
-});
+const [radius, setRadius] = useState(20); // Start small (e.g., 20)
+
+// Target values based on screen size
+const targetRadius = isSmallScreen ? 100 : 160;
+const scalingFactor = 0.5;
+const dynamicRadius = targetRadius + data.length * scalingFactor;
+const finalRadius = Math.max(minRadius, Math.min(maxRadius, dynamicRadius));
+
+useEffect(() => {
+  let startTime;
+  const duration = 1200; // Animation duration in ms (1.2s)
+
+  const animateRadius = (timestamp) => {
+    if (!startTime) startTime = timestamp;
+    const progress = Math.min((timestamp - startTime) / duration, 1); // Normalize [0,1]
+    
+    // Apply easing for smooth acceleration and deceleration
+    const easeOut = 1 - Math.pow(1 - progress, 3);
+
+    setRadius(20 + (finalRadius - 20) * easeOut); // Interpolate between 20 and finalRadius
+
+    if (progress < 1) {
+      requestAnimationFrame(animateRadius);
+    }
+  };
+
+  requestAnimationFrame(animateRadius);
+}, [finalRadius]);
 
   // Get dynamicOffset.ts caluclated value. 
   const dynamicOffset = useDynamicOffset();
@@ -272,9 +293,9 @@ const handleMouseMove = (event) => {
 // Mouse scroll and touch pad scroll for desktop
 const handleScroll = (event) => {
       if (event.ctrlKey) {
-        // Likely a pinch gesture
+        // Likely a touch pad pinch
         setRadius((prevRadius) => {
-          const newRadius = prevRadius - event.deltaY * 0.9; // Adjust for pinch sensitivity
+          const newRadius = prevRadius - event.deltaY * 2; // Adjust for pinch sensitivity
           return Math.max(minRadius, Math.min(maxRadius, newRadius));
         });
       } else {
@@ -529,7 +550,7 @@ useEffect(() => {
  
 return (
     <>
-    <Html zIndexRange={[12, 12]} style={{
+    <Html zIndexRange={[2, 24]} style={{
       pointerEvents: 'none', 
           }}>
         <div className="z-index-respective" style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', height: '100vh', pointerEvents: 'none'}}>
