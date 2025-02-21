@@ -8,16 +8,7 @@ const Canvas = () => {
 
   return (
     <div className="canvas-wrapper">
-        <House />
-        <div className="grass1">
-          <Grass/>
-        </div>
-        <div className="grass2">
-          <Grass/>
-        </div>
-        <div className="grass3">
-          <Grass/>
-        </div>
+
     </div>
   );
 };

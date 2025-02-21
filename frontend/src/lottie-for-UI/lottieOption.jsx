@@ -1,12 +1,14 @@
-import React, { useRef, useEffect } from 'react';
-import Lottie from 'lottie-react';
-import animationData from './radio-button.json';
+import React, { useRef, useEffect } from "react";
+import Lottie from "lottie-react";
+import animationData from "./radio-button.json";
 
 const LottieOption = ({ onClick, selected }) => {
   const lottieRef = useRef();
 
   useEffect(() => {
     if (lottieRef.current) {
+      lottieRef.current.setSpeed(2); // 🔥 Set playback speed to 2x
+
       if (selected) {
         lottieRef.current.setDirection(1); // Forward direction
         lottieRef.current.playSegments([0, 15], true); // Play to the selected state
@@ -19,6 +21,7 @@ const LottieOption = ({ onClick, selected }) => {
 
   const handleMouseEnter = () => {
     if (lottieRef.current && !selected) {
+      lottieRef.current.setSpeed(2); // 🔥 Apply speed for hover animation
       lottieRef.current.setDirection(1); // Forward direction
       lottieRef.current.playSegments([0, 8], true); // Play a short hover segment
     }
@@ -35,7 +38,8 @@ const LottieOption = ({ onClick, selected }) => {
   };
 
   return (
-    <div className="radio-button"
+    <div
+      className="radio-button"
       onClick={handleClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}

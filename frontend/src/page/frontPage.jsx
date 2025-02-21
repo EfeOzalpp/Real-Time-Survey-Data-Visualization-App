@@ -6,8 +6,10 @@ import Survey from '../components/survey.jsx';
 import CenteredLogo from '../components/static/logo';
 import Canvas from '../components/Canvas';
 import DataVisualization from '../components/dataVisualization'; 
+import { useDynamicMargin } from '../utils/dynamicMargin.ts';
 
 const FrontPage = () => {
+  // useDynamicMargin();
   const [animationVisible, setAnimationVisible] = useState(false);
   const [graphVisible, setGraphVisible] = useState(false); // Controls visibility, not rendering
   const [surveyWrapperClass, setSurveyWrapperClass] = useState(''); // Class state for moving Three/Drei related survey-section-wrapper3 styling changes

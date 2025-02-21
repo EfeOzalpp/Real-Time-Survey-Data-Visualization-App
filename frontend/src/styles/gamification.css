@@ -5,18 +5,23 @@
   /* =============================================
      Personalized Gamification
      ============================================= */
-     .personalized-result { transform: translateY(calc(-1 * var(--offset-px))); background-color: #f4fdfcc6; padding: 12px; border-radius: 24px; height: 235px; max-height: 245px; min-height: 210px; color: rgb(51, 51, 51); text-align: center; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: flex; flex-direction: row; flex-wrap: nowrap; position: relative; width: 70vw; max-width: 70vw; min-width: 70vw; bottom: 16px; pointer-events: all; z-index: 10; box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.1), inset -1px -1px 1px rgba(255, 255, 255, 0.6); }
-     .personalized-result::after { content: ''; position: absolute; transform: rotate(180deg) !important; border-width: 14px; left: calc(50% - 13px) !important; top: 100% !important; border-style: solid; border-color: transparent transparent #f7ffffd6 transparent;  }
+     .personalized-result { transform: translateX(var(--offset-px)); background-color: #f4fdfcc6; padding: 0px 0px 0px 12px; border-radius: 24px; color: rgb(51, 51, 51); text-align: center; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: flex; flex-direction: row; flex-wrap: nowrap; position: relative; width: 210px; max-width: 210px; min-width: 210px; left: 6px; pointer-events: all; z-index: 10; box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.1), inset -1px -1px 1px rgba(255, 255, 255, 0.6); }
+     .personalized-result::before { content: ''; position: absolute; transform: rotate(-90deg) !important; border-width: 8px; left: -15px !important; top: calc(50% - 8px) !important; border-style: solid; border-color: transparent transparent #f7ffffc2 transparent;  }
      .personalized-result p {padding-bottom: 0.4em;}
      
      .gamification-text { pointer-events: none; width: 75%; max-width: 75%; min-width: 75%; text-align: left; padding: 9px 0 0.4em 9px; display: flex; flex-direction: column; justify-content: space-between; }
      .gam-title { padding-bottom: 0.3em; color: rgba(24, 24, 24, 0.874); } .personal-title { padding: 0.1em 0 0.3em 0.02em; }
      
      .gamification-knob { position: relative; width: 10%; display: flex; align-items: flex-end; justify-content: flex-end; }
-     .percentage-knob { height: 94%; position: relative; background: none; }
-     .knob-arrow { position: absolute; bottom: 0; left: -50%; transform: translateX(-78%) rotate(90deg); width: 0; height: 0; border-left: 12px solid transparent; border-right: 12px solid transparent; border-radius: 2px; transition: bottom 0.3s ease; }
+     .percentage-knob { height: 89%; position: relative; background: none; }
+     .knob-arrow { position: absolute; bottom: 0; left: -50%; transform: translateX(-78%) rotate(90deg) scale(0.8); width: 0; height: 0; border-left: 12px solid transparent; border-right: 12px solid transparent; border-radius: 2px; transition: bottom 0.3s ease;}
      .gamification-bar { width: 15%; }
-     .percentage-bar { width: 75%; height: 100%; background: linear-gradient(to bottom, rgba(0, 255, 0, 0.9), #e9e103e6, rgba(255, 0, 0, 0.9)); border-radius: 3px; }
+     .percentage-bar { width: 100%; height: 100%; border-radius: 3px 16px 16px 3px;
+      background: linear-gradient(to bottom, 
+      rgba(0, 255, 0, 0.9) 0%,  /* Green at 0% */
+      #e9e103e6 50%,            /* Yellow at 50% */
+      rgba(255, 0, 0, 0.9) 100%  /* Red at 100% */
+      );}
      
   /* =============================================
     Generalized Gamification

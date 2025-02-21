@@ -34,11 +34,11 @@ const GamificationPersonalized = ({ userData, percentage, color }) => {
             "I like mediocrity..:)",
           ],
           "61-80": [
-            "Green-Blue Superhero",
-            "Sustainability, Love-Nature-Life",
+            "Humble-Green MF",
+            "Sustainability Stuff Luver",
             "Planet Partner in Crime",
-            "A cool person, and a cooling agent =)",
-            "Piece of cake, I run this planet",
+            "A cool person for a cool planet",
+            "Enjoyable Results, Thanks",
           ],
           "81-100": [
             "Nature's Humble Savior",

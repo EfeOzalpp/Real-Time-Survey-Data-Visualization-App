@@ -213,7 +213,7 @@ const Questionnaire = ({ setAnimationVisible, setGraphVisible, setSurveyWrapperC
         ))}
 
         <button className="begin-button2" onClick={handleNext}>
-          {currentQuestion < 5 ? <h4>NEXT</h4> : <h4>SUBMIT RESULTS</h4>}
+          {currentQuestion < 5 ? <h4>NEXT</h4> : <h4>I'M READY</h4>}
         </button>
       </div>
     </div>

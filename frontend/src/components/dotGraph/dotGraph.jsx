@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
-import { throttle } from 'lodash'; 
 import GamificationPersonalized from './gamificationPersonalized'; 
 import GamificationGeneral from './gamificationGeneral'; 
 import '../../styles/graph.css';
@@ -13,6 +12,7 @@ const DotGraph = ({ isDragging = false, data = [] }) => {
   const [points, setPoints] = useState([]);
   
   // Rotation references and states
+  const groupRef = useRef();
   const [rotationAngles, setRotationAngles] = useState({ x: 0, y: 0 });
   const [lastCursorPosition, setLastCursorPosition] = useState({ x: 0, y: 0 });
   const lastCursorPositionRef = useRef({ x: 0, y: 0 });
@@ -24,17 +24,17 @@ const DotGraph = ({ isDragging = false, data = [] }) => {
   const [hoveredDot, setHoveredDot] = useState(null);
   const hoverCheckInterval = useRef(null); // Store interval or requestAnimationFrame for periodic checks
   const [viewportClass, setViewportClass] = useState(''); // Track proximity to edges to add class
-  const { camera } = useThree();
   const touchStartDistance = useRef(null);
+  const { camera } = useThree();
 
-  const spreadFactor = 75; // Default spread factor
+  const spreadFactor = 75; // Default spread factor for dots
 
-  const minRadius = 20; // Calculating zoomed in and out states to adjust gamification offset
-  const maxRadius = 300; // Zoomed out
+  const minRadius = 20; // Calculating zoomed in and out states to adjust dynamic offset
+  const maxRadius = 400; // Maximum allowed zoomed out
 
   const [radius, setRadius] = useState(() => {
     const isSmallScreen = window.innerWidth < 768;
-    const baseRadius = isSmallScreen ? 76 : 36; // Smaller base radius for screens below 768px
+    const baseRadius = isSmallScreen ? 135 : 600; // Smaller base radius for screens below 768px
     const scalingFactor = 0.5; // Adjust based on desired spread
     const dynamicRadius = baseRadius + data.length * scalingFactor;
     
@@ -71,7 +71,6 @@ const DotGraph = ({ isDragging = false, data = [] }) => {
   const isPortrait = currentHeight > currentWidth;
 
   let offsetOne;
-
   // Fully zoomed in offset value for Dynamic Offset variable
   if (isPortrait) {
     offsetOne = 160;
@@ -82,7 +81,7 @@ const DotGraph = ({ isDragging = false, data = [] }) => {
   // Use the dynamicOffset in the lerp function
   const offsetPx = nonlinearLerp(offsetOne, dynamicOffset, zoomFactor);
 
-  const interpolateColor = (weight) => {
+const interpolateColor = (weight) => {
     // Flip weight first to match the original logic
     const flippedWeight = 1 - weight; 
   
@@ -116,10 +115,10 @@ const DotGraph = ({ isDragging = false, data = [] }) => {
     const b = Math.round(lower.color.b + (upper.color.b - lower.color.b) * normalizedWeight);
   
     return `rgb(${r}, ${g}, ${b})`;
-  };  
+};  
   
 
-  const generatePositions = (numPoints, minDistance = 24) => {
+const generatePositions = (numPoints, minDistance = 24) => {
     const positions = [];
     const maxRetries = 1000;
   
@@ -177,8 +176,8 @@ const DotGraph = ({ isDragging = false, data = [] }) => {
     }
   
     return positions;
-  };
-  
+};
+
 useEffect(() => {
     const calculatePoints = () => {
       const positions = generatePositions(data.length, 2, spreadFactor);
@@ -202,11 +201,8 @@ useEffect(() => {
       if (latestEntryId) {
         const latestPointIndex = newPoints.findIndex((point) => point._id === latestEntryId);
         if (latestPointIndex !== -1) {
-          const isSmallScreen = window.innerWidth < 768;
-          const yOffset = isSmallScreen ? 9 : 0; // Shift upwards for small screens
-
-          newPoints[latestPointIndex].position = [0, yOffset, 0]; // Adjusted center
-          newPoints[latestPointIndex].originalPosition = [0, yOffset, 0]; // Update original position as well
+          newPoints[latestPointIndex].position = [0, 0, 0]; // Adjusted center
+          newPoints[latestPointIndex].originalPosition = [0, 0, 0]; // Update original position as well
         }
       }
 
@@ -214,13 +210,11 @@ useEffect(() => {
     };
   
     calculatePoints();
-  }, [data]);
-
+}, [data]);
 
 let targetX = 0;
 let targetY = 0;
-
-// Cursor Tracking
+// Detecting of Drag and applying offset to X and Y coordinates
 useEffect(() => {
   if (isDragging) {
     // 🛠 Fix: Ensure cursor starts from the last adjusted position
@@ -245,14 +239,14 @@ useEffect(() => {
     setLastCursorPosition({ ...lastCursorPositionRef.current });
   }
   const handleMouseMove = (event) => {
-
-    const { innerWidth, innerHeight } = window;
-    const normalizedX = (event.clientX / innerWidth) * 2 - 1;
-    const normalizedY = -(event.clientY / innerHeight) * 2 + 1;
+    const normalizedX = (event.clientX / currentWidth) * 2 - 1;
+    const normalizedY = -(event.clientY / currentHeight) * 2 + 1;
   
     // ✅ If dragging, don't update targetX/targetY to avoid jitter
       targetX = normalizedX - dragOffset.current.x;
       targetY = normalizedY - dragOffset.current.y;
+
+      console.log("Mouse Move - targetX:", targetX, "targetY:", targetY);
   
     // ✅ Always track cursor position
     lastCursorPositionRef.current = { x: normalizedX, y: normalizedY };
@@ -271,21 +265,38 @@ useEffect(() => {
 useFrame(() => {
   if (isDragging) return; // Stop updating during drag
 
-  setRotationAngles({
-    x: (lastCursorPositionRef.current.y - dragOffset.current.y) * Math.PI * 0.25,
-    y: (lastCursorPositionRef.current.x - dragOffset.current.x) * Math.PI * 0.5,
-  });
+  const isSmallScreen = window.innerWidth < 768;
+  // Adjust offsets dynamically for small devices
+  const xOffset = isSmallScreen ? -12 : 0; // Slight shift in X
+  const yOffset = isSmallScreen ? 24 : 0; // Slight shift in Y
 
-  const { x, y } = rotationAngles;
+  // Calculate target angles based on cursor position
+  const targetX = (lastCursorPositionRef.current.y - dragOffset.current.y) * Math.PI * 0.25;
+  const targetY = (lastCursorPositionRef.current.x - dragOffset.current.x) * Math.PI * 0.5;
 
-  camera.position.x = radius * Math.sin(y) * Math.cos(x);
-  camera.position.y = radius * Math.sin(x);
-  camera.position.z = radius * Math.cos(y) * Math.cos(x);
+  // Smoothly interpolate rotation angles for a soft stop effect
+  const dampingFactor = 0.05; 
+  const newRotationAngles = {
+    x: lerp(rotationAngles.x, targetX, dampingFactor),
+    y: lerp(rotationAngles.y, targetY, dampingFactor),
+  };
 
-  camera.lookAt(0, 0, 0);
+  setRotationAngles(newRotationAngles);
+  const { x, y } = newRotationAngles;
+  // Apply the updated rotation angles
+
+  // ✅ Rotate the group instead of the camera
+  if (groupRef.current) {
+    groupRef.current.rotation.x = x;
+    groupRef.current.rotation.y = -y;
+    groupRef.current.position.set(xOffset, yOffset, 0); // Shift pivot
+  }
+  
+    camera.position.set(0, 0, radius);
+    camera.lookAt(0, 0, 0);
 });
 
-  useEffect(() => {
+useEffect(() => {
     const handleScroll = (event) => {
       if (event.ctrlKey) {
         // Likely a pinch gesture
@@ -298,13 +309,13 @@ useFrame(() => {
         // Regular scroll wheel
         console.log("Mouse wheel detected!");
         setRadius((prevRadius) => {
-          const newRadius = prevRadius - event.deltaY * 0.15; // Keep this lower for smooth scrolling
+          const newRadius = prevRadius - event.deltaY * 0.5; // Keep this lower for smooth scrolling
           return Math.max(minRadius, Math.min(maxRadius, newRadius));
         });
       }
     };    
   
-   /* const handleTouchStart = (event) => {
+   const handleTouchStart = (event) => {
       if (event.touches.length === 1) {
         const touch = event.touches[0];
         const normalizedX = (touch.clientX / window.innerWidth) * 2 - 1;
@@ -322,9 +333,9 @@ useFrame(() => {
         );
         touchStartDistance.current = distance; // Save initial pinch distance
       }
-    }; */
+    };
     
-  /* const handleTouchMove = (event) => {
+  const handleTouchMove = (event) => {
       if (event.touches.length === 1) {
         // Get touch position (first finger)
         const touch = event.touches[0];
@@ -361,113 +372,121 @@ useFrame(() => {
     
         console.log("Pinch zoom detected, updated radius:", touchStartDistance.current);
       }
-    }; */
+    };
     
     const handleTouchEnd = () => {
       touchStartDistance.current = null; // Reset pinch distance
     };
   
-    // Add event listeners
-    window.addEventListener("wheel", handleScroll);
-   // window.addEventListener("touchstart", handleTouchStart);
-   // window.addEventListener("touchmove", handleTouchMove);
-    window.addEventListener("touchend", handleTouchEnd);
+   // Add event listeners
+   window.addEventListener("wheel", handleScroll);
+   window.addEventListener("touchstart", handleTouchStart);
+   window.addEventListener("touchmove", handleTouchMove);
+   window.addEventListener("touchend", handleTouchEnd);
   
     return () => {
-      // Cleanup event listeners
-      window.removeEventListener("wheel", handleScroll);
-    // window.removeEventListener("touchstart", handleTouchStart);
-    //  window.removeEventListener("touchmove", handleTouchMove);
-      window.removeEventListener("touchend", handleTouchEnd);
+    // Cleanup event listeners
+    window.removeEventListener("wheel", handleScroll);
+    window.removeEventListener("touchstart", handleTouchStart);
+    window.removeEventListener("touchmove", handleTouchMove);
+    window.removeEventListener("touchend", handleTouchEnd);
     };
-  }, [lastCursorPosition, minRadius, maxRadius]);
+}, [lastCursorPosition, minRadius, maxRadius]);
 
-  const latestEntryId = data[0]?._id;
-  const latestPoint = points.find((point) => point._id === latestEntryId);
-  const latestEntry = data.find((entry) => entry._id === latestEntryId);
+const latestEntryId = data[0]?._id;
+const latestPoint = points.find((point) => point._id === latestEntryId);
+const latestEntry = data.find((entry) => entry._id === latestEntryId);
 
-  let percentage = 0;
-  // Did better than % of users calculation
-  const latestWeight =
-      Object.values(latestEntry.weights).reduce((sum, w) => sum + w, 0) /
-      Object.keys(latestEntry.weights).length;
-  
-    const usersWithHigherWeight = data.filter((entry) => {
-      const averageWeight =
-        Object.values(entry.weights).reduce((sum, w) => sum + w, 0) /
-        Object.keys(entry.weights).length;
-      return averageWeight > latestWeight;
-    });
-  
-    percentage = Math.round(
-      (usersWithHigherWeight.length / data.length) * 100
-    );
+let percentage = 0;
+// Did better than % of users calculation
+const latestWeight =
+    Object.values(latestEntry.weights).reduce((sum, w) => sum + w, 0) /
+    Object.keys(latestEntry.weights).length;
 
-    const calculatePercentage = (averageWeight) => {
-      const usersWithHigherWeight = points.filter(
-        (point) => point.averageWeight > averageWeight
-      );
-      return Math.round((usersWithHigherWeight.length / points.length) * 100);
-    };
+// Calculate amount of user with higher weight  
+const usersWithHigherWeight = data.filter((entry) => {
+  const averageWeight =
+    Object.values(entry.weights).reduce((sum, w) => sum + w, 0) /
+    Object.keys(entry.weights).length;
+  return averageWeight > latestWeight;
+});
+
+percentage = Math.round(
+  (usersWithHigherWeight.length / data.length) * 100
+);
+
+const calculatePercentage = (averageWeight) => {
+  const usersWithHigherWeight = points.filter(
+    (point) => point.averageWeight > averageWeight
+  );
+  return Math.round((usersWithHigherWeight.length / points.length) * 100);
+};
     
+// Determine proximity to viewport edges
+const calculateViewportProximity = (x, y) => {
+  const verticalEdgeThreshold = 150; // Adjust threshold for top and bottom
+  const horizontalEdgeThreshold = 300; // Wider threshold for left and right edges
+  const isLeftThreshold = window.innerWidth * 0.4; // 40% of viewport width (40vw) for is-right
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+  const midLeftThreshold = window.innerWidth * 0.4; // Start of 40%-60% range
+  const midRightThreshold = window.innerWidth * 0.6; // End of 40%-60% range
   
-    // Helper to determine proximity to viewport edges
-    const calculateViewportProximity = (x, y) => {
-      const verticalEdgeThreshold = 150; // Adjust threshold for top and bottom
-      const horizontalEdgeThreshold = 300; // Wider threshold for left and right edges
-      const isLeftThreshold = window.innerWidth * 0.4; // 40% of viewport width (40vw) for is-right
-      const width = window.innerWidth;
-      const height = window.innerHeight;
-      const midLeftThreshold = window.innerWidth * 0.4; // Start of 40%-60% range
-      const midRightThreshold = window.innerWidth * 0.6; // End of 40%-60% range
-      
-      const isTop = y < verticalEdgeThreshold;
-      const isBottom = y > height - verticalEdgeThreshold;
-      const isLeft = x < isLeftThreshold;
-      const isRight = x > width - horizontalEdgeThreshold;
-      const isMidHorizontal = x >= midLeftThreshold && x <= midRightThreshold; // Between 40% and 60% of viewport width
+  const isTop = y < verticalEdgeThreshold;
+  const isBottom = y > height - verticalEdgeThreshold;
+  const isLeft = x < isLeftThreshold;
+  const isRight = x > width - horizontalEdgeThreshold;
+  const isMidHorizontal = x >= midLeftThreshold && x <= midRightThreshold; // Between 40% and 60% of viewport width
 
-      let newClass = '';
-      if (isTop) newClass += ' is-top';
-      if (isBottom) newClass += ' is-bottom';
-      if (isLeft) newClass += ' is-left';
-      if (isRight) newClass += ' is-right';
-      if (isMidHorizontal) newClass += ' is-mid';
+  let newClass = '';
+  if (isTop) newClass += ' is-top';
+  if (isBottom) newClass += ' is-bottom';
+  if (isLeft) newClass += ' is-left';
+  if (isRight) newClass += ' is-right';
+  if (isMidHorizontal) newClass += ' is-mid';
 
-      return newClass.trim();
-    };
+  return newClass.trim();
+};
 
-    const handleHoverStart = (dot, event) => {
-      const { clientX, clientY } = event.nativeEvent;
-      const proximityClass = calculateViewportProximity(clientX, clientY);
-      setViewportClass(proximityClass);
+const handleHoverStart = (dot, event) => {
+  const { clientX, clientY } = event.nativeEvent;
+  const proximityClass = calculateViewportProximity(clientX, clientY);
+  setViewportClass(proximityClass);
+
+  // Ensure we store full dot details (including dotId)
+setHoveredDot({
+    dotId: dot._id, // Store unique dot identifier
+    percentage: calculatePercentage(dot.averageWeight),
+    color: dot.color,
+  });
+};
     
-      // Ensure we store full dot details (including dotId)
-      setHoveredDot({
-        dotId: dot._id, // Store unique dot identifier
-        percentage: calculatePercentage(dot.averageWeight),
-        color: dot.color,
-      });
-    };
-    
-    const handleHoverEnd = () => {
-      setHoveredDot(null);
-      setViewportClass(''); // Reset the class on hover end
-    };
+const handleHoverEnd = () => {
+  setHoveredDot(null);
+  setViewportClass(''); // Reset the class on hover end
+};
           
-
-    useEffect(() => {
+useEffect(() => {
       return () => {
         if (hoverCheckInterval.current) {
           clearInterval(hoverCheckInterval.current);
           cancelAnimationFrame(hoverCheckInterval.current);
         }
       };
-    }, []);
-    
-  
-  return (
-    <group>
+}, []);
+ 
+return (
+    <>
+        {/* 🔹 Fixed Button Rendered First (Behind the 3D Scene) */}
+        <Html zIndexRange={[12, 12]} style={{
+           pointerEvents: 'none', 
+              }}>
+            <div className="z-index-respective" style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', height: '100vh', pointerEvents: 'none'}}>
+            <CompleteButton/>
+            </div>
+           </Html>
+
+    <group ref={groupRef}>
       {points.map((point, index) => {
         const isLatestPoint = point._id === latestEntryId;
   
@@ -547,15 +566,7 @@ useFrame(() => {
             </Html>
           );
         })()}
-          {/* Add CompleteButton */}
-          <Html zIndexRange={[12, 12]} style={{
-           pointerEvents: 'none', 
-              }}>
-            <div className="z-index-respective" style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', height: '100vh', pointerEvents: 'none'}}>
-            <CompleteButton/>
-            </div>
-           </Html>
-    </group>
+    </group></>
   );
 };
 
