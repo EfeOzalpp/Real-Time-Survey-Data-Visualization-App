@@ -9,7 +9,7 @@ import DataVisualization from '../components/dataVisualization';
 import { useDynamicMargin } from '../utils/dynamicMargin.ts';
 
 const FrontPage = () => {
-  // useDynamicMargin();
+  useDynamicMargin();
   const [animationVisible, setAnimationVisible] = useState(false);
   const [graphVisible, setGraphVisible] = useState(false); // Controls visibility, not rendering
   const [surveyWrapperClass, setSurveyWrapperClass] = useState(''); // Class state for moving Three/Drei related survey-section-wrapper3 styling changes

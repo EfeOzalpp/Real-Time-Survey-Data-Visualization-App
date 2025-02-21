@@ -5,16 +5,14 @@
   /* =============================================
      Personalized Gamification
      ============================================= */
-     .personalized-result { transform: translateX(var(--offset-px)); background-color: #f4fdfcc6; padding: 0px 0px 0px 12px; border-radius: 24px; color: rgb(51, 51, 51); text-align: center; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: flex; flex-direction: row; flex-wrap: nowrap; position: relative; width: 210px; max-width: 210px; min-width: 210px; left: 6px; pointer-events: all; z-index: 10; box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.1), inset -1px -1px 1px rgba(255, 255, 255, 0.6); }
-     .personalized-result::before { content: ''; position: absolute; transform: rotate(-90deg) !important; border-width: 8px; left: -15px !important; top: calc(50% - 8px) !important; border-style: solid; border-color: transparent transparent #f7ffffc2 transparent;  }
-     .personalized-result p {padding-bottom: 0.4em;}
-     
-     .gamification-text { pointer-events: none; width: 75%; max-width: 75%; min-width: 75%; text-align: left; padding: 9px 0 0.4em 9px; display: flex; flex-direction: column; justify-content: space-between; }
+     .personalized-result { transform: translateX(var(--offset-px)); background-color: #f4fdfcc6; padding: 0px 0px 0px 12px; border-radius: 24px; color: rgb(51, 51, 51); text-align: center; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: flex; flex-direction: row; flex-wrap: nowrap; position: relative; width: 210px; max-width: 210px; min-width: 210px; left: 2px; pointer-events: all; z-index: 10; box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.1), inset -1px -1px 1px rgba(255, 255, 255, 0.6); }
+     .personalized-result::before { content: ''; position: absolute; transform: rotate(-90deg) !important; border-width: 8px; left: -15px !important; top: calc(50% - 8px) !important; border-style: solid; border-color: transparent transparent #f7ffffc2 transparent;}
+     .gamification-text { pointer-events: none; width: 75%; max-width: 75%; min-width: 75%; text-align: left; padding: 18px 0px 14px 6px; display: flex; flex-direction: column; justify-content: space-between; }
      .gam-title { padding-bottom: 0.3em; color: rgba(24, 24, 24, 0.874); } .personal-title { padding: 0.1em 0 0.3em 0.02em; }
      
      .gamification-knob { position: relative; width: 10%; display: flex; align-items: flex-end; justify-content: flex-end; }
      .percentage-knob { height: 89%; position: relative; background: none; }
-     .knob-arrow { position: absolute; bottom: 0; left: -50%; transform: translateX(-78%) rotate(90deg) scale(0.8); width: 0; height: 0; border-left: 12px solid transparent; border-right: 12px solid transparent; border-radius: 2px; transition: bottom 0.3s ease;}
+     .knob-arrow { position: absolute; bottom: 0; left: -50%; transform: translateX(-83%) rotate(90deg) scale(0.8); width: 0; height: 0; border-left: 12px solid transparent; border-right: 12px solid transparent; border-radius: 2px; transition: bottom 0.3s ease;}
      .gamification-bar { width: 15%; }
      .percentage-bar { width: 100%; height: 100%; border-radius: 3px 16px 16px 3px;
       background: linear-gradient(to bottom, 
@@ -28,26 +26,26 @@
     ============================================= */
      .gam-general { display: flex; flex-wrap: nowrap; width: 100%; }
      .gam-general-title { padding-left: 0.4em; padding-top: 0.2em; }
-     .gam-general-description { min-height: fit-content; text-align: left; width: 70%; padding-left: 0.4em; }
+     .gam-general-description { min-height: fit-content; text-align: left; width: 80%; padding-left: 0.4em; }
      .gam-description-title { padding: 0.6em 0 0.4em 0.1em; }
      .gam-description-text { padding: 0.3em 0 0.4em; }
      
-     .gam-visualization { width: 30%; display: flex; position: relative; right: 0.4em; flex-wrap: nowrap; justify-content: flex-end; }
-     .gam-percentage-knob { position: relative; width: 10px; height: 100%; }
-     .gam-percentage-bar { width: 30%; height: 106%; margin-top: -15%; background: linear-gradient(to bottom, rgba(0, 255, 0, 0.9) 0%, #baf104 25%, #f1e904 50%, #f18e04 75%, rgba(255, 0, 0, 0.9) 100%); border-radius: 3px; }
-     .gam-knob-arrow { position: absolute; bottom: 0; left: -74%; transform: translateX(-50%) rotate(90deg); width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-radius: 2px; transition: bottom 0.3s ease; }
+     .gam-visualization { width: 20%; display: flex; position: relative; flex-wrap: nowrap; justify-content: flex-end; }
+     .gam-percentage-knob { position: relative; width: 6px; height: 100%; }
+     .gam-percentage-bar { width: 60%; height: 106%; margin-top: -15%; background: linear-gradient(to bottom, rgba(0, 255, 0, 0.9) 0%, #baf104 25%, #f1e904 50%, #f18e04 75%, rgba(255, 0, 0, 0.9) 100%); border-radius: 3px 3px 12px 3px; }
+     .gam-knob-arrow { position: absolute; bottom: 0; transform: translateX(-50%) rotate(90deg) scale(0.8); width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-radius: 2px; transition: bottom 0.3s ease; }
   
   /* =============================================
     Generalized Gamification Edge Cases
     ============================================= */
-    .generalized-result { transform: translateX(var(--offset-px)); background-color: #f4fafdee; padding: 12px; border-radius: 18px; color: rgb(51, 51, 51); text-align: center; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: flex; flex-direction: row; flex-wrap: wrap; position: relative; width: 220px; max-width: 220px; min-width: 220px; left: 50px; pointer-events: none; z-index: 10; box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.055), inset -1px -1px 1px rgba(255, 255, 255, 0.9); }
-    .generalized-result::after { content: ''; position: absolute; top: 50%; left: -20px; transform: translateY(-50%) rotate(90deg); border-width: 11px; border-style: solid; border-color: #f3ffffe0 transparent transparent transparent; }
+    .generalized-result { transform: translateX(var(--offset-px)); background-color: #f4fafdee; padding: 12px 12px 12px 8px; border-radius: 18px; color: rgb(51, 51, 51); text-align: center; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: flex; flex-direction: row; flex-wrap: wrap; position: relative; width: 160px; max-width: 160px; min-width: 160px; left: 12px; pointer-events: none; z-index: 10; box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.055), inset -1px -1px 1px rgba(255, 255, 255, 0.9); }
+    .generalized-result::after { content: ''; position: absolute; top: 50%; left: -20px; transform: translateY(-50%) rotate(90deg); border-width: 8px; border-style: solid; border-color: #f3ffffe0 transparent transparent transparent; }
     
     .is-top .generalized-result { height: 200px !important; transform: translateY(var(--offset-px)) !important; left: 0px !important; top: 35px !important; }
     .is-top .generalized-result::after { transform: translateY(-50%) rotate(360deg) !important; left: 46% !important; top: -4% !important; border-color: transparent transparent #f7ffffe7 transparent; }
     
-    .is-right .generalized-result, .is-mid .generalized-result { transform: translateX(calc(1 - var(--offset-px))); left: -140px; top: 0px; }
-    .is-right .generalized-result::after, .is-mid .generalized-result::after { transform: translateY(-50%) rotate(-90deg); left: 100%; top: 50%; border-color: transparent transparent #f7ffffe7 transparent; }
+    .is-right .generalized-result, .is-mid .generalized-result { transform: translateX(calc(1 - var(--offset-px))); left: -110px; top: 0px; }
+    .is-right .generalized-result::after, .is-mid .generalized-result::after { transform: translateY(-50%) rotate(90deg); left: 100%; top: 50%; border-color: transparent transparent #f7ffffe7 transparent; }
     
     .is-bottom .generalized-result, .is-left.is-bottom .generalized-result { transform: translateY(calc(-1 * var(--offset-px))); left: 0; top: -40px; height: 200px !important; }
     .is-bottom .generalized-result::after, .is-left.is-bottom .generalized-result::after { transform: translateY(-50%) rotate(0deg) !important; left: 46% !important; top: 104% !important; border-color: transparent transparent #f7ffffe7 transparent; }

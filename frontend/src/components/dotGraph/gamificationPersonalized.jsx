@@ -20,10 +20,10 @@ const GamificationPersonalized = ({ userData, percentage, color }) => {
             "Green isn't my favorite color",
           ],
           "21-40": [
-            "I have a Backup Planet!",
-            "Nature? Is it edible?",
+            "I Have a Backup Planet!",
+            "Nature? Is it Edible?",
             "Sustainability, Who?",
-            "Comfort Seeker, Nature is ok...",
+            "Comfort Seeker, Earth is Ok Too",
             "I am Aware of my Bad-nature",
           ],
           "41-60": [

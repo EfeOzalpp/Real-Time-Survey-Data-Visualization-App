@@ -11,7 +11,7 @@ import { useDynamicOffset } from '../../utils/dynamicOffset.ts';
 const DotGraph = ({ isDragging = false, data = [] }) => {
   const [points, setPoints] = useState([]);
   
-  // Rotation references and states
+  // Rotation + pinch ref and states
   const groupRef = useRef();
   const [rotationAngles, setRotationAngles] = useState({ x: 0, y: 0 });
   const [lastCursorPosition, setLastCursorPosition] = useState({ x: 0, y: 0 });
@@ -19,33 +19,47 @@ const DotGraph = ({ isDragging = false, data = [] }) => {
   const dragStartRef = useRef({ x: 0, y: 0 }); 
   const dragEndRef = useRef({ x: 0, y: 0 }); 
   const dragOffset = useRef({ x: 0, y: 0 }); 
+  const isPinchingRef = useRef(false); // Track if pinch is active
+  const pinchCooldownRef = useRef(false);
+  const pinchTimeoutRef = useRef(null); // Store timeout reference
+  const touchRotationRef = useRef({ x: 0, y: 0 }); // Persistent touch rotation
+  const lastRotationRef = useRef({ x: 0, y: 0 }); // Stores last rotation before a new touch starts  
+  const isTouchRotatingRef = useRef(false); // Track active one-finger rotation
+  const lastTouchPositionRef = useRef({ x: 0, y: 0 });
 
-// Dot hover states, edge case states
+
+  // Dot hover states, edge case states
   const [hoveredDot, setHoveredDot] = useState(null);
   const hoverCheckInterval = useRef(null); // Store interval or requestAnimationFrame for periodic checks
   const [viewportClass, setViewportClass] = useState(''); // Track proximity to edges to add class
   const touchStartDistance = useRef(null);
   const { camera } = useThree();
 
-  const spreadFactor = 75; // Default spread factor for dots
+  // Screen Detector
+  const isSmallScreen = window.innerWidth < 768;
+  const isNotDesktop = window.innerWidth <= 1024;
+  const isDesktop = window.innerWidth > 1024;
 
-  const minRadius = 20; // Calculating zoomed in and out states to adjust dynamic offset
+  const xOffset = isSmallScreen ? -12 : 0;
+  const yOffset = isSmallScreen ? 24 : 0;
+
+  const minRadius = isSmallScreen ? 60 : 20; // Calculating zoomed in and out states to adjust dynamic offset
   const maxRadius = 400; // Maximum allowed zoomed out
 
-  const [radius, setRadius] = useState(() => {
-    const isSmallScreen = window.innerWidth < 768;
-    const baseRadius = isSmallScreen ? 135 : 600; // Smaller base radius for screens below 768px
-    const scalingFactor = 0.5; // Adjust based on desired spread
-    const dynamicRadius = baseRadius + data.length * scalingFactor;
-    
-    // Clamp within min/max range
-    return Math.max(minRadius, Math.min(maxRadius, dynamicRadius));
-  });
+// First load zoom position for a planned initial appearance 
+const [radius, setRadius] = useState(() => {
+const baseRadius = isSmallScreen ? 110 : 150; // Smaller base radius for screens below 768px
+const scalingFactor = 0.5; // Adjust based on desired spread
+const dynamicRadius = baseRadius + data.length * scalingFactor;
+// Clamp within min/max range
+return Math.max(minRadius, Math.min(maxRadius, dynamicRadius));
+});
 
-  // Use the dynamic offset hook
+  // Get dynamicOffset.ts caluclated value. 
   const dynamicOffset = useDynamicOffset();
-  // Nonlinear interpolation function with clamping
 
+  /* Nonlinear interpolation is necessary to create a tailored value that adapts to different viewport sizes
+  and Three.js DOM environment's x,y,z positions + movement to work with 2D elements */
   const nonlinearLerp = (start, end, t) => {
   // Apply an easing function (ease-in)
   const easedT = 1 - Math.pow(1 - t, 5); // Adjust this function for different skew effects
@@ -56,31 +70,24 @@ const DotGraph = ({ isDragging = false, data = [] }) => {
   // Clamp the result to stay within [start, end]
   return Math.min(Math.max(value, Math.min(start, end)), Math.max(start, end));
   };
-
   // Linear interpolation function
   const lerp = (start, end, t) => start + (end - start) * t;
 
   // Map radius to a 0..1 range for gamification offset
   const zoomFactor = (radius - minRadius) / (maxRadius - minRadius);
 
-  // Get current viewport dimensions
   const currentWidth = window.innerWidth;
   const currentHeight = window.innerHeight;
-
-  // Check the current aspect ratio
   const isPortrait = currentHeight > currentWidth;
 
   let offsetOne;
-  // Fully zoomed in offset value for Dynamic Offset variable
-  if (isPortrait) {
-    offsetOne = 160;
-  } else {
-    offsetOne = 120;
-  }
+  // Fully zoomed in offset value for Dynamic Offset variable for device type
+  if (isPortrait) {offsetOne = 160;} else {offsetOne = 120;}
 
   // Use the dynamicOffset in the lerp function
   const offsetPx = nonlinearLerp(offsetOne, dynamicOffset, zoomFactor);
 
+// Generating red-yellow-green gradient to apply based on data weight 
 const interpolateColor = (weight) => {
     // Flip weight first to match the original logic
     const flippedWeight = 1 - weight; 
@@ -117,15 +124,16 @@ const interpolateColor = (weight) => {
     return `rgb(${r}, ${g}, ${b})`;
 };  
   
-
+const spreadFactor = 75; // Default spread factor for dots
+// Generate dot positions, spread them as numbers increase
 const generatePositions = (numPoints, minDistance = 24) => {
-    const positions = [];
-    const maxRetries = 1000;
-  
-    // Dynamically adjust spreadFactor based on number of points
-    const baseSpread = 76; // Minimum spread
-    const scalingFactor = 0.26; // Spread increases by 0.26 per point
-    const spreadFactor = baseSpread + numPoints * scalingFactor;
+  const positions = [];
+  const maxRetries = 1000;
+
+  // Dynamically adjust spreadFactor based on number of points
+  const baseSpread = 76; // Minimum spread
+  const scalingFactor = 0.26; // Spread increases by 0.26 per point
+  const spreadFactor = baseSpread + numPoints * scalingFactor;
   
     for (let i = 0; i < numPoints; i++) {
       let position;
@@ -174,50 +182,56 @@ const generatePositions = (numPoints, minDistance = 24) => {
         }
       }
     }
-  
-    return positions;
+  return positions;
 };
 
+// Center personalized dot
 useEffect(() => {
-    const calculatePoints = () => {
-      const positions = generatePositions(data.length, 2, spreadFactor);
-  
-      // Map data to points
-      const newPoints = data.map((response, index) => {
-        const weights = Object.values(response.weights);
-        const averageWeight = weights.reduce((sum, w) => sum + w, 0) / weights.length;
-  
-        return {
-          position: positions[index],
-          originalPosition: positions[index],
-          color: interpolateColor(averageWeight),
-          averageWeight,
-          _id: response._id,
-        };
-      });
-  
-      // Ensure latest point is at the center (adjust for small screens)
-      const latestEntryId = data[0]?._id;
-      if (latestEntryId) {
-        const latestPointIndex = newPoints.findIndex((point) => point._id === latestEntryId);
-        if (latestPointIndex !== -1) {
-          newPoints[latestPointIndex].position = [0, 0, 0]; // Adjusted center
-          newPoints[latestPointIndex].originalPosition = [0, 0, 0]; // Update original position as well
-        }
-      }
+  const calculatePoints = () => {
+  const positions = generatePositions(data.length, 2, spreadFactor);
 
-      setPoints(newPoints);
+  // Map data to points
+  const newPoints = data.map((response, index) => {
+  const weights = Object.values(response.weights);
+  const averageWeight = weights.reduce((sum, w) => sum + w, 0) / weights.length;
+
+    return {
+      position: positions[index],
+      originalPosition: positions[index],
+      color: interpolateColor(averageWeight),
+      averageWeight,
+      _id: response._id,
     };
+  });
+  
+  // Ensure latest point is at the center
+  const latestEntryId = data[0]?._id;
+  if (latestEntryId) {
+    const latestPointIndex = newPoints.findIndex((point) => point._id === latestEntryId);
+    if (latestPointIndex !== -1) {
+      if (isNotDesktop) {
+        newPoints[latestPointIndex].position = [0, 0, 0]; // Adjusted center for mobile
+        newPoints[latestPointIndex].originalPosition = [0, 0, 0]; // Update original position as well
+      } else {
+        newPoints[latestPointIndex].position = [0, 0, 0]; // Adjusted center for desktop
+        newPoints[latestPointIndex].originalPosition = [0, 0, 0]; // Update original position as well
+      }
+    }
+  }
+
+    setPoints(newPoints);
+  };
   
     calculatePoints();
 }, [data]);
 
-let targetX = 0;
+let targetX = 0; // Default value for x and y
 let targetY = 0;
-// Detecting of Drag and applying offset to X and Y coordinates
+// Event listeners and special cases
 useEffect(() => {
+  // Dragging Bar graph initial coordinate and final coordinate storing
   if (isDragging) {
-    // 🛠 Fix: Ensure cursor starts from the last adjusted position
+    // Ensure cursor starts from the last adjusted position
     lastCursorPositionRef.current = {
       x: lastCursorPositionRef.current.x - dragOffset.current.x,
       y: lastCursorPositionRef.current.y - dragOffset.current.y,
@@ -226,7 +240,7 @@ useEffect(() => {
     // Now correctly set drag start position
     dragStartRef.current = { ...lastCursorPositionRef.current };
   }
-
+  // Calculating offset between initial and final to undo drag at the end of freeze to avoid jitter
   if (!isDragging) {
     // Dragging ended: Capture the end position
     dragEndRef.current = { ...lastCursorPositionRef.current };
@@ -238,160 +252,195 @@ useEffect(() => {
     };
     setLastCursorPosition({ ...lastCursorPositionRef.current });
   }
-  const handleMouseMove = (event) => {
+
+// Rotate with cursor position for desktop
+const handleMouseMove = (event) => {
+    if (isNotDesktop && event.type === "mousemove") return;
+
     const normalizedX = (event.clientX / currentWidth) * 2 - 1;
     const normalizedY = -(event.clientY / currentHeight) * 2 + 1;
   
-    // ✅ If dragging, don't update targetX/targetY to avoid jitter
+    // If dragging, don't update targetX/targetY to avoid jitter
       targetX = normalizedX - dragOffset.current.x;
       targetY = normalizedY - dragOffset.current.y;
-
-      console.log("Mouse Move - targetX:", targetX, "targetY:", targetY);
   
-    // ✅ Always track cursor position
+    // Always track cursor position
     lastCursorPositionRef.current = { x: normalizedX, y: normalizedY };
     setLastCursorPosition({ x: targetX, y: targetY });
-  };
+};
 
-  window.addEventListener("mousemove", handleMouseMove);
-
-  return () => {
-    window.removeEventListener("mousemove", handleMouseMove);
-
-  };
-}, [isDragging]);
-
-// Smooth rotation transition in useFrame
-useFrame(() => {
-  if (isDragging) return; // Stop updating during drag
-
-  const isSmallScreen = window.innerWidth < 768;
-  // Adjust offsets dynamically for small devices
-  const xOffset = isSmallScreen ? -12 : 0; // Slight shift in X
-  const yOffset = isSmallScreen ? 24 : 0; // Slight shift in Y
-
-  // Calculate target angles based on cursor position
-  const targetX = (lastCursorPositionRef.current.y - dragOffset.current.y) * Math.PI * 0.25;
-  const targetY = (lastCursorPositionRef.current.x - dragOffset.current.x) * Math.PI * 0.5;
-
-  // Smoothly interpolate rotation angles for a soft stop effect
-  const dampingFactor = 0.05; 
-  const newRotationAngles = {
-    x: lerp(rotationAngles.x, targetX, dampingFactor),
-    y: lerp(rotationAngles.y, targetY, dampingFactor),
-  };
-
-  setRotationAngles(newRotationAngles);
-  const { x, y } = newRotationAngles;
-  // Apply the updated rotation angles
-
-  // ✅ Rotate the group instead of the camera
-  if (groupRef.current) {
-    groupRef.current.rotation.x = x;
-    groupRef.current.rotation.y = -y;
-    groupRef.current.position.set(xOffset, yOffset, 0); // Shift pivot
-  }
-  
-    camera.position.set(0, 0, radius);
-    camera.lookAt(0, 0, 0);
-});
-
-useEffect(() => {
-    const handleScroll = (event) => {
+// Mouse scroll and touch pad scroll for desktop
+const handleScroll = (event) => {
       if (event.ctrlKey) {
         // Likely a pinch gesture
-        console.log("Pinch detected!");
         setRadius((prevRadius) => {
           const newRadius = prevRadius - event.deltaY * 0.9; // Adjust for pinch sensitivity
           return Math.max(minRadius, Math.min(maxRadius, newRadius));
         });
       } else {
         // Regular scroll wheel
-        console.log("Mouse wheel detected!");
         setRadius((prevRadius) => {
           const newRadius = prevRadius - event.deltaY * 0.5; // Keep this lower for smooth scrolling
           return Math.max(minRadius, Math.min(maxRadius, newRadius));
         });
       }
-    };    
+};    
+
+const handleTouchStart = (event) => {
+  if (event.touches.length === 1) {
+    // Store the last known rotation BEFORE starting a new drag
+    lastRotationRef.current = { ...touchRotationRef.current };
+
+    // Store initial touch position
+    const touch = event.touches[0];
+    lastTouchPositionRef.current = { x: touch.clientX, y: touch.clientY };
+  }
+};
+
+// Rotate one finger, two finger pinch for mobile     
+const handleTouchMove = (event) => { 
+  if (isDesktop && event.type === "mousemove") return;
+  if (isDragging) return;
+  if (event.touches.length === 1 && !isPinchingRef.current) {
+    isTouchRotatingRef.current = true;
+    const touch = event.touches[0];
+    const currentTouch = { x: touch.clientX, y: touch.clientY };
+
+    if (lastTouchPositionRef.current) {
+      // Calculate movement direction **only**
+      const dx = currentTouch.x - lastTouchPositionRef.current.x;
+      const dy = currentTouch.y - lastTouchPositionRef.current.y;
+
+      // Normalize movement vector (ensures smooth scaling)
+      const length = Math.sqrt(dx * dx + dy * dy) || 1;
+      const direction = { x: dx / length, y: dy / length };
+
+      // Scale rotation based on movement **only**
+      const speedMultiplier = 4.8; // Sensitivity
+      const rotationX = lastRotationRef.current.x - direction.y * speedMultiplier;
+      const rotationY = lastRotationRef.current.y - direction.x * speedMultiplier;
+
+      touchRotationRef.current = {
+        x: rotationX,
+        y: rotationY
+      };
+    }
+
+    lastTouchPositionRef.current = currentTouch;
+  } else if (event.touches.length === 2) {
+    if (pinchCooldownRef.current) return;  // Prevent pinch if cooldown is active
+
+    isPinchingRef.current = true; // Block rotation while pinching
+    isTouchRotatingRef.current = false;
+
+    // Extract both touch points
+    const [touch1, touch2] = event.touches;
+
+    // Calculate current distance between fingers
+    const x1 = touch1.clientX;
+    const y1 = touch1.clientY;
+    const x2 = touch2.clientX;
+    const y2 = touch2.clientY;
+
+    const newDistance = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+
+    if (touchStartDistance.current !== null) {
+      // Determine if fingers are moving apart (Zoom In) or closer (Zoom Out)
+      const isZoomingIn = newDistance > touchStartDistance.current;
+
+      // Apply zooming logic
+      setRadius((prevRadius) => {
+        const zoomInSensitivity = 2.0;  // 🔹 Less aggressive zoom-in
+        const zoomOutSensitivity = 3.5; // 🔹 More aggressive zoom-out
+
+        const sensitivity = isZoomingIn ? zoomInSensitivity : zoomOutSensitivity;
+        let newRadius = prevRadius - (newDistance - touchStartDistance.current) * sensitivity;
+
+        // Prevent unwanted flickering by clamping the zoom-out limit
+        if (!isZoomingIn && newRadius < prevRadius) {
+          newRadius = prevRadius; // Prevent sudden jumps back in
+        }
+
+        return Math.max(minRadius, Math.min(maxRadius, newRadius));
+      });
+    }
+
+    // Update stored distance for next frame
+    touchStartDistance.current = newDistance;
+  }
+};
+
+// Add delay between pinch gestures to stop rotation and fast-paced pinching
+const handleTouchEnd = (e) => {
+  if (e.touches.length === 0) {
+    isTouchRotatingRef.current = false; // Reset rotation tracking when touch ends
+  }
+  if (e.touches.length < 2) { 
+    if (isPinchingRef.current) {
+      clearTimeout(pinchTimeoutRef.current);
+
+      // Set a timeout to re-enable rotation after 100ms
+      pinchTimeoutRef.current = setTimeout(() => {
+        isPinchingRef.current = false;
+      }, 300);
+    }
+
+    // Delay pinch cooldown reset by 150ms so it doesn't block forever
+    pinchCooldownRef.current = true; 
+    setTimeout(() => {
+      pinchCooldownRef.current = false; // Allow new pinch gestures
+    }, 300); 
+
+    touchStartDistance.current = null; 
+  }
+};
+    
+// Add event listeners
+window.addEventListener("wheel", handleScroll);
+window.addEventListener("touchstart", handleTouchStart);
+window.addEventListener("mousemove", handleMouseMove);
+window.addEventListener("touchmove", handleTouchMove);
+window.addEventListener("touchend", handleTouchEnd);
+
+return () => {
+// Cleanup event listeners
+window.removeEventListener("wheel", handleScroll);
+window.removeEventListener("touchstart", handleTouchStart);
+window.removeEventListener("mousemove", handleMouseMove);
+window.removeEventListener("touchmove", handleTouchMove);
+window.removeEventListener("touchend", handleTouchEnd);
+}; }, [minRadius, maxRadius, isDragging]);
+
+useFrame(() => {
+  if (isDragging) return; // Stop updating during drag
+  if (isDesktop) {
+    // DESKTOP: Cursor-based movement
+    targetX = (lastCursorPositionRef.current.y - dragOffset.current.y) * Math.PI * 0.25;
+    targetY = (lastCursorPositionRef.current.x - dragOffset.current.x) * Math.PI * 0.5;
+  } else {
+    // MOBILE: Use touch velocity-based rotation
+    targetX = -(touchRotationRef.current.x - yOffset) * 0.08;  // Adjust Y rotation for offset
+    targetY = -(touchRotationRef.current.y - xOffset) * 0.14;  // Adjust X rotation for offset  
+  }
+
+  // **Improve damping for snappier response**
+  const dampingFactor = isSmallScreen ? 0.15 : 0.03; 
+  const newRotationAngles = {
+    x: lerp(rotationAngles.x, targetX, dampingFactor),
+    y: lerp(rotationAngles.y, targetY, dampingFactor),
+  };
+
+  setRotationAngles(newRotationAngles);
   
-   const handleTouchStart = (event) => {
-      if (event.touches.length === 1) {
-        const touch = event.touches[0];
-        const normalizedX = (touch.clientX / window.innerWidth) * 2 - 1;
-        const normalizedY = -(touch.clientY / window.innerHeight) * 2 + 1;
-  
-        lastCursorPositionRef.current = { x: normalizedX, y: normalizedY }; // ✅ Instant update
-        setLastCursorPosition({ x: normalizedX, y: normalizedY }); // ✅ Update React state for consistency
-      }
-     else if (event.touches.length === 2) {
-        // Two fingers touch for pinch-to-zoom
-        const [touch1, touch2] = event.touches;
-        const distance = Math.sqrt(
-          Math.pow(touch2.clientX - touch1.clientX, 2) +
-          Math.pow(touch2.clientY - touch1.clientY, 2)
-        );
-        touchStartDistance.current = distance; // Save initial pinch distance
-      }
-    };
-    
-  const handleTouchMove = (event) => {
-      if (event.touches.length === 1) {
-        // Get touch position (first finger)
-        const touch = event.touches[0];
-        const normalizedX = (touch.clientX / window.innerWidth) * 2 - 1;
-        const normalizedY = -(touch.clientY / window.innerHeight) * 2 + 1;
-    
-        // Apply smooth rotation
-        setRotationAngles((prev) => ({
-          x: prev.x + (normalizedY - lastCursorPositionRef.current.y) * Math.PI * 0.05, // Smooth scaling
-          y: prev.y + (normalizedX - lastCursorPositionRef.current.x) * Math.PI * 0.05, // Smooth scaling
-        }));
-    
-        // Update both ref & state (prevents jumpiness)
-        lastCursorPositionRef.current = { x: normalizedX, y: normalizedY };
-        setLastCursorPosition({ x: normalizedX, y: normalizedY });
-    
-      } 
-      else if (event.touches.length === 2) {
-        // Handle pinch-to-zoom
-        const [touch1, touch2] = event.touches;
-        const distance = Math.sqrt(
-          Math.pow(touch2.clientX - touch1.clientX, 2) +
-          Math.pow(touch2.clientY - touch1.clientY, 2)
-        );
-    
-        const pinchDelta = distance - touchStartDistance.current;
-        
-        setRadius((prevRadius) => {
-          const newRadius = prevRadius - pinchDelta * 0.9; // Adjust zoom sensitivity
-          return Math.max(minRadius, Math.min(maxRadius, newRadius));
-        });
-    
-        touchStartDistance.current = distance; // Update pinch distance
-    
-        console.log("Pinch zoom detected, updated radius:", touchStartDistance.current);
-      }
-    };
-    
-    const handleTouchEnd = () => {
-      touchStartDistance.current = null; // Reset pinch distance
-    };
-  
-   // Add event listeners
-   window.addEventListener("wheel", handleScroll);
-   window.addEventListener("touchstart", handleTouchStart);
-   window.addEventListener("touchmove", handleTouchMove);
-   window.addEventListener("touchend", handleTouchEnd);
-  
-    return () => {
-    // Cleanup event listeners
-    window.removeEventListener("wheel", handleScroll);
-    window.removeEventListener("touchstart", handleTouchStart);
-    window.removeEventListener("touchmove", handleTouchMove);
-    window.removeEventListener("touchend", handleTouchEnd);
-    };
-}, [lastCursorPosition, minRadius, maxRadius]);
+  if (groupRef.current) {
+    groupRef.current.rotation.x = newRotationAngles.x;
+    groupRef.current.rotation.y = -newRotationAngles.y;
+    groupRef.current.position.set(xOffset, yOffset, 0);
+  }
+
+  camera.position.set(0, 0, radius);
+  camera.lookAt(0, 0, 0);
+});
 
 const latestEntryId = data[0]?._id;
 const latestPoint = points.find((point) => point._id === latestEntryId);
@@ -400,8 +449,8 @@ const latestEntry = data.find((entry) => entry._id === latestEntryId);
 let percentage = 0;
 // Did better than % of users calculation
 const latestWeight =
-    Object.values(latestEntry.weights).reduce((sum, w) => sum + w, 0) /
-    Object.keys(latestEntry.weights).length;
+Object.values(latestEntry.weights).reduce((sum, w) => sum + w, 0) /
+Object.keys(latestEntry.weights).length;
 
 // Calculate amount of user with higher weight  
 const usersWithHigherWeight = data.filter((entry) => {
@@ -449,12 +498,14 @@ const calculateViewportProximity = (x, y) => {
 };
 
 const handleHoverStart = (dot, event) => {
+  if (isTouchRotatingRef.current || isDragging || isPinchingRef.current) return; // Prevent hover if dragging or pinching
   const { clientX, clientY } = event.nativeEvent;
+  
   const proximityClass = calculateViewportProximity(clientX, clientY);
   setViewportClass(proximityClass);
 
   // Ensure we store full dot details (including dotId)
-setHoveredDot({
+  setHoveredDot({
     dotId: dot._id, // Store unique dot identifier
     percentage: calculatePercentage(dot.averageWeight),
     color: dot.color,
@@ -462,6 +513,7 @@ setHoveredDot({
 };
     
 const handleHoverEnd = () => {
+  if (isTouchRotatingRef.current || isDragging || isPinchingRef.current) return;
   setHoveredDot(null);
   setViewportClass(''); // Reset the class on hover end
 };
@@ -477,15 +529,13 @@ useEffect(() => {
  
 return (
     <>
-        {/* 🔹 Fixed Button Rendered First (Behind the 3D Scene) */}
-        <Html zIndexRange={[12, 12]} style={{
-           pointerEvents: 'none', 
-              }}>
-            <div className="z-index-respective" style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', height: '100vh', pointerEvents: 'none'}}>
-            <CompleteButton/>
-            </div>
-           </Html>
-
+    <Html zIndexRange={[12, 12]} style={{
+      pointerEvents: 'none', 
+          }}>
+        <div className="z-index-respective" style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', height: '100vh', pointerEvents: 'none'}}>
+        <CompleteButton/>
+        </div>
+      </Html>
     <group ref={groupRef}>
       {points.map((point, index) => {
         const isLatestPoint = point._id === latestEntryId;
@@ -512,14 +562,15 @@ return (
             }}
             onClick={(event) => {
               event.stopPropagation();
-          
+              if (isTouchRotatingRef.current || isDragging || isPinchingRef.current) return; // Prevent hover if dragging or pinching
+              
               // Simulate hover start logic on click for touch-based devices
               if (!isLatestPoint) {
                 handleHoverStart(point, event);
               }
             }}
           >
-            <sphereGeometry args={[1.1, 48, 48]} />
+            <sphereGeometry args={[1.4, 48, 48]} />
             <meshStandardMaterial color={point.color} />
           </mesh>
         );
