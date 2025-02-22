@@ -17,20 +17,22 @@ const FrontPage = () => {
   // Dsiable trackpad and touch device pinch UI zoom in functionality to avoid clashing zoom-in function of dot graph
   useEffect(() => {
     const preventZoom = (event) => {
-      if (event.ctrlKey || event.touches?.length > 1) {
+      // 🔹 Allow pinch zooming inside DotGraph
+      const isInsideDotGraph = event.target.closest('.dot-graph-container'); 
+  
+      if (!isInsideDotGraph && (event.ctrlKey || event.touches?.length > 1)) {
         event.preventDefault();
       }
     };
-
-    // Disable pinch-zoom and Ctrl+scroll globally
+  
+    // Allow pinch gestures in `DotGraph`, block it elsewhere
     document.addEventListener("wheel", preventZoom, { passive: false });
     document.addEventListener("gesturestart", preventZoom);
     document.addEventListener("gesturechange", preventZoom);
     document.addEventListener("gestureend", preventZoom);
     document.addEventListener("touchmove", preventZoom, { passive: false });
-
+  
     return () => {
-      // Cleanup when component unmounts
       document.removeEventListener("wheel", preventZoom);
       document.removeEventListener("gesturestart", preventZoom);
       document.removeEventListener("gesturechange", preventZoom);

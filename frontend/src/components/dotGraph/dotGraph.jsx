@@ -7,6 +7,7 @@ import '../../styles/graph.css';
 import '../../styles/survey.css';
 import CompleteButton from '../completeButton.jsx'; 
 import { useDynamicOffset } from '../../utils/dynamicOffset.ts';
+import { isMobile, isTablet, isDesktop } from 'react-device-detect';
 
 const DotGraph = ({ isDragging = false, data = [] }) => {
   const [points, setPoints] = useState([]);
@@ -26,7 +27,7 @@ const DotGraph = ({ isDragging = false, data = [] }) => {
   const lastRotationRef = useRef({ x: 0, y: 0 }); // Stores last rotation before a new touch starts  
   const isTouchRotatingRef = useRef(false); // Track active one-finger rotation
   const lastTouchPositionRef = useRef({ x: 0, y: 0 });
-
+  const pinchDeltaRef = useRef(0); // Store pinch distance changes
 
   // Dot hover states, edge case states
   const [hoveredDot, setHoveredDot] = useState(null);
@@ -39,6 +40,10 @@ const DotGraph = ({ isDragging = false, data = [] }) => {
   const isSmallScreen = window.innerWidth < 768;
   const isNotDesktop = window.innerWidth <= 1024;
   const isDesktop = window.innerWidth > 1024;
+
+  const IS_MOBILE = isMobile;
+  const IS_TABLET = isTablet;
+  const IS_DESKTOP = isDesktop;
 
   const xOffset = isSmallScreen ? -12 : 0;
   const yOffset = isSmallScreen ? 24 : 0;
@@ -66,15 +71,21 @@ useEffect(() => {
     // Apply easing for smooth acceleration and deceleration
     const easeOut = 1 - Math.pow(1 - progress, 3);
 
-    setRadius(20 + (finalRadius - 20) * easeOut); // Interpolate between 20 and finalRadius
+    // **Only animate if the user hasn't zoomed yet**
+    setRadius((prevRadius) => {
+      // If user already zoomed, stop the animation early
+      if (isPinchingRef.current || pinchDeltaRef.current !== 0) return prevRadius;
+      return 20 + (finalRadius - 20) * easeOut;
+    });
 
-    if (progress < 1) {
+    if (progress < 1 && !isPinchingRef.current) {
       requestAnimationFrame(animateRadius);
     }
   };
 
   requestAnimationFrame(animateRadius);
 }, [finalRadius]);
+
 
   // Get dynamicOffset.ts caluclated value. 
   const dynamicOffset = useDynamicOffset();
@@ -319,8 +330,9 @@ const handleTouchStart = (event) => {
 };
 
 // Rotate one finger, two finger pinch for mobile     
-const handleTouchMove = (event) => { 
-  if (isDesktop && event.type === "mousemove") return;
+const handleTouchMove = (event) => {
+  event.preventDefault();
+  if (IS_DESKTOP && !IS_TABLET && event.type === "mousemove") return;
   if (isDragging) return;
   if (event.touches.length === 1 && !isPinchingRef.current) {
     isTouchRotatingRef.current = true;
@@ -349,68 +361,50 @@ const handleTouchMove = (event) => {
 
     lastTouchPositionRef.current = currentTouch;
   } else if (event.touches.length === 2) {
-    if (pinchCooldownRef.current) return;  // Prevent pinch if cooldown is active
-
-    isPinchingRef.current = true; // Block rotation while pinching
-    isTouchRotatingRef.current = false;
-
-    // Extract both touch points
-    const [touch1, touch2] = event.touches;
-
-    // Calculate current distance between fingers
-    const x1 = touch1.clientX;
-    const y1 = touch1.clientY;
-    const x2 = touch2.clientX;
-    const y2 = touch2.clientY;
-
-    const newDistance = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-
-    if (touchStartDistance.current !== null) {
-      // Determine if fingers are moving apart (Zoom In) or closer (Zoom Out)
-      const isZoomingIn = newDistance > touchStartDistance.current;
-
-      // Apply zooming logic
-      setRadius((prevRadius) => {
-        const zoomInSensitivity = 2.0;  // 🔹 Less aggressive zoom-in
-        const zoomOutSensitivity = 3.5; // 🔹 More aggressive zoom-out
-
-        const sensitivity = isZoomingIn ? zoomInSensitivity : zoomOutSensitivity;
-        let newRadius = prevRadius - (newDistance - touchStartDistance.current) * sensitivity;
-
-        // Prevent unwanted flickering by clamping the zoom-out limit
-        if (!isZoomingIn && newRadius < prevRadius) {
-          newRadius = prevRadius; // Prevent sudden jumps back in
-        }
-
-        return Math.max(minRadius, Math.min(maxRadius, newRadius));
-      });
+      if (pinchCooldownRef.current) return;
+    
+      isPinchingRef.current = true;
+      isTouchRotatingRef.current = false;
+    
+      const [touch1, touch2] = event.touches;
+      const x1 = touch1.clientX, y1 = touch1.clientY;
+      const x2 = touch2.clientX, y2 = touch2.clientY;
+      const newDistance = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+    
+      if (touchStartDistance.current !== null) {
+        const pinchDelta = newDistance - touchStartDistance.current;
+    
+        // Adjust radius
+        setRadius((prevRadius) => {
+          const zoomFactor = pinchDelta * 0.9; // Increase this for more responsiveness
+          let newRadius = prevRadius - zoomFactor;
+    
+          return Math.max(minRadius, Math.min(maxRadius, newRadius));
+        });
+      }
+    
+      touchStartDistance.current = newDistance; // Update for next frame
     }
-
-    // Update stored distance for next frame
-    touchStartDistance.current = newDistance;
   }
-};
 
 // Add delay between pinch gestures to stop rotation and fast-paced pinching
 const handleTouchEnd = (e) => {
   if (e.touches.length === 0) {
     isTouchRotatingRef.current = false; // Reset rotation tracking when touch ends
   }
-  if (e.touches.length < 2) { 
-    if (isPinchingRef.current) {
-      clearTimeout(pinchTimeoutRef.current);
+    if (e.touches.length < 2) { 
+        if (isPinchingRef.current) {
+            clearTimeout(pinchTimeoutRef.current);
+            pinchTimeoutRef.current = setTimeout(() => {
+                isPinchingRef.current = false;
+                touchStartDistance.current = null; // Reset stored distance
+            }, 150); // Shorter timeout for faster pinch reset
+        }
 
-      // Set a timeout to re-enable rotation after 100ms
-      pinchTimeoutRef.current = setTimeout(() => {
-        isPinchingRef.current = false;
-      }, 300);
-    }
-
-    // Delay pinch cooldown reset by 150ms so it doesn't block forever
-    pinchCooldownRef.current = true; 
-    setTimeout(() => {
-      pinchCooldownRef.current = false; // Allow new pinch gestures
-    }, 300); 
+        pinchCooldownRef.current = true; 
+        setTimeout(() => {
+            pinchCooldownRef.current = false;
+        }, 200); // Lower cooldown threshold
 
     touchStartDistance.current = null; 
   }
@@ -420,7 +414,7 @@ const handleTouchEnd = (e) => {
 window.addEventListener("wheel", handleScroll);
 window.addEventListener("touchstart", handleTouchStart);
 window.addEventListener("mousemove", handleMouseMove);
-window.addEventListener("touchmove", handleTouchMove);
+window.addEventListener("touchmove", handleTouchMove, { passive: false });
 window.addEventListener("touchend", handleTouchEnd);
 
 return () => {
@@ -434,14 +428,34 @@ window.removeEventListener("touchend", handleTouchEnd);
 
 useFrame(() => {
   if (isDragging) return; // Stop updating during drag
-  if (isDesktop) {
+  if (IS_DESKTOP && !IS_TABLET) {
     // DESKTOP: Cursor-based movement
     targetX = (lastCursorPositionRef.current.y - dragOffset.current.y) * Math.PI * 0.25;
     targetY = (lastCursorPositionRef.current.x - dragOffset.current.x) * Math.PI * 0.5;
+  } else if (IS_TABLET && !IS_DESKTOP) {
+    // MOBILE: Use touch velocity-based rotation
+    targetX = -(touchRotationRef.current.x - yOffset) * 0.20;  // Adjust Y rotation for offset
+    targetY = -(touchRotationRef.current.y - xOffset) * 0.35;  // Adjust X rotation for offset  
   } else {
     // MOBILE: Use touch velocity-based rotation
-    targetX = -(touchRotationRef.current.x - yOffset) * 0.08;  // Adjust Y rotation for offset
-    targetY = -(touchRotationRef.current.y - xOffset) * 0.14;  // Adjust X rotation for offset  
+    targetX = -(touchRotationRef.current.x - yOffset) * 0.10;  // Adjust Y rotation for offset
+    targetY = -(touchRotationRef.current.y - xOffset) * 0.17;  // Adjust X rotation for offset  
+  }
+
+  // **Process Smooth Pinch Zooming in useFrame**
+  if (isPinchingRef.current && pinchDeltaRef.current !== 0) {
+    const zoomInSensitivity = 2.5;
+    const zoomOutSensitivity = 3;
+    
+    const isZoomingIn = pinchDeltaRef.current > 0;
+    const sensitivity = isZoomingIn ? zoomInSensitivity : zoomOutSensitivity;
+
+    setRadius((prevRadius) => {
+      let newRadius = prevRadius - pinchDeltaRef.current * sensitivity;
+      return Math.max(minRadius, Math.min(maxRadius, newRadius));
+    });
+
+    pinchDeltaRef.current = 0; // Reset after processing
   }
 
   // **Improve damping for snappier response**
@@ -630,7 +644,7 @@ return (
             >
               <div>
                 <GamificationGeneral 
-                  dotId={hoveredDot.dotId} // ✅ Pass dotId for unique caching
+                  dotId={hoveredDot.dotId} // Pass dotId for unique caching
                   percentage={hoveredDot.percentage} 
                   color={hoveredDot.color} 
                 />
