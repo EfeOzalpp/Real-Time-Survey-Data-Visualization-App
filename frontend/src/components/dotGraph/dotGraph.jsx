@@ -3,11 +3,9 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
 import GamificationPersonalized from './gamificationPersonalized'; 
 import GamificationGeneral from './gamificationGeneral'; 
-import '../../styles/graph.css';
-import '../../styles/survey.css';
 import CompleteButton from '../completeButton.jsx'; 
-import { useDynamicOffset } from '../../utils/dynamicOffset.ts';
-import { isMobile, isTablet, isDesktop } from 'react-device-detect';
+import { useDynamicOffset } from '../../utils/dynamicOffset.ts'; // Dynamic Offset to adjust offset for popups
+import { isMobile, isTablet, isDesktop } from 'react-device-detect'; // Device detector library
 
 const DotGraph = ({ isDragging = false, data = [] }) => {
   const [points, setPoints] = useState([]);
@@ -39,8 +37,9 @@ const DotGraph = ({ isDragging = false, data = [] }) => {
   // Screen Detector
   const isSmallScreen = window.innerWidth < 768;
   const isNotDesktop = window.innerWidth <= 1024;
-  const isDesktop = window.innerWidth > 1024;
+  const isDesktop2 = window.innerWidth > 1024;
 
+  // Device Detector
   const IS_MOBILE = isMobile;
   const IS_TABLET = isTablet;
   const IS_DESKTOP = isDesktop;
@@ -159,62 +158,62 @@ const interpolateColor = (weight) => {
 const spreadFactor = 75; // Default spread factor for dots
 // Generate dot positions, spread them as numbers increase
 const generatePositions = (numPoints, minDistance = 24) => {
-  const positions = [];
-  const maxRetries = 1000;
+const positions = [];
+const maxRetries = 1000;
 
-  // Dynamically adjust spreadFactor based on number of points
-  const baseSpread = 76; // Minimum spread
-  const scalingFactor = 0.26; // Spread increases by 0.26 per point
-  const spreadFactor = baseSpread + numPoints * scalingFactor;
+// Dynamically adjust spreadFactor based on number of points
+const baseSpread = 76; // Minimum spread
+const scalingFactor = 0.26; // Spread increases by 0.26 per point
+const spreadFactor = baseSpread + numPoints * scalingFactor;
   
-    for (let i = 0; i < numPoints; i++) {
-      let position;
-      let overlapping;
-      let retries = 0;
-  
-      do {
-        if (retries > maxRetries) {
-          console.warn(`Failed to place point ${i} after ${maxRetries} retries.`);
-          break;
-        }
-  
-        position = [
-          (Math.random() - 0.5) * spreadFactor,
-          (Math.random() - 0.5) * spreadFactor,
-          (Math.random() - 0.5) * spreadFactor,
-        ];
-  
-        overlapping = positions.some((existing) => {
-          const distance = Math.sqrt(
-            (position[0] - existing[0]) ** 2 +
-            (position[1] - existing[1]) ** 2 +
-            (position[2] - existing[2]) ** 2
-          );
-          return distance < minDistance;
-        });
-  
-        retries++;
-      } while (overlapping);
-  
-      if (!overlapping) {
-        positions.push(position);
+  for (let i = 0; i < numPoints; i++) {
+    let position;
+    let overlapping;
+    let retries = 0;
+
+    do {
+      if (retries > maxRetries) {
+        console.warn(`Failed to place point ${i} after ${maxRetries} retries.`);
+        break;
       }
-    }
-  
-    // Validation step
-    for (let i = 0; i < positions.length; i++) {
-      for (let j = i + 1; j < positions.length; j++) {
+
+      position = [
+        (Math.random() - 0.5) * spreadFactor,
+        (Math.random() - 0.5) * spreadFactor,
+        (Math.random() - 0.5) * spreadFactor,
+      ];
+
+      overlapping = positions.some((existing) => {
         const distance = Math.sqrt(
-          (positions[i][0] - positions[j][0]) ** 2 +
-          (positions[i][1] - positions[j][1]) ** 2 +
-          (positions[i][2] - positions[j][2]) ** 2
+          (position[0] - existing[0]) ** 2 +
+          (position[1] - existing[1]) ** 2 +
+          (position[2] - existing[2]) ** 2
         );
-        if (distance < minDistance) {
-          console.error(`Points ${i} and ${j} are too close! Distance: ${distance}`);
-        }
+        return distance < minDistance;
+      });
+
+      retries++;
+    } while (overlapping);
+
+    if (!overlapping) {
+      positions.push(position);
+    }
+  }
+
+  // Validation step
+  for (let i = 0; i < positions.length; i++) {
+    for (let j = i + 1; j < positions.length; j++) {
+      const distance = Math.sqrt(
+        (positions[i][0] - positions[j][0]) ** 2 +
+        (positions[i][1] - positions[j][1]) ** 2 +
+        (positions[i][2] - positions[j][2]) ** 2
+      );
+      if (distance < minDistance) {
+        console.error(`Points ${i} and ${j} are too close! Distance: ${distance}`);
       }
     }
-  return positions;
+  }
+return positions;
 };
 
 // Center personalized dot
@@ -385,7 +384,7 @@ const handleTouchMove = (event) => {
     
       touchStartDistance.current = newDistance; // Update for next frame
     }
-  }
+}
 
 // Add delay between pinch gestures to stop rotation and fast-paced pinching
 const handleTouchEnd = (e) => {
@@ -508,7 +507,7 @@ const calculatePercentage = (averageWeight) => {
     
 // Determine proximity to viewport edges
 const calculateViewportProximity = (x, y) => {
-  const verticalEdgeThreshold = 150; // Adjust threshold for top and bottom
+  const verticalEdgeThreshold = isSmallScreen ? 100 : 150; // Adjusted for small screens
   const horizontalEdgeThreshold = 300; // Wider threshold for left and right edges
   const isLeftThreshold = window.innerWidth * 0.4; // 40% of viewport width (40vw) for is-right
   const width = window.innerWidth;

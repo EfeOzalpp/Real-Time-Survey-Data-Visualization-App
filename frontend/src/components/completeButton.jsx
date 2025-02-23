@@ -7,7 +7,7 @@ const CompleteButton = () => {
       <div className="survey-section">
         <div className="surveyStart">
           <button className="begin-button3">
-            <h4>I AM DONE</h4>
+            <h4>DONE VIEWING</h4>
           </button>
         </div>
       </div>
