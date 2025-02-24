@@ -24,14 +24,14 @@ const GamificationPersonalized = ({ userData, percentage, color }) => {
             "Nature? Is it Edible?",
             "Sustainability, Who?",
             "Comfort Seeker, Earth is Ok Too",
-            "I am Aware of my Bad-nature",
+            "I am Aware of My Bad-nature",
           ],
           "41-60": [
-            "Average-Eco Loverzz",
+            "Averagely Content, It's Ok",
             "Is it trendy to like nature?",
             "Nature <3 (ok, where's my award?)",
-            "The least I can do is honesty",
-            "I like mediocrity..:)",
+            "The Least I Can Do Is Honesty",
+            "I Like Mediocrity..:)",
           ],
           "61-80": [
             "Humble-Green MF",
@@ -45,7 +45,7 @@ const GamificationPersonalized = ({ userData, percentage, color }) => {
             "Damn! Larger than life habits",
             "The Most Precious Award Goes to...",
             "A Reminder to Reward Yourself",
-            "Simply, Outstanding...",
+            "Simply, Good Results, Goodjob",
           ],
         };
 
@@ -76,7 +76,7 @@ const GamificationPersonalized = ({ userData, percentage, color }) => {
           ],
           "41-60": [
             "You're getting there! -Ahead of",
-            "I mean... You do you. You're ahead of",
+            "I mean... You do you, and average is you. You're ahead of",
             "Kind of in the middle, huh? You're higher than",
           ],
           "61-80": [

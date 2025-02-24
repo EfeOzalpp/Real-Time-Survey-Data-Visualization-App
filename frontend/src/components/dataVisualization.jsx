@@ -16,20 +16,20 @@ const getPositionByViewport = (id = null, customX = null, customY = null) => {
 
   // Define bar1's position
   if (width < 768) {
-    bar1Position = { x: window.innerWidth * 0, y: window.innerHeight * 0.8 };
+    bar1Position = { x: window.innerWidth * 0, y: window.innerHeight * 0.52 };
   } else if (width >= 768 && width < 1024) {
-    bar1Position = { x: window.innerWidth * 0, y: window.innerHeight * 0.2 };
+    bar1Position = { x: window.innerWidth * 0.2, y: window.innerHeight * 0.51 };
   } else {
-    bar1Position = { x: window.innerWidth * 0.05, y: window.innerHeight * 0.15 };
+    bar1Position = { x: window.innerWidth * 0.75, y: window.innerHeight * 0.15 };
   }
 
   // Define bar2's position
   if (width < 768) {
-    bar2Position = { x: window.innerWidth * 0.2, y: window.innerHeight * 0.1 };
+    bar2Position = { x: window.innerWidth * 0.05, y: window.innerHeight * 0.275 };
   } else if (width >= 768 && width < 1024) {
-    bar2Position = { x: window.innerWidth * 0, y: window.innerHeight * 0.6 };
+    bar2Position = { x: window.innerWidth * 0.05, y: window.innerHeight * 0.05 };
   } else {
-    bar2Position = { x: window.innerWidth * 0.6, y: window.innerHeight * 0.2 };
+    bar2Position = { x: window.innerWidth * 0.1, y: window.innerHeight * 0.175 };
   }
 
   // If requesting both bars, return an object containing both
@@ -227,12 +227,12 @@ return (
 <div
   key={id}
   ref={dragRefs[id]}
-  className="draggable-container"
+  className={id === 'bar1' ? "draggable-container" : "draggable-container2"}
   style={{
     position: 'absolute',
     left: `${positions[id].x}px`,
     top: `${positions[id].y}px`,
-    zIndex: topGraph === id ? 20 : 5,
+    zIndex: topGraph === id ? 5 : 20,
     cursor: dragStates[id] ? "grabbing" : "grab",
   }}
   onMouseDown={(e) => handleDragStart(id, e)}
