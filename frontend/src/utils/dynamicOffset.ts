@@ -62,8 +62,8 @@ export const useDynamicOffset = (): number => {
           // Portrait mode with conditional ranges for width
           if (currentWidth >= 66 && currentWidth <= 675) {
           // First range: 66px to 675px width
-          const minOffset = 30;
-          const maxOffset = 200;
+          const minOffset = 80;
+          const maxOffset = 165;
           const normalizedWidth = Math.min(
             Math.max((currentWidth - 66) / (675 - 66), 0),
             1
@@ -71,7 +71,7 @@ export const useDynamicOffset = (): number => {
           offset = minOffset + (maxOffset - minOffset) * normalizedWidth;
         } else if (currentWidth > 675 && currentWidth <= 900) {
           // NEW: Second range 675px to 900px width (SAME AS 66px to 675px)
-          const minOffset = 30;
+          const minOffset = -150;
           const maxOffset = 200;
           const normalizedWidth = Math.min(
             Math.max((currentWidth - 675) / (900 - 675), 0),

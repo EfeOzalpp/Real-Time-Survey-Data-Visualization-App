@@ -1,7 +1,7 @@
 /* Gamification Styles */
 
 /* Mobile */
-@media screen and (max-width: 768px) { 
+@media screen and (max-width: 767px) { 
 /* =============================================
 Personalized Gamification
 ============================================= */
@@ -91,17 +91,17 @@ Generalized Gamification
 /* =============================================
 Generalized Gamification Edge Cases
 ============================================= */
-.generalized-result { transform: translateX(var(--offset-px)); background-color: #f4fdfcc6;; padding: 12px; border-radius: 18px; color: rgb(51, 51, 51); text-align: center; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: flex; flex-direction: row; flex-wrap: wrap; position: relative; width: 240px; max-width: 240px; min-width: 240px; left: 8px; pointer-events: none; z-index: 10; box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.055), inset -1px -1px 1px rgba(255, 255, 255, 0.9); }
+.generalized-result { transform: translateX(var(--offset-px)); background-color: #f4fdfcc6;; padding: 12px; border-radius: 18px; color: rgb(51, 51, 51); text-align: center; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: flex; flex-direction: row; flex-wrap: wrap; position: relative; width: 240px; max-width: 240px; min-width: 240px; left: 72px; pointer-events: none; z-index: 10; box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.055), inset -1px -1px 1px rgba(255, 255, 255, 0.9); }
 .generalized-result::after { content: ''; position: absolute; top: 50%; left: -20px; transform: translateY(-50%) rotate(90deg); border-width: 11px; border-style: solid; border-color: #f3ffffdc transparent transparent transparent; }
 
-.is-top .generalized-result { height: 200px !important; min-height: 200px !important; max-height: 200px !important; width: 280px !important; min-width: 280px !important; max-width: 280px !important; transform: translateY(var(--offset-px)) !important; left: 0px !important; top: -12px !important; }
+.is-top .generalized-result { height: 200px !important; min-height: 200px !important; max-height: 200px !important; width: 280px !important; min-width: 280px !important; max-width: 280px !important; transform: translateY(var(--offset-px)) !important; left: 0px !important; top: 52px !important; }
 .is-top .generalized-result::after { transform: translateY(-50%) rotate(180deg) !important; left: 46% !important; top: -4% !important;}
 
 .is-right .generalized-result, .is-mid .generalized-result { transform: translateX(calc(1 - var(--offset-px))); left: -148px; top: 0px; }
 .is-right .generalized-result::after, .is-mid .generalized-result::after {transform: translateY(-50%) rotate(-90deg); left: 100%; top: 50%; }
 
-.is-bottom .generalized-result, .is-left.is-bottom .generalized-result { transform: translateY(calc(-1 * var(--offset-px))); left: 0; top: 6px; height: 200px !important; width: 280px !important; max-width: 280px !important; min-width: 280px !important; }
-.is-bottom .generalized-result::after, .is-left.is-bottom .generalized-result::after {transform: translateY(-50%) rotate(0deg) !important; left: 46% !important; top: 104% !important; }
+.is-bottom .generalized-result, .is-left.is-bottom .generalized-result { transform: translateY(calc(-1 * var(--offset-px))); left: 0; top: -57px; height: 200px !important; width: 280px !important; max-width: 280px !important; min-width: 280px !important; }
+.is-bottom .generalized-result::after, .is-left.is-bottom .generalized-result::after {transform: translateY(-50%) rotate(0deg) !important; left: 46.5% !important; top: 104% !important; }
 
 .is-left .generalized-result { top: 0px; }
 .is-left .generalized-result::after { transform: translateY(-50%) rotate(90deg); }
@@ -110,7 +110,7 @@ Generalized Gamification Edge Cases
 }
 
 /* Desktop */
-@media screen and (min-width: 1024px) { 
+@media screen and (min-width: 1025px) { 
 /* =============================================
    Personalized Gamification
    ============================================= */
@@ -141,7 +141,8 @@ Generalized Gamification Edge Cases
 /* =============================================
    Generalized Gamification Edge Cases
    ============================================= */
-@media screen and (min-width: 1024px) and (max-width: 1320px) {
+   
+@media screen and (min-width: 1025px) and (max-width: 1320px) {
 .generalized-result { transform: translateX(var(--offset-px)); background-color: #f4fdfcc6;; padding: 12px; border-radius: 18px; color: rgb(51, 51, 51); text-align: center; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: flex; flex-direction: row; flex-wrap: wrap; position: relative; width: 160px; max-width: 160px; min-width: 160px; left: 30px; pointer-events: none; z-index: 10; box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.055), inset -1px -1px 1px rgba(255, 255, 255, 0.9); }
 .generalized-result::after { content: ''; position: absolute; top: 50%; left: -20px; transform: translateY(-50%) rotate(90deg); border-width: 11px; border-style: solid; border-color: #f3ffffdc transparent transparent transparent; }
 

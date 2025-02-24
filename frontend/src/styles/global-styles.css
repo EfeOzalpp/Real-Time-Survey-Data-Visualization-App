@@ -16,7 +16,7 @@ html, body {
 button { padding-inline: 0; padding-block: 0; }
 
 /* Mobile */
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 767px) {
   h1, h2, h3, h4, p { font-family: Heebo, sans-serif; padding: 0; margin: 0; }
   h1 { font-size: clamp(5.6vw, 5.8vw, 6vw); line-height: 1.224em; font-weight: 500; letter-spacing: -0.2px; }
   h1.begin-title2 { white-space: nowrap; }
@@ -63,7 +63,7 @@ button { padding-inline: 0; padding-block: 0; }
 }
 
 /* Desktop */
-@media screen and (min-width: 1024px) {
+@media screen and (min-width: 1025px) {
   h1, h2, h3, h4, p { font-family: Heebo, sans-serif; padding: 0; margin: 0; }
   h1 { font-size: 1.8vw; line-height: 1.204em; font-weight: 500; letter-spacing: -0.23px; }
   h2 { font-size: 1.6vw; font-weight: 500; line-height: 1.2em; }

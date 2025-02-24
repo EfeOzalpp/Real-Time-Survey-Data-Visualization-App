@@ -61,7 +61,7 @@ const finalRadius = Math.max(minRadius, Math.min(maxRadius, dynamicRadius));
 
 useEffect(() => {
   let startTime;
-  const duration = 1200; // Animation duration in ms (1.2s)
+  const duration = 1000; // Animation duration in ms (1s)
 
   const animateRadius = (timestamp) => {
     if (!startTime) startTime = timestamp;

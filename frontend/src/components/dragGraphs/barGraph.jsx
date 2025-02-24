@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import Lottie from 'lottie-react';
-import { fetchSurveyData } from '../utils/sanityAPI';
-import '../styles/graph.css';
+import { fetchSurveyData } from '../../utils/sanityAPI';
+import '../../styles/graph.css';
 
-import tree1 from '../lottie-for-UI/tree1.json'; 
-import tree2 from '../lottie-for-UI/tree2.json'; 
-import tree3 from '../lottie-for-UI/tree3.json'; 
+import tree1 from '../../lottie-for-UI/tree1.json'; 
+import tree2 from '../../lottie-for-UI/tree2.json'; 
+import tree3 from '../../lottie-for-UI/tree3.json'; 
 
 const BarGraph = () => {
   const [data, setData] = useState([]);
