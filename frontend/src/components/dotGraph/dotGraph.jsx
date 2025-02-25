@@ -47,14 +47,14 @@ const DotGraph = ({ isDragging = false, data = [] }) => {
   const xOffset = isSmallScreen ? -12 : 0;
   const yOffset = isSmallScreen ? 24 : 0;
 
-  const minRadius = isSmallScreen ? 60 : 20; // Calculating zoomed in and out states to adjust dynamic offset
+  const minRadius = isSmallScreen ? 2 : 20; // Calculating zoomed in and out states to adjust dynamic offset
   const maxRadius = 400; // Maximum allowed zoomed out
 
 // First load zoom position for a planned initial appearance 
 const [radius, setRadius] = useState(20); // Start small (e.g., 20)
 
 // Target values based on screen size
-const targetRadius = isSmallScreen ? 100 : 160;
+const targetRadius = isSmallScreen ? 100 : 200;
 const scalingFactor = 0.5;
 const dynamicRadius = targetRadius + data.length * scalingFactor;
 const finalRadius = Math.max(minRadius, Math.min(maxRadius, dynamicRadius));
@@ -74,7 +74,7 @@ useEffect(() => {
     setRadius((prevRadius) => {
       // If user already zoomed, stop the animation early
       if (isPinchingRef.current || pinchDeltaRef.current !== 0) return prevRadius;
-      return 20 + (finalRadius - 20) * easeOut;
+      return 20 + (finalRadius- 20) * easeOut;
     });
 
     if (progress < 1 && !isPinchingRef.current) {
@@ -125,11 +125,11 @@ const interpolateColor = (weight) => {
   
     // Define color stops (Red → Orange → Yellow → Lime-Yellow → Green)
     const colorStops = [
-      { stop: 0.0, color: { r: 245, g: 4, b: 8 } },       // Red
-      { stop: 0.45, color: { r: 241, g: 142, b: 4 } },   // Orange
-      { stop: 0.5, color: { r: 241, g: 233, b: 4 } },    // Yellow
-      { stop: 0.70, color: { r: 186, g: 241, b: 4 } },   // Lime-Yellow
-      { stop: 1.0, color: { r: 3, g: 235, b: 8 } }       // Green
+      { stop: 0.0, color: { r: 245, g: 4, b: 8 } },      // Red
+      { stop: 0.46, color: { r: 241, g: 142, b: 4 } },   // Orange
+      { stop: 0.58, color: { r: 241, g: 233, b: 4 } },    // Yellow
+      { stop: 0.75, color: { r: 186, g: 241, b: 4 } },   // Lime-Yellow
+      { stop: 1, color: { r: 3, g: 235, b: 8 } }       // Green
     ];
   
     // Find two closest color stops

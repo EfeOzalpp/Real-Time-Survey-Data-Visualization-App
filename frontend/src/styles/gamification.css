@@ -62,7 +62,7 @@ Generalized Gamification Edge Cases
 /* =============================================
 Personalized Gamification
 ============================================= */
-.personalized-result { padding: 0px 0px 0px 12px; border-radius: 12px; color: rgb(51, 51, 51); text-align: center; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: flex; flex-direction: row; flex-wrap: nowrap; position: relative; width: 280px; max-width: 280px; min-width: 280px; left: 165px; pointer-events: all; z-index: 10; }
+.personalized-result { padding: 0px 0px 0px 12px; border-radius: 12px; color: rgb(51, 51, 51); text-align: center; display: flex; flex-direction: row; flex-wrap: nowrap; position: relative; width: 280px; max-width: 280px; min-width: 280px; left: 165px; pointer-events: all; z-index: 10; }
 .personalized-result:before { border-radius: 12px; content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: #f4fdfcc6; z-index: -1; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.1), inset -1px -1px 1px rgba(255, 255, 255, 0.6); }
 .personalized-result::after { content: ''; position: absolute; top: 50%; left: -20px; transform: translateY(-50%) rotate(90deg); border-width: 11px; border-style: solid; border-color: #f3ffffe0 transparent transparent transparent; }
 
@@ -117,7 +117,7 @@ Generalized Gamification Edge Cases
    ============================================= */
 .personalized-result::after { content: ''; position: absolute; top: 50%; left: -20px; transform: translateY(-50%) rotate(90deg); border-width: 11px; border-style: solid; border-color: #f3ffffe0 transparent transparent transparent; }
 
-.gamification-text { pointer-events: none; width: 70%; max-width: 70%; min-width: 70%; text-align: left; padding: 9px 0 0.4em 9px; }
+.gamification-text { pointer-events: none; width: 70%; max-width: 70%; min-width: 70%; text-align: left; padding: 24px 0 24px 9px; }
 .gam-title { padding-bottom: 0.3em; padding-top: 0.3em; color: rgba(24, 24, 24, 0.874); }
 
 .gamification-knob { position: relative; width: 15%; display: flex; justify-content: center; align-items: flex-end; }
@@ -160,8 +160,9 @@ Generalized Gamification Edge Cases
 .is-left .generalized-result::after { transform: translateY(-50%) rotate(90deg); }
 
 .is-left.is-top .generalized-result::after { transform: translateY(-50%) rotate(180deg) !important; }
-.personalized-result { padding: 12px; border-radius: 24px; color: rgb(51, 51, 51); text-align: center; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: flex; flex-direction: row; flex-wrap: nowrap; position: relative; width: 200px; max-width: 200px; min-width: 200px; left: 125px; pointer-events: all; z-index: 10; }
-.personalized-result:before { border-radius: 32px; content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: #f4fdfcc6; z-index: -1; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.1), inset -1px -1px 1px rgba(255, 255, 255, 0.6); }
+.personalized-result { padding: 0px 0px 0px 12px; border-radius: 24px; color: rgb(51, 51, 51); text-align: center; display: flex; flex-direction: row; flex-wrap: nowrap; position: relative; width: 200px; max-width: 200px; min-width: 200px; left: 125px; pointer-events: all; z-index: 10; }
+.personalized-result:before { border-radius: 24px; content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: #f4fdfcc6; z-index: -1; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.1), inset -1px -1px 1px rgba(255, 255, 255, 0.6); }
+
 .knob-arrow { left: 7px; position: absolute; bottom: 0; transform: translateX(-50%) rotate(90deg) scale(0.7); width: 0; height: 0; border-left: 12px solid transparent; border-right: 12px solid transparent; border-bottom: 18px solid ; border-radius: 2px; transition: bottom 0.3s ease; }
 .personal-title { padding: 0.5em 0 0.4em 0em; }
 }
@@ -184,7 +185,7 @@ Generalized Gamification Edge Cases
 
 .is-left.is-top .generalized-result::after { transform: translateY(-50%) rotate(180deg) !important; }
 .personalized-result {  padding: 0px 0px 0px 12px; border-radius: 24px; color: rgb(51, 51, 51); text-align: center; display: flex; flex-direction: row; flex-wrap: nowrap; position: relative; min-height: 233px; height: 233px; width: 280px; max-width: 280px; min-width: 280px; left: 160px; pointer-events: all; z-index: 10;}
-.personalized-result:before { border-radius: 32px; content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: #f4fdfcc6; z-index: -1; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.1), inset -1px -1px 1px rgba(255, 255, 255, 0.6); }
+.personalized-result:after { border-radius: 24px; content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: #f4fdfcc6; z-index: -1; backdrop-filter: blur(60px); -webkit-backdrop-filter: blur(60px); box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.1), inset -1px -1px 1px rgba(255, 255, 255, 0.6); }
 
 .knob-arrow { left: 9px; position: absolute; bottom: 0; transform: translateX(-50%) rotate(90deg); width: 0; height: 0; border-left: 12px solid transparent; border-right: 12px solid transparent; border-bottom: 18px solid ; border-radius: 2px; transition: bottom 0.3s ease; }
 .personal-title { padding: 0.5em 0 0.1em 0.03em; }

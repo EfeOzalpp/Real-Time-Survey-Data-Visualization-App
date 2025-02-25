@@ -40,7 +40,7 @@ const BarGraph = () => {
     if (avgWeight <= 0.33) {
       categories.green++;
       percentages.green.push(avgWeight);
-    } else if (avgWeight < 0.6) {
+    } else if (avgWeight < 0.60) {
       categories.yellow++;
       percentages.yellow.push(avgWeight);
     } else {

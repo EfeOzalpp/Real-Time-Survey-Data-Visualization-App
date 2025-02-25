@@ -16,20 +16,20 @@ const getPositionByViewport = (id = null, customX = null, customY = null) => {
 
   // Define bar1's position
   if (width < 768) {
-    bar1Position = { x: window.innerWidth * 0, y: window.innerHeight * 0.52 };
+    bar1Position = { x: window.innerWidth * 0, y: window.innerHeight * 0.35 };
   } else if (width >= 768 && width < 1024) {
     bar1Position = { x: window.innerWidth * 0.2, y: window.innerHeight * 0.51 };
   } else {
-    bar1Position = { x: window.innerWidth * 0.75, y: window.innerHeight * 0.15 };
+    bar1Position = { x: window.innerWidth * 0.76, y: window.innerHeight * 0.14 };
   }
 
   // Define bar2's position
   if (width < 768) {
-    bar2Position = { x: window.innerWidth * 0.05, y: window.innerHeight * 0.275 };
+    bar2Position = { x: window.innerWidth * 0.05, y: window.innerHeight * 0.15 };
   } else if (width >= 768 && width < 1024) {
     bar2Position = { x: window.innerWidth * 0.05, y: window.innerHeight * 0.05 };
   } else {
-    bar2Position = { x: window.innerWidth * 0.1, y: window.innerHeight * 0.175 };
+    bar2Position = { x: window.innerWidth * 0.025, y: window.innerHeight * 0.175 };
   }
 
   // If requesting both bars, return an object containing both
@@ -219,6 +219,14 @@ useEffect(() => {
   };
 }, [dragStates]);
 
+const handleClick = (id) => {
+  // If the same item is clicked, don't toggle anything.
+  if (topGraph === id) return;
+
+  // Set the clicked item to the top
+  setTopGraph(id);
+};
+
 return (
   <div>
     <Graph isDragging={Object.values(dragStates).some((state) => state)} />
@@ -232,7 +240,7 @@ return (
     position: 'absolute',
     left: `${positions[id].x}px`,
     top: `${positions[id].y}px`,
-    zIndex: topGraph === id ? 5 : 20,
+    zIndex: topGraph === id ? 20 : 5,
     cursor: dragStates[id] ? "grabbing" : "grab",
   }}
   onMouseDown={(e) => handleDragStart(id, e)}
@@ -253,12 +261,12 @@ return (
         hasMoved.current = false;
         return;
       }
-      setTopGraph(id);
+      handleClick(id);
       if (id === 'bar1') setIsBarGraphVisible1((prev) => !prev);
       else setIsBarGraphVisible2((prev) => !prev);
     }}
   >
-    <p>{id === 'bar1' ? (isBarGraphVisible1 ? '- Close' : '+ Open') : (isBarGraphVisible2 ? '- Close' : '+ Open')}</p>
+    <p>{id === 'bar1' ? (isBarGraphVisible1 ? '-' : '+') : (isBarGraphVisible2 ? '-' : '+')}</p>
   </div>
 
   {(id === 'bar1' ? isBarGraphVisible1 : isBarGraphVisible2) && (

@@ -27,15 +27,15 @@ const GamificationPersonalized = ({ userData, percentage, color }) => {
             "I am Aware of My Bad-nature",
           ],
           "41-60": [
-            "Averagely Content, It's Ok",
+            "Middle Spot is Yours",
             "Is it trendy to like nature?",
             "Nature <3 (ok, where's my award?)",
             "The Least I Can Do Is Honesty",
-            "I Like Mediocrity..:)",
+            "I Like Mediocrity..:) (not really)",
           ],
           "61-80": [
             "Humble-Green MF",
-            "Sustainability Stuff Luver",
+            "Sustainability and Whatnot",
             "Planet Partner in Crime",
             "A cool person for a cool planet",
             "Enjoyable Results, Thanks",
@@ -76,7 +76,7 @@ const GamificationPersonalized = ({ userData, percentage, color }) => {
           ],
           "41-60": [
             "You're getting there! -Ahead of",
-            "I mean... You do you, and average is you. You're ahead of",
+            "I mean... You do you. You're ahead of",
             "Kind of in the middle, huh? You're higher than",
           ],
           "61-80": [

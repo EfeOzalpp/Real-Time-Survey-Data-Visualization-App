@@ -13,9 +13,15 @@ const FrontPage = () => {
   const [animationVisible, setAnimationVisible] = useState(false);
   const [graphVisible, setGraphVisible] = useState(false); // Controls visibility, not rendering
   const [surveyWrapperClass, setSurveyWrapperClass] = useState(''); // Class state for moving Three/Drei related survey-section-wrapper3 styling changes
-
-  // Dsiable trackpad and touch device pinch UI zoom in functionality to avoid clashing zoom-in function of dot graph
+  const [isVisible, setIsVisible] = useState(false);
+  
   useEffect(() => {
+    // Trigger the fade-in animation when the component mounts
+    setTimeout(() => {
+      setIsVisible(true); // Trigger the page to fade in
+    }, 300); // Optional delay before fade-in starts (for better user experience)
+
+  // Disable trackpad and touch device pinch UI zoom in functionality to avoid clashing zoom-in function of dot graph
     const preventZoom = (event) => {
       // 🔹 Allow pinch zooming inside DotGraph
       const isInsideDotGraph = event.target.closest('.dot-graph-container'); 
@@ -42,7 +48,7 @@ const FrontPage = () => {
   }, []); // Runs only once when the component mounts
 
   return (
-    <div className="app-content">
+    <div className={`app-content ${isVisible ? 'fade-in' : ''}`}>
       <div className="logo-divider">
         <CenteredLogo />
       </div>
