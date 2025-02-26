@@ -41,10 +41,10 @@ const GamificationGeneral = ({ dotId, percentage, color }) => {
     const getRandomPrimaryTitle = (percentage) => {
       const titles = {
         "0-20": ["Climate Clueless", "Eco-Absentee", "Melting-Ice Enthusiast", "Carbon Profiter", "Asphalt Enjoyer", "Unworthy Commuter", "UV Enjoyer"],
-        "21-40": ["Footprint Fumbler", "She's an Eco Dabbler", "He Exhaust Earth", "Yellow Velvet Cake", "Heat Struck", "He's an Eco Dabbler",],
-        "41-60": ["Uncertain Datapoint", "Balanced Dude", "Null Responder", "Realistic Answerer", "Booring", "Must Be Fun", "Warming Up to the Idea"],
-        "61-80": ["Planet Ally", "Animal Protector", "Nature Carer", "Ecological Warrior", "Sustainable King"],
-        "81-100": ["Planet Guardian", "Sustainability Superhero", "Earth's Best Friend", "Green MVP", "Utopian Hardworker"],
+        "21-40": ["Footprint Fumbler", "Living Gas Source", "Earth Kind of Sucks", "Yellow Velvet Cake", "Heat Struck", "Eco Dabbler"],
+        "41-60": ["Uncertain Datapoint", "Balanced as in Average", "Null Responder", "Realistic Answerer", "Booring", "Must Be Fun", "Warming Up to the Idea"],
+        "61-80": ["Planet Ally", "Animal Protector", "Nature Carer", "Ecological Warrior", "Sustainable Folk", "Caring is Fullfilling", "Rather Contributes than Consumes"],
+        "81-100": ["Planet Guardian", "Sustainability Superhero", "Earth's Best Friend", "Green MVP", "Utopian Hardworker", "Sweet Greens are Made of This"],
       };
 
       if (percentage <= 20) return titles["0-20"][Math.floor(Math.random() * titles["0-20"].length)];
@@ -59,7 +59,7 @@ const GamificationGeneral = ({ dotId, percentage, color }) => {
       description: getRandomSecondaryText(percentage),
     };
 
-    // ✅ Save in cache per dotId, not percentage
+    // Save in cache per dotId, not percentage
     textCache.current[dotId] = assignedText;
     localStorage.setItem('gamificationDotCache', JSON.stringify(textCache.current));
 

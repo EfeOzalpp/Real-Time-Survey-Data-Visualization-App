@@ -15,33 +15,40 @@ const FrontPage = () => {
   const [surveyWrapperClass, setSurveyWrapperClass] = useState(''); // Additional class for special button
   const [answers, setAnswers] = useState({});
   
-    useEffect(() => {
-  // Disable trackpad and touch device pinch UI zoom in functionality to avoid clashing zoom-in function of dot graph
-    const preventZoom = (event) => {
-      // Allow pinch zooming inside DotGraph
-      const isInsideDotGraph = event.target.closest('.dot-graph-container'); 
-  
-      if (!isInsideDotGraph && (event.ctrlKey || event.touches?.length > 1)) {
-        event.preventDefault();
-      }
-    };
-  
-    // Allow pinch gestures in `DotGraph`, block it elsewhere
-    document.addEventListener("wheel", preventZoom, { passive: false });
-    document.addEventListener("gesturestart", preventZoom);
-    document.addEventListener("gesturechange", preventZoom);
-    document.addEventListener("gestureend", preventZoom);
-    document.addEventListener("touchmove", preventZoom, { passive: false });
-  
-    return () => {
-      document.removeEventListener("wheel", preventZoom);
-      document.removeEventListener("gesturestart", preventZoom);
-      document.removeEventListener("gesturechange", preventZoom);
-      document.removeEventListener("gestureend", preventZoom);
-      document.removeEventListener("touchmove", preventZoom);
-    };
-  }, []); // Runs only once when the component mounts
+useEffect(() => {
+// Disable trackpad and touch device pinch UI zoom in functionality to avoid clashing zoom-in function of dot graph
+const preventZoom = (event) => {
+  // Allow pinch zooming inside DotGraph
+  const isInsideDotGraph = event.target.closest('.dot-graph-container'); 
 
+  if (!isInsideDotGraph && (event.ctrlKey || event.touches?.length > 1)) {
+    event.preventDefault();
+  }
+};
+
+// Allow pinch gestures in `DotGraph`, block it elsewhere
+document.addEventListener("wheel", preventZoom, { passive: false });
+document.addEventListener("gesturestart", preventZoom);
+document.addEventListener("gesturechange", preventZoom);
+document.addEventListener("gestureend", preventZoom);
+document.addEventListener("touchmove", preventZoom, { passive: false });
+
+return () => {
+  document.removeEventListener("wheel", preventZoom);
+  document.removeEventListener("gesturestart", preventZoom);
+  document.removeEventListener("gesturechange", preventZoom);
+  document.removeEventListener("gestureend", preventZoom);
+  document.removeEventListener("touchmove", preventZoom);
+};
+}, []); // Runs only once when the component mounts
+
+// Re-render answers upon visibility change
+useEffect(() => {
+if (animationVisible) {
+  setAnswers({}); // Reset answers when animation starts
+}
+}, [animationVisible]);
+  
   return (
     <div className="app-content">
       <div className="logo-divider">
