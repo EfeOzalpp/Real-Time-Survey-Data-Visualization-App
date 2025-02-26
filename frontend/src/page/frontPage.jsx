@@ -3,7 +3,7 @@ import '../styles/survey.css';
 import '../styles/global-styles.css';
 import RadialBackground from '../components/static/radialBackground';
 import Survey from '../components/survey.jsx';
-import CenteredLogo from '../components/static/logo';
+import Logo from '../components/static/logo';
 import Canvas from '../components/Canvas';
 import DataVisualization from '../components/dataVisualization'; 
 import { useDynamicMargin } from '../utils/dynamicMargin.ts';
@@ -12,18 +12,13 @@ const FrontPage = () => {
   useDynamicMargin();
   const [animationVisible, setAnimationVisible] = useState(false);
   const [graphVisible, setGraphVisible] = useState(false); // Controls visibility, not rendering
-  const [surveyWrapperClass, setSurveyWrapperClass] = useState(''); // Class state for moving Three/Drei related survey-section-wrapper3 styling changes
-  const [isVisible, setIsVisible] = useState(false);
+  const [surveyWrapperClass, setSurveyWrapperClass] = useState(''); // Additional class for special button
+  const [answers, setAnswers] = useState({});
   
-  useEffect(() => {
-    // Trigger the fade-in animation when the component mounts
-    setTimeout(() => {
-      setIsVisible(true); // Trigger the page to fade in
-    }, 300); // Optional delay before fade-in starts (for better user experience)
-
+    useEffect(() => {
   // Disable trackpad and touch device pinch UI zoom in functionality to avoid clashing zoom-in function of dot graph
     const preventZoom = (event) => {
-      // 🔹 Allow pinch zooming inside DotGraph
+      // Allow pinch zooming inside DotGraph
       const isInsideDotGraph = event.target.closest('.dot-graph-container'); 
   
       if (!isInsideDotGraph && (event.ctrlKey || event.touches?.length > 1)) {
@@ -48,11 +43,11 @@ const FrontPage = () => {
   }, []); // Runs only once when the component mounts
 
   return (
-    <div className={`app-content ${isVisible ? 'fade-in' : ''}`}>
+    <div className="app-content">
       <div className="logo-divider">
-        <CenteredLogo />
+        <Logo />
       </div>
-        {!animationVisible && <Canvas />} {/* Render Canvas only when animationVisible is true */}
+        {!animationVisible && <Canvas answers={answers} />} {/* Render Canvas only when animationVisible is true */}
       {/* Graph always renders, visibility controlled by class */}
       <div className={`graph-wrapper ${graphVisible ? 'visible' : ''}`}>
         <DataVisualization />
@@ -62,6 +57,7 @@ const FrontPage = () => {
           setAnimationVisible={setAnimationVisible}
           setGraphVisible={setGraphVisible}
           setSurveyWrapperClass={setSurveyWrapperClass}
+          onAnswersUpdate={setAnswers}
         />
       </div>
       <RadialBackground />

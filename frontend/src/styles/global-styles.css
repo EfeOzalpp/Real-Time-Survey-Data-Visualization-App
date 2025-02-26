@@ -1,8 +1,5 @@
 /* Global */
-/* Smooth Fade-In for homepage */
-
-canvas {
-  touch-action: none !important;
+canvas { touch-action: none !important; 
 }
 
 a { text-decoration: none; }
@@ -14,31 +11,6 @@ html, body {
   touch-action: none;
 }
 button { padding-inline: 0; padding-block: 0; }
-
-/* Base styling for the app-content */
-.app-content {
-  transform: translateY(10px); /* Slightly offset initially for sliding */
-  opacity: 0; /* Start with opacity 0 for fade-in effect */
-  transition: transform 1s ease-out, opacity 1s ease-out; /* Apply smooth transitions for both transform and opacity */
-}
-
-/* Fade-in effect */
-.app-content.fade-in {
-  opacity: 1; /* Fade in the element */
-  transform: translateY(0); /* Slide up to original position */
-}
-
-/* Slide-in effect (alternative to fade-in) */
-.app-content.slide-in {
-  transform: translateX(-100%); /* Start off-screen to the left */
-  opacity: 0; /* Initially hidden */
-  transition: transform 1s ease-out, opacity 1s ease-out;
-}
-
-.app-content.slide-in.slide-in-active {
-  transform: translateX(0); /* Slide to its original position */
-  opacity: 1; /* Make the element visible */
-}
 
 /* Mobile */
 @media screen and (max-width: 767px) {

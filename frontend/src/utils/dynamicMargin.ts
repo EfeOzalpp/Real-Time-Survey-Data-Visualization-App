@@ -19,7 +19,7 @@ export const useDynamicMargin = (): void => {
       // Interpolate value
       const newMargin = minMargin + (maxMargin - minMargin) * normalizedHeight;
 
-      // ✅ Apply the CSS variable only to the specified selectors
+      // Apply the CSS variable only to the specified selectors
       const elements = document.querySelectorAll(
         ".z-index-respective .survey-section-wrapper .survey-section, " +
         ".z-index-respective .survey-section-wrapper2 .survey-section"
