@@ -125,11 +125,11 @@ const interpolateColor = (weight) => {
   
     // Define color stops (Red → Orange → Yellow → Lime-Yellow → Green)
     const colorStops = [
-      { stop: 0.0, color: { r: 245, g: 4, b: 8 } },      // Red
-      { stop: 0.46, color: { r: 241, g: 142, b: 4 } },   // Orange
-      { stop: 0.58, color: { r: 241, g: 233, b: 4 } },    // Yellow
-      { stop: 0.75, color: { r: 186, g: 241, b: 4 } },   // Lime-Yellow
-      { stop: 1, color: { r: 3, g: 235, b: 8 } }       // Green
+      { stop: 0.0, color: { r: 249, g: 14, b: 33 } },      // Red
+      { stop: 0.46, color: { r: 252, g: 159, b: 29 } },   // Orange
+      { stop: 0.64, color: { r: 245, g: 252, b: 95 } },    // Yellow
+      { stop: 0.8, color: { r: 0, g: 253, b: 156 } },   // Lime-Yellow
+      { stop: 1, color: { r: 1, g: 238, b: 0 } }       // Green
     ];
   
     // Find two closest color stops

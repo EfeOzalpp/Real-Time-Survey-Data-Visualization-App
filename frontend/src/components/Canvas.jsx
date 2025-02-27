@@ -3,7 +3,7 @@ import q5 from 'q5';
 
 // Canvas Background style extracted
 const drawBackground = (p) => {
-  p.background('#8bbad2');
+  p.background('#a3d2ea');
   let innerRadius, outerRadius;
   
   if (p.width < 768) {
@@ -21,7 +21,7 @@ const drawBackground = (p) => {
     p.width / 2, p.height / 2, innerRadius,
     p.width / 2, p.height / 2, outerRadius
   );
-  gradient.addColorStop(0.1, 'rgba(215,215,215,0.8)');
+  gradient.addColorStop(0.1, 'rgba(215, 215, 215, 0.82)');
   gradient.addColorStop(0.3, 'rgba(205,205,205,0.6)');
   gradient.addColorStop(0.5, 'rgba(197,197,197,0.3)');
   gradient.addColorStop(1, 'transparent');
@@ -172,15 +172,17 @@ const extractRGB = (rgbString) => {
 
 // Color transitioning system 1
 const lerpColor = (color1, color2, t) => {
-  const c1 = color1.match(/\d+/g).map(Number); // Extract RGB values
-  const c2 = color2.match(/\d+/g).map(Number);
+  // Ensure colors are in "rgb(r, g, b)" format before proceeding
+  const c1 = typeof color1 === "string" ? color1.match(/\d+/g).map(Number) : [color1.r, color1.g, color1.b];
+  const c2 = typeof color2 === "string" ? color2.match(/\d+/g).map(Number) : [color2.r, color2.g, color2.b];
 
   const r = Math.round(c1[0] + (c2[0] - c1[0]) * t);
   const g = Math.round(c1[1] + (c2[1] - c1[1]) * t);
   const b = Math.round(c1[2] + (c2[2] - c1[2]) * t);
 
-  return `rgb(${r}, ${g}, ${b})`;
+  return `rgb(${r}, ${g}, ${b})`; // Return valid "rgb(r, g, b)" format
 };
+
 
 // Behavior pop instead of color
 const computeBehaviorScore = (answers) => {
@@ -202,12 +204,12 @@ const computeBehaviorScore = (answers) => {
 // Opacity bump toggle behavior
 const applyOpacityToggle = (baseOpacity, speed = 1, minOpacity = 100) => { 
   const timeFactor = performance.now() * speed; 
-  const oscillation = (0.5 + 0.5 * Math.sign(Math.sin(timeFactor * 0.015))); // Square-wave flicker
+  const oscillation = (0.5 + 0.5 * Math.sign(Math.sin(timeFactor * 0.0015))); // Square-wave flicker
   // Ensure opacity stays above the minimum level
   return Math.max(minOpacity, baseOpacity * oscillation);
 };
 // Apply scale random behavior effect
-const applySquareWaveScale = (baseScale = 1, minScale = 1, maxScale = 1.7, interval = 333) => {
+const applySquareWaveScale = ( /*baseScale = 1,*/ minScale = 1, maxScale = 1.35, interval = 1200) => {
   const timeFactor = Math.floor(performance.now() / interval); 
   // Generate a new random scale only when timeFactor changes (prevents flickering)
   if (applySquareWaveScale.lastTimeFactor !== timeFactor) {
@@ -217,7 +219,7 @@ const applySquareWaveScale = (baseScale = 1, minScale = 1, maxScale = 1.7, inter
   return applySquareWaveScale.lastRandomScale; // Return the stored random value
 };
 // random offset behavior effect
-const applySquareWaveOffset = (maxOffset = 10, interval = 333) => {
+const applySquareWaveOffset = (maxOffset = 6, interval = 1200) => {
   const timeFactor = Math.floor(performance.now() / interval);
   // Generate a new random offset only when timeFactor changes (prevents flickering)
   if (applySquareWaveOffset.lastTimeFactor !== timeFactor) {
@@ -291,26 +293,74 @@ const sketch = (p) => {
       previousColorRef.current = colorsRef.current[0];
     }
 
-    const blendedColor = lerpColor(previousColorRef.current, colorsRef.current[0], colorTransitionRef.current);
+// Step 1: Lerp base blended color first (smooth transition)
+const blendedColor = lerpColor(previousColorRef.current, colorsRef.current[0], colorTransitionRef.current);
 
-    // Non-weight based color transitioning
-    const getTransitioningColor = (baseColor, staticColor, transitionProgress) => {
-      return lerpColor(baseColor, staticColor, transitionProgress);
-    };    
+// Step 2: Extract RGB values AFTER lerping
+const blendedRGB = extractRGB(blendedColor);
+
+// Step 3: Generate accent colors AFTER blendedColor is initialized
+const [accent1, accent2, accent3] = generateAccentColors(blendedColor);
+
+// Step 4: Apply oscillation to keep flickering effects
+const oscillatingBlended = applyHueShift(blendedRGB, 10);
+
+// Step 5: Apply oscillation FIRST to base accent colors
+const oscillatingAccent1 = applyHueShift(extractRGB(lerpColor(blendedColor, accent1, colorTransitionRef.current)), 5);
+const oscillatingAccent2 = applyHueShift(extractRGB(lerpColor(blendedColor, accent2, colorTransitionRef.current)), 10);
+const oscillatingAccent3 = applyHueShift(extractRGB(lerpColor(blendedColor, accent3, colorTransitionRef.current)), 5);
+
+// Step 6: Mix-Match Colors (Swap R/G/B randomly AFTER oscillation)
+const mixedAccent1 = { 
+  r: oscillatingAccent2.r, 
+  g: oscillatingAccent3.g, 
+  b: oscillatingAccent1.b 
+};
+
+const mixedAccent2 = { 
+  r: oscillatingAccent3.r, 
+  g: oscillatingAccent1.g, 
+  b: oscillatingAccent2.b 
+};
+
+const mixedAccent3 = { 
+  r: oscillatingAccent1.r, 
+  g: oscillatingAccent2.g, 
+  b: oscillatingAccent3.b 
+};
+
+// Step 7: Now LERP the mixed colors instead (to maintain smooth transitions)
+const accent1Lerp = lerpColor(blendedColor, `rgb(${mixedAccent1.r}, ${mixedAccent1.g}, ${mixedAccent1.b})`, colorTransitionRef.current);
+const accent2Lerp = lerpColor(blendedColor, `rgb(${mixedAccent2.r}, ${mixedAccent2.g}, ${mixedAccent2.b})`, colorTransitionRef.current);
+const accent3Lerp = lerpColor(blendedColor, `rgb(${mixedAccent3.r}, ${mixedAccent3.g}, ${mixedAccent3.b})`, colorTransitionRef.current);
+
+// Step 8: Extract RGB values AFTER lerping (final result)
+const accent1RGB = extractRGB(accent1Lerp);
+const accent2RGB = extractRGB(accent2Lerp);
+const accent3RGB = extractRGB(accent3Lerp);
+
+
+    // Opacity toggle bumpy behavior
+    const opacityValue = applyOpacityToggle(100, 1);
+    p.noStroke();
   
-    // Generate accent colors from blendedColor
-    const [accent1, accent2, accent3] = generateAccentColors(blendedColor);
+    shapesRef.current.forEach((shape) => {
+    p.push();
+    p.translate(centerX, centerY);
 
-    // Generate oscillating versions of existing colors
-    const blendedRGB = extractRGB(blendedColor); // Convert before applying shift
-    const accent1RGB = extractRGB(accent1);
-    const accent2RGB = extractRGB(accent2);
-    const accent3RGB = extractRGB(accent3);
-    
-    const oscillatingBlended = applyHueShift(blendedRGB, 20);
-    const oscillatingAccent1 = applyHueShift(accent1RGB, 15);
-    const oscillatingAccent2 = applyHueShift(accent2RGB, 10);
-    const oscillatingAccent3 = applyHueShift(accent3RGB, 5);
+    /* Example full shape 
+        p.push();
+        const { x: offsetX, y: offsetY } = applySquareWaveOffset();
+        p.translate(offsetX, offsetY);
+
+        const topFlameScale = applySquareWaveScale(); // Only top flame will scale
+        p.scale(topFlameScale);
+      
+        // Apply fill and draw the triangle
+        p.fill(oscillatingBlended.r, oscillatingBlended.g, oscillatingBlended.b, opacityValue);
+        p.triangle(-size / 3, size / 3, size / 3, size / 3, 0, -size / 3);
+        
+        p.pop();*/
     
     // example use: p.fill(getTransitioningColor(blendedColor, 'rgb(50, 50, 50)', colorTransitionRef.current)); for non-weight transition
     // example use with opacity toggle and blended: p.fill(oscillatingBlended.r, oscillatingBlended.g, oscillatingBlended.b, opacityValue);
@@ -319,33 +369,151 @@ const sketch = (p) => {
     // Scale example: const topFlameScale = applySquareWaveScale(); // Only top flame will scale
     // p.scale(topFlameScale);
     
-    
-    // Opacity toggle bumpy behavior
-    const opacityValue = applyOpacityToggle(255, 1);
-    p.noStroke();
-  
-    shapesRef.current.forEach((shape) => {
-      p.push();
-      p.translate(centerX, centerY);
+    // example use offset (comes before opacity): const { x: offsetX, y: offsetY } = applySquareWaveOffset();
+    // p.translate(offsetX, offsetY);
+
+      // Define scaling factors based on viewport width
+      const widthScale = p.width < 1024 ? 0.5 : 1;
+      const widthScale2 = p.width < 1024 ? 1.1 : 1;
+      const widthScale3 = p.width < 1024 ? 2.4 : 1;
+      const heightScale = p.width < 1024 ? 0.2 : 1;
+      const heightScale2 = p.width < 1024 ? -0.3 : 1;
+      const heightScale3 = p.width < 1024 ? -0.45 : 1;
+      const heightOffset = p.width < 1024 ? p.height * -0.47 : 0;
   
       // New environment states declared (not drawn yet)
       if (shape === 'neutral-land') {
-        // Placeholder: Balanced environment (some trees, some clouds)    
-        p.push();
+        // Placeholder: Balanced environment (some trees, some clouds) 
+// Tree 1   
+p.push();
+p.translate(p.width * -0.4 * widthScale, p.height * 0.2 * heightScale2);
+const treeBaseSize1 = size * 0.8; //Smaller tree   
+const treeHeightFactor = 0.8;     
+const verticalSpacing1 = treeBaseSize1 * 0.55;
 
-        // Generate the offset values (randomly changes every interval)
-        const { x: offsetX, y: offsetY } = applySquareWaveOffset();
-      
-        // Apply offset and scale
-        p.translate(offsetX, offsetY);
-        const topFlameScale = applySquareWaveScale(); // Only top flame will scale
-        p.scale(topFlameScale);
-      
-        // Apply fill and draw the triangle
-        p.fill(oscillatingBlended.r, oscillatingBlended.g, oscillatingBlended.b, opacityValue);
-        p.triangle(-size / 3, size / 3, size / 3, size / 3, 0, -size / 3);
-        
-        p.pop();
+p.fill(oscillatingAccent1.r, oscillatingAccent2.g, oscillatingAccent3.b);
+p.triangle(-treeBaseSize1 / 2, treeBaseSize1 / 2, treeBaseSize1 / 2, treeBaseSize1 / 2, 0, -treeBaseSize1 / 2);
+p.fill(mixedAccent1.r, oscillatingAccent1.g, oscillatingAccent1.b);
+p.triangle(-treeBaseSize1 / 2 * treeHeightFactor, treeBaseSize1 / 2 - verticalSpacing1, treeBaseSize1 / 2 * treeHeightFactor, treeBaseSize1 / 2 - verticalSpacing1, 0, -treeBaseSize1 / 2 * treeHeightFactor - verticalSpacing1);
+p.fill(oscillatingAccent2.r, mixedAccent1.g, mixedAccent3.b);
+p.triangle(-treeBaseSize1 / 2 * treeHeightFactor * 0.8, treeBaseSize1 / 2 - 2 * verticalSpacing1, treeBaseSize1 / 2 * treeHeightFactor * 0.8, treeBaseSize1 / 2 - 2 * verticalSpacing1, 0, -treeBaseSize1 / 2 * treeHeightFactor * 0.8 - 2 * verticalSpacing1);
+p.pop();
+
+    // Tree 2 (Large)
+    p.push();
+    p.translate(p.width * 0.4 * widthScale2, p.height * 0.2 * heightScale2);
+    const treeBaseSize2 = size * 1.1; // Smaller tree
+    const verticalSpacing2 = treeBaseSize2 * 0.62;
+
+    p.fill(oscillatingAccent2.r, mixedAccent3.g, oscillatingAccent1.b);
+    p.triangle(-treeBaseSize2 / 2, treeBaseSize2 / 2, treeBaseSize2 / 2, treeBaseSize2 / 2, 0, -treeBaseSize2 / 2);
+    p.fill(mixedAccent2.r, oscillatingAccent1.g, oscillatingAccent1.b);
+    p.triangle(-treeBaseSize2 / 2 * treeHeightFactor, treeBaseSize2 / 2 - verticalSpacing2, treeBaseSize2 / 2 * treeHeightFactor, treeBaseSize2 / 2 - verticalSpacing2, 0, -treeBaseSize2 / 2 * treeHeightFactor - verticalSpacing2);
+    p.fill(oscillatingAccent2.r, mixedAccent1.g, mixedAccent3.b);
+    p.triangle(-treeBaseSize2 / 2 * treeHeightFactor * 0.8, treeBaseSize2 / 2 - 2 * verticalSpacing2, treeBaseSize2 / 2 * treeHeightFactor * 0.8, treeBaseSize2 / 2 - 2 * verticalSpacing2, 0, -treeBaseSize2 / 2 * treeHeightFactor * 0.8 - 2 * verticalSpacing2);
+    p.pop();
+
+// Tree 3 (Medium)
+p.push();
+p.translate(p.width * -0.2 * widthScale, p.height * 0.1 * heightScale2);
+const treeBaseSize3 = size * 1.2; // Default size
+const verticalSpacing3 = treeBaseSize3 * 0.35;
+
+p.fill(mixedAccent1.r, mixedAccent3.g, mixedAccent2.b);
+p.triangle(-treeBaseSize3 / 2, treeBaseSize3 / 2, treeBaseSize3 / 2, treeBaseSize3 / 2, 0, -treeBaseSize3 / 2);
+p.fill(oscillatingAccent2.r, oscillatingAccent2.g, oscillatingAccent1.b);
+p.triangle(-treeBaseSize3 / 2 * treeHeightFactor, treeBaseSize3 / 2 - verticalSpacing3, treeBaseSize3 / 2 * treeHeightFactor, treeBaseSize3 / 2 - verticalSpacing3, 0, -treeBaseSize3 / 2 * treeHeightFactor - verticalSpacing3);
+p.fill(oscillatingAccent1.r, mixedAccent2.g, mixedAccent1.b);
+p.triangle(-treeBaseSize3 / 2 * treeHeightFactor * 0.8, treeBaseSize3 / 2 - 2 * verticalSpacing3, treeBaseSize3 / 2 * treeHeightFactor * 0.8, treeBaseSize3 / 2 - 2 * verticalSpacing3, 0, -treeBaseSize3 / 2 * treeHeightFactor * 0.8 - 2 * verticalSpacing3);
+p.pop();
+
+    // Tree 4 (Large)
+    p.push();
+    p.translate(p.width * -0.3 * widthScale2, p.height * 0.2 * heightScale);
+    const treeBaseSize4 = size * 2; // Slightly larger
+    const verticalSpacing4 = treeBaseSize4 * 0.42;
+
+    p.fill(oscillatingAccent1.r, mixedAccent3.g, mixedAccent1.b);
+    p.triangle(-treeBaseSize4 / 2, treeBaseSize4 / 2, treeBaseSize4 / 2, treeBaseSize4 / 2, 0, -treeBaseSize4 / 2);
+    p.fill(mixedAccent2.r, oscillatingAccent3.g, oscillatingAccent3.b);
+    p.triangle(-treeBaseSize4 / 2 * treeHeightFactor, treeBaseSize4 / 2 - verticalSpacing4, treeBaseSize4 / 2 * treeHeightFactor, treeBaseSize4 / 2 - verticalSpacing4, 0, -treeBaseSize4 / 2 * treeHeightFactor - verticalSpacing4);
+    p.fill(oscillatingAccent3.r, mixedAccent2.g, mixedAccent1.b);
+    p.triangle(-treeBaseSize4 / 2 * treeHeightFactor * 0.8, treeBaseSize4 / 2 - 2 * verticalSpacing4, treeBaseSize4 / 2 * treeHeightFactor * 0.8, treeBaseSize4 / 2 - 2 * verticalSpacing4, 0, -treeBaseSize4 / 2 * treeHeightFactor * 0.8 - 2 * verticalSpacing4);
+    p.pop();
+
+// Tree 5 (Large)
+p.push();
+p.translate(p.width * 0.3 * widthScale2, p.height * 0.2 * heightScale);
+const treeBaseSize5 = size * 2.4; // Larger tree
+const verticalSpacing5 = treeBaseSize5 * 0.48;
+
+p.fill(oscillatingAccent3.r, mixedAccent3.g, mixedAccent2.b);
+p.triangle(-treeBaseSize5 / 2, treeBaseSize5 / 2, treeBaseSize5 / 2, treeBaseSize5 / 2, 0, -treeBaseSize5 / 2);
+p.fill(oscillatingAccent1.r, mixedAccent2.g, mixedAccent2.b);
+p.triangle(-treeBaseSize5 / 2 * treeHeightFactor, treeBaseSize5 / 2 - verticalSpacing5, treeBaseSize5 / 2 * treeHeightFactor, treeBaseSize5 / 2 - verticalSpacing5, 0, -treeBaseSize5 / 2 * treeHeightFactor - verticalSpacing5);
+p.fill(mixedAccent1.r, oscillatingAccent1.g, oscillatingAccent1.b);
+p.triangle(-treeBaseSize5 / 2 * treeHeightFactor * 0.8, treeBaseSize5 / 2 - 2 * verticalSpacing5, treeBaseSize5 / 2 * treeHeightFactor * 0.8, treeBaseSize5 / 2 - 2 * verticalSpacing5, 0, -treeBaseSize5 / 2 * treeHeightFactor * 0.8 - 2 * verticalSpacing5);
+p.pop();
+
+    // Cloud 1
+    p.push();
+    p.translate(p.width * 0.1 * widthScale3, p.height * -0.4 * heightScale3);
+    const { x: offsetX1, y: offsetY1 } = applySquareWaveOffset();
+    p.translate(offsetX1, offsetY1);
+    const cloudBaseSize1 = size * 1.1;
+    const scale1 = applySquareWaveScale();
+    p.scale(scale1);
+    p.fill(oscillatingBlended.r, oscillatingBlended.g, oscillatingBlended.b, opacityValue);
+    p.rect(-cloudBaseSize1 / 3, -cloudBaseSize1 / 3, cloudBaseSize1 / 3 * 2, cloudBaseSize1 / 3 * 2);
+    p.pop();
+
+// Cloud 2
+p.push();
+p.translate(p.width * 0.05 * widthScale3, p.height * -0.3 * heightScale3);
+const { x: offsetX2, y: offsetY2 } = applySquareWaveOffset();
+p.translate(offsetX2, offsetY2);
+const cloudBaseSize2 = size * 1;
+const scale2 = applySquareWaveScale();
+p.scale(scale2);
+p.fill(oscillatingAccent1.r, oscillatingAccent1.g, oscillatingAccent1.b, opacityValue);
+p.rect(-cloudBaseSize2 / 2, -cloudBaseSize2 / 2, cloudBaseSize2, cloudBaseSize2);
+p.pop();
+
+      // Cloud 3
+      p.push();
+      p.translate(p.width * 0.01 * widthScale3, p.height * -0.2 * heightScale3);
+      const { x: offsetX3, y: offsetY3 } = applySquareWaveOffset();
+      p.translate(offsetX3, offsetY3);
+      const cloudBaseSize3 = size * 1;
+      const scale3 = applySquareWaveScale();
+      p.scale(scale3);
+      p.fill(mixedAccent2.r, mixedAccent2.g, mixedAccent2.b, opacityValue);
+      p.rect(-cloudBaseSize3 / 4, -cloudBaseSize3 / 4, cloudBaseSize3 / 2, cloudBaseSize3 / 2);
+      p.pop();
+
+// Cloud 4
+p.push();
+p.translate(p.width * -0.04 * widthScale3, p.height * -0.36 * heightScale3);
+const { x: offsetX4, y: offsetY4 } = applySquareWaveOffset();
+p.translate(offsetX4, offsetY4);
+const cloudBaseSize4 = size * 1.1;
+const scale4 = applySquareWaveScale();
+p.scale(scale4);
+p.fill(oscillatingAccent3.r, oscillatingAccent2.g, oscillatingAccent1.b, opacityValue);
+p.rect(-cloudBaseSize4 / 3, -cloudBaseSize4 / 3, cloudBaseSize4 * 0.75, cloudBaseSize4 * 0.75);
+p.pop();
+
+      // Cloud 5
+      p.push();
+      p.translate(p.width * -0.1 * widthScale3, p.height * -0.32 * heightScale3);
+      const { x: offsetX5, y: offsetY5 } = applySquareWaveOffset();
+      p.translate(offsetX5, offsetY5);
+      const cloudBaseSize5 = size * 0.6;
+      const scale5 = applySquareWaveScale();
+      p.scale(scale5);
+      p.fill(oscillatingBlended.r, oscillatingBlended.g, oscillatingBlended.b, opacityValue);
+      p.rect(-cloudBaseSize5 / 3, -cloudBaseSize5 / 3, cloudBaseSize5 * 1.2, cloudBaseSize5 * 1.2);
+      p.pop();
 
       } else if (shape === 'lush-environment') {
         // Placeholder: More trees, denser clouds
@@ -353,30 +521,272 @@ const sketch = (p) => {
         // Placeholder: Fewer trees, some squares appearing
       } else if (shape === 'chimneys') {
         // Placeholder: Chimneys emitting particles
+
+        // Tree 1   
+p.push();
+p.translate(p.width * -0.4 * widthScale, p.height * 0.2 * heightScale2);
+const treeBaseSize1 = size * 0.8; //Smaller tree   
+const treeHeightFactor = 0.8;     
+const verticalSpacing1 = treeBaseSize1 * 0.55;
+
+p.fill(oscillatingAccent1.r, oscillatingAccent2.g, oscillatingAccent3.b);
+p.triangle(-treeBaseSize1 / 2, treeBaseSize1 / 2, treeBaseSize1 / 2, treeBaseSize1 / 2, 0, -treeBaseSize1 / 2);
+p.fill(mixedAccent1.r, oscillatingAccent1.g, oscillatingAccent1.b);
+p.triangle(-treeBaseSize1 / 2 * treeHeightFactor, treeBaseSize1 / 2 - verticalSpacing1, treeBaseSize1 / 2 * treeHeightFactor, treeBaseSize1 / 2 - verticalSpacing1, 0, -treeBaseSize1 / 2 * treeHeightFactor - verticalSpacing1);
+p.fill(oscillatingAccent2.r, mixedAccent1.g, mixedAccent3.b);
+p.triangle(-treeBaseSize1 / 2 * treeHeightFactor * 0.8, treeBaseSize1 / 2 - 2 * verticalSpacing1, treeBaseSize1 / 2 * treeHeightFactor * 0.8, treeBaseSize1 / 2 - 2 * verticalSpacing1, 0, -treeBaseSize1 / 2 * treeHeightFactor * 0.8 - 2 * verticalSpacing1);
+p.pop();
+
+    // Tree 2 (Large)
+    p.push();
+    p.translate(p.width * 0.4 * widthScale2, p.height * 0.2 * heightScale2);
+    const treeBaseSize2 = size * 1.1; // Smaller tree
+    const verticalSpacing2 = treeBaseSize2 * 0.62;
+
+    p.fill(oscillatingAccent2.r, mixedAccent3.g, oscillatingAccent1.b);
+    p.triangle(-treeBaseSize2 / 2, treeBaseSize2 / 2, treeBaseSize2 / 2, treeBaseSize2 / 2, 0, -treeBaseSize2 / 2);
+    p.fill(mixedAccent2.r, oscillatingAccent1.g, oscillatingAccent1.b);
+    p.triangle(-treeBaseSize2 / 2 * treeHeightFactor, treeBaseSize2 / 2 - verticalSpacing2, treeBaseSize2 / 2 * treeHeightFactor, treeBaseSize2 / 2 - verticalSpacing2, 0, -treeBaseSize2 / 2 * treeHeightFactor - verticalSpacing2);
+    p.fill(oscillatingAccent2.r, mixedAccent1.g, mixedAccent3.b);
+    p.triangle(-treeBaseSize2 / 2 * treeHeightFactor * 0.8, treeBaseSize2 / 2 - 2 * verticalSpacing2, treeBaseSize2 / 2 * treeHeightFactor * 0.8, treeBaseSize2 / 2 - 2 * verticalSpacing2, 0, -treeBaseSize2 / 2 * treeHeightFactor * 0.8 - 2 * verticalSpacing2);
+    p.pop();
+
+// Tree 3 (Medium)
+p.push();
+p.translate(p.width * -0.2 * widthScale, p.height * 0.1 * heightScale2);
+const treeBaseSize3 = size * 1.2; // Default size
+const verticalSpacing3 = treeBaseSize3 * 0.35;
+
+p.fill(mixedAccent1.r, mixedAccent3.g, mixedAccent2.b);
+p.triangle(-treeBaseSize3 / 2, treeBaseSize3 / 2, treeBaseSize3 / 2, treeBaseSize3 / 2, 0, -treeBaseSize3 / 2);
+p.fill(oscillatingAccent2.r, oscillatingAccent2.g, oscillatingAccent1.b);
+p.triangle(-treeBaseSize3 / 2 * treeHeightFactor, treeBaseSize3 / 2 - verticalSpacing3, treeBaseSize3 / 2 * treeHeightFactor, treeBaseSize3 / 2 - verticalSpacing3, 0, -treeBaseSize3 / 2 * treeHeightFactor - verticalSpacing3);
+p.fill(oscillatingAccent1.r, mixedAccent2.g, mixedAccent1.b);
+p.triangle(-treeBaseSize3 / 2 * treeHeightFactor * 0.8, treeBaseSize3 / 2 - 2 * verticalSpacing3, treeBaseSize3 / 2 * treeHeightFactor * 0.8, treeBaseSize3 / 2 - 2 * verticalSpacing3, 0, -treeBaseSize3 / 2 * treeHeightFactor * 0.8 - 2 * verticalSpacing3);
+p.pop();
+
+    // Tree 4 (Large)
+    p.push();
+    p.translate(p.width * -0.3 * widthScale2, p.height * 0.2 * heightScale);
+    const treeBaseSize4 = size * 2; // Slightly larger
+    const verticalSpacing4 = treeBaseSize4 * 0.42;
+
+    p.fill(oscillatingAccent1.r, mixedAccent3.g, mixedAccent1.b);
+    p.triangle(-treeBaseSize4 / 2, treeBaseSize4 / 2, treeBaseSize4 / 2, treeBaseSize4 / 2, 0, -treeBaseSize4 / 2);
+    p.fill(mixedAccent2.r, oscillatingAccent3.g, oscillatingAccent3.b);
+    p.triangle(-treeBaseSize4 / 2 * treeHeightFactor, treeBaseSize4 / 2 - verticalSpacing4, treeBaseSize4 / 2 * treeHeightFactor, treeBaseSize4 / 2 - verticalSpacing4, 0, -treeBaseSize4 / 2 * treeHeightFactor - verticalSpacing4);
+    p.fill(oscillatingAccent3.r, mixedAccent2.g, mixedAccent1.b);
+    p.triangle(-treeBaseSize4 / 2 * treeHeightFactor * 0.8, treeBaseSize4 / 2 - 2 * verticalSpacing4, treeBaseSize4 / 2 * treeHeightFactor * 0.8, treeBaseSize4 / 2 - 2 * verticalSpacing4, 0, -treeBaseSize4 / 2 * treeHeightFactor * 0.8 - 2 * verticalSpacing4);
+    p.pop();
+
+// Tree 5 (Large)
+p.push();
+p.translate(p.width * 0.3 * widthScale2, p.height * 0.2 * heightScale);
+const treeBaseSize5 = size * 2.4; // Larger tree
+const verticalSpacing5 = treeBaseSize5 * 0.48;
+
+p.fill(oscillatingAccent3.r, mixedAccent3.g, mixedAccent2.b);
+p.triangle(-treeBaseSize5 / 2, treeBaseSize5 / 2, treeBaseSize5 / 2, treeBaseSize5 / 2, 0, -treeBaseSize5 / 2);
+p.fill(oscillatingAccent1.r, mixedAccent2.g, mixedAccent2.b);
+p.triangle(-treeBaseSize5 / 2 * treeHeightFactor, treeBaseSize5 / 2 - verticalSpacing5, treeBaseSize5 / 2 * treeHeightFactor, treeBaseSize5 / 2 - verticalSpacing5, 0, -treeBaseSize5 / 2 * treeHeightFactor - verticalSpacing5);
+p.fill(mixedAccent1.r, oscillatingAccent1.g, oscillatingAccent1.b);
+p.triangle(-treeBaseSize5 / 2 * treeHeightFactor * 0.8, treeBaseSize5 / 2 - 2 * verticalSpacing5, treeBaseSize5 / 2 * treeHeightFactor * 0.8, treeBaseSize5 / 2 - 2 * verticalSpacing5, 0, -treeBaseSize5 / 2 * treeHeightFactor * 0.8 - 2 * verticalSpacing5);
+p.pop();
+
+    // Cloud 1
+    p.push();
+    p.translate(p.width * 0.1 * widthScale3, p.height * -0.4 * heightScale3);
+    const { x: offsetX1, y: offsetY1 } = applySquareWaveOffset();
+    p.translate(offsetX1, offsetY1);
+    const cloudBaseSize1 = size * 1.1;
+    const scale1 = applySquareWaveScale();
+    p.scale(scale1);
+    p.fill(oscillatingBlended.r, oscillatingBlended.g, oscillatingBlended.b, opacityValue);
+    p.rect(-cloudBaseSize1 / 3, -cloudBaseSize1 / 3, cloudBaseSize1 / 3 * 2, cloudBaseSize1 / 3 * 2);
+    p.pop();
+
+// Cloud 2
+p.push();
+p.translate(p.width * 0.05 * widthScale3, p.height * -0.3 * heightScale3);
+const { x: offsetX2, y: offsetY2 } = applySquareWaveOffset();
+p.translate(offsetX2, offsetY2);
+const cloudBaseSize2 = size * 1;
+const scale2 = applySquareWaveScale();
+p.scale(scale2);
+p.fill(oscillatingAccent1.r, oscillatingAccent1.g, oscillatingAccent1.b, opacityValue);
+p.rect(-cloudBaseSize2 / 2, -cloudBaseSize2 / 2, cloudBaseSize2, cloudBaseSize2);
+p.pop();
+
+      // Cloud 3
+      p.push();
+      p.translate(p.width * 0.01 * widthScale3, p.height * -0.2 * heightScale3);
+      const { x: offsetX3, y: offsetY3 } = applySquareWaveOffset();
+      p.translate(offsetX3, offsetY3);
+      const cloudBaseSize3 = size * 1;
+      const scale3 = applySquareWaveScale();
+      p.scale(scale3);
+      p.fill(mixedAccent2.r, mixedAccent2.g, mixedAccent2.b, opacityValue);
+      p.rect(-cloudBaseSize3 / 4, -cloudBaseSize3 / 4, cloudBaseSize3 / 2, cloudBaseSize3 / 2);
+      p.pop();
+
+// Cloud 4
+p.push();
+p.translate(p.width * -0.04 * widthScale3, p.height * -0.36 * heightScale3);
+const { x: offsetX4, y: offsetY4 } = applySquareWaveOffset();
+p.translate(offsetX4, offsetY4);
+const cloudBaseSize4 = size * 1.1;
+const scale4 = applySquareWaveScale();
+p.scale(scale4);
+p.fill(oscillatingAccent3.r, oscillatingAccent2.g, oscillatingAccent1.b, opacityValue);
+p.rect(-cloudBaseSize4 / 3, -cloudBaseSize4 / 3, cloudBaseSize4 * 0.75, cloudBaseSize4 * 0.75);
+p.pop();
+
+      // Cloud 5
+      p.push();
+      p.translate(p.width * -0.1 * widthScale3, p.height * -0.32 * heightScale3);
+      const { x: offsetX5, y: offsetY5 } = applySquareWaveOffset();
+      p.translate(offsetX5, offsetY5);
+      const cloudBaseSize5 = size * 0.6;
+      const scale5 = applySquareWaveScale();
+      p.scale(scale5);
+      p.fill(oscillatingBlended.r, oscillatingBlended.g, oscillatingBlended.b, opacityValue);
+      p.rect(-cloudBaseSize5 / 3, -cloudBaseSize5 / 3, cloudBaseSize5 * 1.2, cloudBaseSize5 * 1.2);
+      p.pop();
       } else if (shape === 'acid-rain') {
         // Placeholder: Dark clouds, acid rain effect
       } else if (shape === 'fireworld') {
         // Placeholder: Balanced environment (some trees, some clouds)
-        p.fill(oscillatingBlended.r, oscillatingBlended.g, oscillatingBlended.b, opacityValue);
-        p.triangle(
-          -size / 2, size / 2,   // Left corner
-          size / 2, size / 2,    // Right corner
-          0, -size / 2           // Top corner
-        );
-        // Draw 2-3 slightly overlapping triangles (stacked vertically)
-        p.fill(oscillatingBlended.r, oscillatingBlended.g, oscillatingBlended.b);
-        p.triangle(
-          -size / 2, size / 2 - size * 0.3,
-          size / 2, size / 2 - size * 0.3,
-          0, -size / 2 - size * 0.3
-        );
-        p.triangle(
-          -size / 2, size / 2 - size * 0.6,
-          size / 2, size / 2 - size * 0.6,
-          0, -size / 2 - size * 0.6
-        );
-      }
+// Tree 1   
+p.push();
+p.translate(p.width * -0.4 * widthScale, p.height * 0.2 * heightScale2);
+const treeBaseSize1 = size * 0.8; //Smaller tree   
+const treeHeightFactor = 0.8;     
+const verticalSpacing1 = treeBaseSize1 * 0.55;
+
+p.fill(oscillatingAccent1.r, oscillatingAccent2.g, oscillatingAccent3.b);
+p.triangle(-treeBaseSize1 / 2, treeBaseSize1 / 2, treeBaseSize1 / 2, treeBaseSize1 / 2, 0, -treeBaseSize1 / 2);
+p.fill(mixedAccent1.r, oscillatingAccent1.g, oscillatingAccent1.b);
+p.triangle(-treeBaseSize1 / 2 * treeHeightFactor, treeBaseSize1 / 2 - verticalSpacing1, treeBaseSize1 / 2 * treeHeightFactor, treeBaseSize1 / 2 - verticalSpacing1, 0, -treeBaseSize1 / 2 * treeHeightFactor - verticalSpacing1);
+p.fill(oscillatingAccent2.r, mixedAccent1.g, mixedAccent3.b);
+p.triangle(-treeBaseSize1 / 2 * treeHeightFactor * 0.8, treeBaseSize1 / 2 - 2 * verticalSpacing1, treeBaseSize1 / 2 * treeHeightFactor * 0.8, treeBaseSize1 / 2 - 2 * verticalSpacing1, 0, -treeBaseSize1 / 2 * treeHeightFactor * 0.8 - 2 * verticalSpacing1);
+p.pop();
+
+    // Tree 2 (Large)
+    p.push();
+    p.translate(p.width * 0.4 * widthScale2, p.height * 0.2 * heightScale2);
+    const treeBaseSize2 = size * 1.1; // Smaller tree
+    const verticalSpacing2 = treeBaseSize2 * 0.62;
+
+    p.fill(oscillatingAccent2.r, mixedAccent3.g, oscillatingAccent1.b);
+    p.triangle(-treeBaseSize2 / 2, treeBaseSize2 / 2, treeBaseSize2 / 2, treeBaseSize2 / 2, 0, -treeBaseSize2 / 2);
+    p.fill(mixedAccent2.r, oscillatingAccent1.g, oscillatingAccent1.b);
+    p.triangle(-treeBaseSize2 / 2 * treeHeightFactor, treeBaseSize2 / 2 - verticalSpacing2, treeBaseSize2 / 2 * treeHeightFactor, treeBaseSize2 / 2 - verticalSpacing2, 0, -treeBaseSize2 / 2 * treeHeightFactor - verticalSpacing2);
+    p.fill(oscillatingAccent2.r, mixedAccent1.g, mixedAccent3.b);
+    p.triangle(-treeBaseSize2 / 2 * treeHeightFactor * 0.8, treeBaseSize2 / 2 - 2 * verticalSpacing2, treeBaseSize2 / 2 * treeHeightFactor * 0.8, treeBaseSize2 / 2 - 2 * verticalSpacing2, 0, -treeBaseSize2 / 2 * treeHeightFactor * 0.8 - 2 * verticalSpacing2);
+    p.pop();
+
+// Tree 3 (Medium)
+p.push();
+p.translate(p.width * -0.2 * widthScale, p.height * 0.1 * heightScale2);
+const treeBaseSize3 = size * 1.2; // Default size
+const verticalSpacing3 = treeBaseSize3 * 0.35;
+
+p.fill(mixedAccent1.r, mixedAccent3.g, mixedAccent2.b);
+p.triangle(-treeBaseSize3 / 2, treeBaseSize3 / 2, treeBaseSize3 / 2, treeBaseSize3 / 2, 0, -treeBaseSize3 / 2);
+p.fill(oscillatingAccent2.r, oscillatingAccent2.g, oscillatingAccent1.b);
+p.triangle(-treeBaseSize3 / 2 * treeHeightFactor, treeBaseSize3 / 2 - verticalSpacing3, treeBaseSize3 / 2 * treeHeightFactor, treeBaseSize3 / 2 - verticalSpacing3, 0, -treeBaseSize3 / 2 * treeHeightFactor - verticalSpacing3);
+p.fill(oscillatingAccent1.r, mixedAccent2.g, mixedAccent1.b);
+p.triangle(-treeBaseSize3 / 2 * treeHeightFactor * 0.8, treeBaseSize3 / 2 - 2 * verticalSpacing3, treeBaseSize3 / 2 * treeHeightFactor * 0.8, treeBaseSize3 / 2 - 2 * verticalSpacing3, 0, -treeBaseSize3 / 2 * treeHeightFactor * 0.8 - 2 * verticalSpacing3);
+p.pop();
+
+    // Tree 4 (Large)
+    p.push();
+    p.translate(p.width * -0.3 * widthScale2, p.height * 0.2 * heightScale);
+    const treeBaseSize4 = size * 2; // Slightly larger
+    const verticalSpacing4 = treeBaseSize4 * 0.42;
+
+    p.fill(oscillatingAccent1.r, mixedAccent3.g, mixedAccent1.b);
+    p.triangle(-treeBaseSize4 / 2, treeBaseSize4 / 2, treeBaseSize4 / 2, treeBaseSize4 / 2, 0, -treeBaseSize4 / 2);
+    p.fill(mixedAccent2.r, oscillatingAccent3.g, oscillatingAccent3.b);
+    p.triangle(-treeBaseSize4 / 2 * treeHeightFactor, treeBaseSize4 / 2 - verticalSpacing4, treeBaseSize4 / 2 * treeHeightFactor, treeBaseSize4 / 2 - verticalSpacing4, 0, -treeBaseSize4 / 2 * treeHeightFactor - verticalSpacing4);
+    p.fill(oscillatingAccent3.r, mixedAccent2.g, mixedAccent1.b);
+    p.triangle(-treeBaseSize4 / 2 * treeHeightFactor * 0.8, treeBaseSize4 / 2 - 2 * verticalSpacing4, treeBaseSize4 / 2 * treeHeightFactor * 0.8, treeBaseSize4 / 2 - 2 * verticalSpacing4, 0, -treeBaseSize4 / 2 * treeHeightFactor * 0.8 - 2 * verticalSpacing4);
+    p.pop();
+
+// Tree 5 (Large)
+p.push();
+p.translate(p.width * 0.3 * widthScale2, p.height * 0.2 * heightScale);
+const treeBaseSize5 = size * 2.4; // Larger tree
+const verticalSpacing5 = treeBaseSize5 * 0.48;
+
+p.fill(oscillatingAccent3.r, mixedAccent3.g, mixedAccent2.b);
+p.triangle(-treeBaseSize5 / 2, treeBaseSize5 / 2, treeBaseSize5 / 2, treeBaseSize5 / 2, 0, -treeBaseSize5 / 2);
+p.fill(oscillatingAccent1.r, mixedAccent2.g, mixedAccent2.b);
+p.triangle(-treeBaseSize5 / 2 * treeHeightFactor, treeBaseSize5 / 2 - verticalSpacing5, treeBaseSize5 / 2 * treeHeightFactor, treeBaseSize5 / 2 - verticalSpacing5, 0, -treeBaseSize5 / 2 * treeHeightFactor - verticalSpacing5);
+p.fill(mixedAccent1.r, oscillatingAccent1.g, oscillatingAccent1.b);
+p.triangle(-treeBaseSize5 / 2 * treeHeightFactor * 0.8, treeBaseSize5 / 2 - 2 * verticalSpacing5, treeBaseSize5 / 2 * treeHeightFactor * 0.8, treeBaseSize5 / 2 - 2 * verticalSpacing5, 0, -treeBaseSize5 / 2 * treeHeightFactor * 0.8 - 2 * verticalSpacing5);
+p.pop();
+
+    // Cloud 1
+    p.push();
+    p.translate(p.width * 0.1 * widthScale3, p.height * -0.4 * heightScale3 + heightOffset);
+    const { x: offsetX1, y: offsetY1 } = applySquareWaveOffset();
+    p.translate(offsetX1, offsetY1);
+    const cloudBaseSize1 = size * 1.1;
+    const scale1 = applySquareWaveScale();
+    p.scale(scale1);
+    p.fill(oscillatingBlended.r, oscillatingBlended.g, oscillatingBlended.b, opacityValue);
+    p.rect(-cloudBaseSize1 / 3, -cloudBaseSize1 / 3, cloudBaseSize1 / 3 * 2, cloudBaseSize1 / 3 * 2);
+    p.pop();
+
+// Cloud 2
+p.push();
+p.translate(p.width * 0.05 * widthScale3, p.height * -0.3 * heightScale3 + heightOffset);
+const { x: offsetX2, y: offsetY2 } = applySquareWaveOffset();
+p.translate(offsetX2, offsetY2);
+const cloudBaseSize2 = size * 1;
+const scale2 = applySquareWaveScale();
+p.scale(scale2);
+p.fill(oscillatingAccent1.r, oscillatingAccent1.g, oscillatingAccent1.b, opacityValue);
+p.rect(-cloudBaseSize2 / 2, -cloudBaseSize2 / 2, cloudBaseSize2, cloudBaseSize2);
+p.pop();
+
+      // Cloud 3
+      p.push();
+      p.translate(p.width * 0.01 * widthScale3, p.height * -0.2 * heightScale3 + heightOffset);
+      const { x: offsetX3, y: offsetY3 } = applySquareWaveOffset();
+      p.translate(offsetX3, offsetY3);
+      const cloudBaseSize3 = size * 1;
+      const scale3 = applySquareWaveScale();
+      p.scale(scale3);
+      p.fill(mixedAccent2.r, mixedAccent2.g, mixedAccent2.b, opacityValue);
+      p.rect(-cloudBaseSize3 / 4, -cloudBaseSize3 / 4, cloudBaseSize3 / 2, cloudBaseSize3 / 2);
       p.pop();
+
+// Cloud 4
+p.push();
+p.translate(p.width * -0.04 * widthScale3, p.height * -0.36 * heightScale3 + heightOffset);
+const { x: offsetX4, y: offsetY4 } = applySquareWaveOffset();
+p.translate(offsetX4, offsetY4);
+const cloudBaseSize4 = size * 1.1;
+const scale4 = applySquareWaveScale();
+p.scale(scale4);
+p.fill(oscillatingAccent3.r, oscillatingAccent2.g, oscillatingAccent1.b, opacityValue);
+p.rect(-cloudBaseSize4 / 3, -cloudBaseSize4 / 3, cloudBaseSize4 * 0.75, cloudBaseSize4 * 0.75);
+p.pop();
+
+      // Cloud 5
+      p.push();
+      p.translate(p.width * -0.1 * widthScale3, p.height * -0.32 * heightScale3 + heightOffset);
+      const { x: offsetX5, y: offsetY5 } = applySquareWaveOffset();
+      p.translate(offsetX5, offsetY5);
+      const cloudBaseSize5 = size * 0.6;
+      const scale5 = applySquareWaveScale();
+      p.scale(scale5);
+      p.fill(oscillatingBlended.r, oscillatingBlended.g, oscillatingBlended.b, opacityValue);
+      p.rect(-cloudBaseSize5 / 3, -cloudBaseSize5 / 3, cloudBaseSize5 * 1.2, cloudBaseSize5 * 1.2);
+      p.pop();
+      }
     });
   };
 };
