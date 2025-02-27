@@ -20,7 +20,7 @@ const getPositionByViewport = (id = null, customX = null, customY = null) => {
   } else if (width >= 768 && width < 1024) {
     bar1Position = { x: window.innerWidth * 0.2, y: window.innerHeight * 0.51 };
   } else {
-    bar1Position = { x: window.innerWidth * 0.76, y: window.innerHeight * 0.14 };
+    bar1Position = { x: window.innerWidth * 0.81, y: window.innerHeight * 0.14 };
   }
 
   // Define bar2's position
@@ -108,7 +108,7 @@ const buttonRefs = {
 const hasMoved = useRef(false);
 const dragAnimationRef = useRef(null);
 const currentMediaQuery = useRef(getPositionByViewport());
-const [topGraph, setTopGraph] = useState(null);
+const [topGraph, setTopGraph] = useState('bar2')
 
 useEffect(() => {
   const initialPosition = getPositionByViewport();

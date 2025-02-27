@@ -247,29 +247,137 @@ const Canvas = ({ answers }) => {
   const colorTransitionRef = useRef(0); // Transition progress
   const previousColorRef = useRef('rgb(150, 150, 150)'); // Start from neutral color
 
-// Define what to do with the weight we got
-useEffect(() => {
-  const behaviorScore = computeBehaviorScore(answers);
-  const newColor = calculateFinalColor(answers);
+  const elementsVisibilityRef = useRef({
+    tree1Visible: false,
+    tree2Visible: false,
+    tree3Visible: false,
+    tree4Visible: false,
+    tree5Visible: false,
+    cloud1Visible: false,
+    cloud2Visible: false,
+    cloud3Visible: false,
+    cloud4Visible: false,
+    cloud5Visible: false,
+  });
 
-  if (Object.keys(answers).length === 0) {
-    shapesRef.current = ['neutral-land'];
-    colorsRef.current = [newColor];
-  } else {
-    let shape;
-    if (behaviorScore < 0.2) shape = 'lush-environment';
-    else if (behaviorScore < 0.4) shape = 'fewer-trees';
-    else if (behaviorScore < 0.6) shape = 'chimneys';
-    else if (behaviorScore < 0.8) shape = 'acid-rain';
-    else shape = 'fireworld';
+  useEffect(() => {
+    const behaviorScore = computeBehaviorScore(answers);
+    const newColor = calculateFinalColor(answers);
 
-    previousColorRef.current = colorsRef.current[0] || newColor;
-    colorTransitionRef.current = 0;
-    shapesRef.current = [shape];
-    colorsRef.current = [newColor];
-  }
-}, [answers]);
-  
+    if (Object.keys(answers).length === 0) {
+      shapesRef.current = ['neutral-land'];
+      colorsRef.current = [newColor];
+    } else {
+      let shape;
+      if (behaviorScore < 0.2) shape = 'lush-environment';
+      else if (behaviorScore < 0.4) shape = 'fewer-trees';
+      else if (behaviorScore < 0.6) shape = 'chimneys';
+      else if (behaviorScore < 0.8) shape = 'acid-rain';
+      else shape = 'fireworld';
+
+      previousColorRef.current = colorsRef.current[0] || newColor;
+      colorTransitionRef.current = 0;
+      shapesRef.current = [shape];
+      colorsRef.current = [newColor];
+    }
+
+    // Update elements visibility persistently
+    const newVisibility = {
+      tree1Visible: false,
+      tree2Visible: false,
+      tree3Visible: false,
+      tree4Visible: false,
+      tree5Visible: false,
+      cloud1Visible: false,
+      cloud2Visible: false,
+      cloud3Visible: false,
+      cloud4Visible: false,
+      cloud5Visible: false,
+    };
+
+    if (shapesRef.current[0] === 'neutral-land') {
+      Object.assign(newVisibility, {
+        tree1Visible: true,
+        tree2Visible: true,
+        tree3Visible: true,
+        tree4Visible: true,
+        tree5Visible: true,
+        cloud1Visible: true,
+        cloud2Visible: true,
+        cloud3Visible: true,
+        cloud4Visible: true,
+        cloud5Visible: true,
+      });
+    } else if (shapesRef.current[0] === 'lush-environment') {
+      Object.assign(newVisibility, {
+        tree1Visible: true,
+        tree2Visible: true,
+        tree3Visible: true,
+        tree4Visible: true,
+        tree5Visible: true,
+        cloud1Visible: true,
+        cloud2Visible: true,
+        cloud3Visible: true,
+        cloud4Visible: true,
+        cloud5Visible: true,
+      });
+    } else if (shapesRef.current[0] === 'fewer-trees') {
+      Object.assign(newVisibility, {
+        tree1Visible: true,
+        tree2Visible: true,
+        tree3Visible: true,
+        tree4Visible: true,
+        tree5Visible: true,
+        cloud1Visible: true,
+        cloud2Visible: true,
+        cloud3Visible: true,
+        cloud4Visible: false,
+        cloud5Visible: true,
+      });
+    } else if (shapesRef.current[0] === 'chimneys') {
+      Object.assign(newVisibility, {
+        tree1Visible: true,
+        tree2Visible: true,
+        tree3Visible: true,
+        tree4Visible: false,
+        tree5Visible: true,
+        cloud1Visible: true,
+        cloud2Visible: false,
+        cloud3Visible: true,
+        cloud4Visible: false,
+        cloud5Visible: true,
+      });
+    } else if (shapesRef.current[0] === 'acid-rain') {
+      Object.assign(newVisibility, {
+        tree1Visible: true,
+        tree2Visible: false,
+        tree3Visible: true,
+        tree4Visible: false,
+        tree5Visible: true,
+        cloud1Visible: false,
+        cloud2Visible: false,
+        cloud3Visible: true,
+        cloud4Visible: false,
+        cloud5Visible: true,
+      });
+    } else if (shapesRef.current[0] === 'fireworld') {
+      Object.assign(newVisibility, {
+        tree1Visible: false,
+        tree2Visible: false,
+        tree3Visible: true,
+        tree4Visible: false,
+        tree5Visible: true,
+        cloud1Visible: false,
+        cloud2Visible: false,
+        cloud3Visible: false,
+        cloud4Visible: false,
+        cloud5Visible: false,
+      });
+    }
+
+    elementsVisibilityRef.current = newVisibility; // Update persistently
+  }, [answers]);
+
 useEffect(() => {
 const sketch = (p) => {
   p.setup = () => {
@@ -339,14 +447,13 @@ const accent1RGB = extractRGB(accent1Lerp);
 const accent2RGB = extractRGB(accent2Lerp);
 const accent3RGB = extractRGB(accent3Lerp);
 
+// Opacity toggle bumpy behavior
+const opacityValue = applyOpacityToggle(100, 1);
+p.noStroke();
 
-    // Opacity toggle bumpy behavior
-    const opacityValue = applyOpacityToggle(100, 1);
-    p.noStroke();
-  
-    shapesRef.current.forEach((shape) => {
-    p.push();
-    p.translate(centerX, centerY);
+shapesRef.current.forEach((shape) => {
+p.push();
+p.translate(centerX, centerY);
 
     /* Example full shape 
         p.push();
@@ -373,372 +480,34 @@ const accent3RGB = extractRGB(accent3Lerp);
     // p.translate(offsetX, offsetY);
 
       // Define scaling factors based on viewport width
-      const widthScale = p.width < 1024 ? 0.5 : 1;
-      const widthScale2 = p.width < 1024 ? 1.1 : 1;
-      const widthScale3 = p.width < 1024 ? 2.4 : 1;
-      const heightScale = p.width < 1024 ? 0.2 : 1;
-      const heightScale2 = p.width < 1024 ? -0.3 : 1;
-      const heightScale3 = p.width < 1024 ? -0.45 : 1;
-      const heightOffset = p.width < 1024 ? p.height * -0.47 : 0;
+      
+const widthScale = p.width < 1024 ? 0.5 : 1;
+const widthScale2 = p.width < 1024 ? 1.2 : 1;
+const widthScale3 = p.width < 1024 ? 2.4 : 1;
+const heightScale = p.width < 1024 ? -0.15 : 1;
+const heightScale2 = p.width < 1024 ? -0.3 : 1;
+const heightScale3 = p.width < 1024 ? -0.45 : 1;
+const heightOffset = p.width < 1024 ? p.height * -0.47 : 0;
   
-      // New environment states declared (not drawn yet)
-      if (shape === 'neutral-land') {
-        // Placeholder: Balanced environment (some trees, some clouds) 
-// Tree 1   
-p.push();
-p.translate(p.width * -0.4 * widthScale, p.height * 0.2 * heightScale2);
-const treeBaseSize1 = size * 0.8; //Smaller tree   
-const treeHeightFactor = 0.8;     
-const verticalSpacing1 = treeBaseSize1 * 0.55;
+const treeHeightFactor = 0.8; 
 
-p.fill(oscillatingAccent1.r, oscillatingAccent2.g, oscillatingAccent3.b);
-p.triangle(-treeBaseSize1 / 2, treeBaseSize1 / 2, treeBaseSize1 / 2, treeBaseSize1 / 2, 0, -treeBaseSize1 / 2);
-p.fill(mixedAccent1.r, oscillatingAccent1.g, oscillatingAccent1.b);
-p.triangle(-treeBaseSize1 / 2 * treeHeightFactor, treeBaseSize1 / 2 - verticalSpacing1, treeBaseSize1 / 2 * treeHeightFactor, treeBaseSize1 / 2 - verticalSpacing1, 0, -treeBaseSize1 / 2 * treeHeightFactor - verticalSpacing1);
-p.fill(oscillatingAccent2.r, mixedAccent1.g, mixedAccent3.b);
-p.triangle(-treeBaseSize1 / 2 * treeHeightFactor * 0.8, treeBaseSize1 / 2 - 2 * verticalSpacing1, treeBaseSize1 / 2 * treeHeightFactor * 0.8, treeBaseSize1 / 2 - 2 * verticalSpacing1, 0, -treeBaseSize1 / 2 * treeHeightFactor * 0.8 - 2 * verticalSpacing1);
-p.pop();
+const elementsVisibility = elementsVisibilityRef.current;
 
-    // Tree 2 (Large)
-    p.push();
-    p.translate(p.width * 0.4 * widthScale2, p.height * 0.2 * heightScale2);
-    const treeBaseSize2 = size * 1.1; // Smaller tree
-    const verticalSpacing2 = treeBaseSize2 * 0.62;
+if (elementsVisibility.cloud1Visible) {
+  // Cloud 1
+  p.push();
+  p.translate(p.width * 0.1 * widthScale3, p.height * -0.4 * heightScale3 + heightOffset);
+  const { x: offsetX1, y: offsetY1 } = applySquareWaveOffset();
+  p.translate(offsetX1, offsetY1);
+  const cloudBaseSize1 = size * 1.1;
+  const scale1 = applySquareWaveScale();
+  p.scale(scale1);
+  p.fill(oscillatingBlended.r, oscillatingBlended.g, oscillatingBlended.b, opacityValue);
+  p.rect(-cloudBaseSize1 / 3, -cloudBaseSize1 / 3, cloudBaseSize1 / 3 * 2, cloudBaseSize1 / 3 * 2);
+  p.pop();
+}
 
-    p.fill(oscillatingAccent2.r, mixedAccent3.g, oscillatingAccent1.b);
-    p.triangle(-treeBaseSize2 / 2, treeBaseSize2 / 2, treeBaseSize2 / 2, treeBaseSize2 / 2, 0, -treeBaseSize2 / 2);
-    p.fill(mixedAccent2.r, oscillatingAccent1.g, oscillatingAccent1.b);
-    p.triangle(-treeBaseSize2 / 2 * treeHeightFactor, treeBaseSize2 / 2 - verticalSpacing2, treeBaseSize2 / 2 * treeHeightFactor, treeBaseSize2 / 2 - verticalSpacing2, 0, -treeBaseSize2 / 2 * treeHeightFactor - verticalSpacing2);
-    p.fill(oscillatingAccent2.r, mixedAccent1.g, mixedAccent3.b);
-    p.triangle(-treeBaseSize2 / 2 * treeHeightFactor * 0.8, treeBaseSize2 / 2 - 2 * verticalSpacing2, treeBaseSize2 / 2 * treeHeightFactor * 0.8, treeBaseSize2 / 2 - 2 * verticalSpacing2, 0, -treeBaseSize2 / 2 * treeHeightFactor * 0.8 - 2 * verticalSpacing2);
-    p.pop();
-
-// Tree 3 (Medium)
-p.push();
-p.translate(p.width * -0.2 * widthScale, p.height * 0.1 * heightScale2);
-const treeBaseSize3 = size * 1.2; // Default size
-const verticalSpacing3 = treeBaseSize3 * 0.35;
-
-p.fill(mixedAccent1.r, mixedAccent3.g, mixedAccent2.b);
-p.triangle(-treeBaseSize3 / 2, treeBaseSize3 / 2, treeBaseSize3 / 2, treeBaseSize3 / 2, 0, -treeBaseSize3 / 2);
-p.fill(oscillatingAccent2.r, oscillatingAccent2.g, oscillatingAccent1.b);
-p.triangle(-treeBaseSize3 / 2 * treeHeightFactor, treeBaseSize3 / 2 - verticalSpacing3, treeBaseSize3 / 2 * treeHeightFactor, treeBaseSize3 / 2 - verticalSpacing3, 0, -treeBaseSize3 / 2 * treeHeightFactor - verticalSpacing3);
-p.fill(oscillatingAccent1.r, mixedAccent2.g, mixedAccent1.b);
-p.triangle(-treeBaseSize3 / 2 * treeHeightFactor * 0.8, treeBaseSize3 / 2 - 2 * verticalSpacing3, treeBaseSize3 / 2 * treeHeightFactor * 0.8, treeBaseSize3 / 2 - 2 * verticalSpacing3, 0, -treeBaseSize3 / 2 * treeHeightFactor * 0.8 - 2 * verticalSpacing3);
-p.pop();
-
-    // Tree 4 (Large)
-    p.push();
-    p.translate(p.width * -0.3 * widthScale2, p.height * 0.2 * heightScale);
-    const treeBaseSize4 = size * 2; // Slightly larger
-    const verticalSpacing4 = treeBaseSize4 * 0.42;
-
-    p.fill(oscillatingAccent1.r, mixedAccent3.g, mixedAccent1.b);
-    p.triangle(-treeBaseSize4 / 2, treeBaseSize4 / 2, treeBaseSize4 / 2, treeBaseSize4 / 2, 0, -treeBaseSize4 / 2);
-    p.fill(mixedAccent2.r, oscillatingAccent3.g, oscillatingAccent3.b);
-    p.triangle(-treeBaseSize4 / 2 * treeHeightFactor, treeBaseSize4 / 2 - verticalSpacing4, treeBaseSize4 / 2 * treeHeightFactor, treeBaseSize4 / 2 - verticalSpacing4, 0, -treeBaseSize4 / 2 * treeHeightFactor - verticalSpacing4);
-    p.fill(oscillatingAccent3.r, mixedAccent2.g, mixedAccent1.b);
-    p.triangle(-treeBaseSize4 / 2 * treeHeightFactor * 0.8, treeBaseSize4 / 2 - 2 * verticalSpacing4, treeBaseSize4 / 2 * treeHeightFactor * 0.8, treeBaseSize4 / 2 - 2 * verticalSpacing4, 0, -treeBaseSize4 / 2 * treeHeightFactor * 0.8 - 2 * verticalSpacing4);
-    p.pop();
-
-// Tree 5 (Large)
-p.push();
-p.translate(p.width * 0.3 * widthScale2, p.height * 0.2 * heightScale);
-const treeBaseSize5 = size * 2.4; // Larger tree
-const verticalSpacing5 = treeBaseSize5 * 0.48;
-
-p.fill(oscillatingAccent3.r, mixedAccent3.g, mixedAccent2.b);
-p.triangle(-treeBaseSize5 / 2, treeBaseSize5 / 2, treeBaseSize5 / 2, treeBaseSize5 / 2, 0, -treeBaseSize5 / 2);
-p.fill(oscillatingAccent1.r, mixedAccent2.g, mixedAccent2.b);
-p.triangle(-treeBaseSize5 / 2 * treeHeightFactor, treeBaseSize5 / 2 - verticalSpacing5, treeBaseSize5 / 2 * treeHeightFactor, treeBaseSize5 / 2 - verticalSpacing5, 0, -treeBaseSize5 / 2 * treeHeightFactor - verticalSpacing5);
-p.fill(mixedAccent1.r, oscillatingAccent1.g, oscillatingAccent1.b);
-p.triangle(-treeBaseSize5 / 2 * treeHeightFactor * 0.8, treeBaseSize5 / 2 - 2 * verticalSpacing5, treeBaseSize5 / 2 * treeHeightFactor * 0.8, treeBaseSize5 / 2 - 2 * verticalSpacing5, 0, -treeBaseSize5 / 2 * treeHeightFactor * 0.8 - 2 * verticalSpacing5);
-p.pop();
-
-    // Cloud 1
-    p.push();
-    p.translate(p.width * 0.1 * widthScale3, p.height * -0.4 * heightScale3);
-    const { x: offsetX1, y: offsetY1 } = applySquareWaveOffset();
-    p.translate(offsetX1, offsetY1);
-    const cloudBaseSize1 = size * 1.1;
-    const scale1 = applySquareWaveScale();
-    p.scale(scale1);
-    p.fill(oscillatingBlended.r, oscillatingBlended.g, oscillatingBlended.b, opacityValue);
-    p.rect(-cloudBaseSize1 / 3, -cloudBaseSize1 / 3, cloudBaseSize1 / 3 * 2, cloudBaseSize1 / 3 * 2);
-    p.pop();
-
-// Cloud 2
-p.push();
-p.translate(p.width * 0.05 * widthScale3, p.height * -0.3 * heightScale3);
-const { x: offsetX2, y: offsetY2 } = applySquareWaveOffset();
-p.translate(offsetX2, offsetY2);
-const cloudBaseSize2 = size * 1;
-const scale2 = applySquareWaveScale();
-p.scale(scale2);
-p.fill(oscillatingAccent1.r, oscillatingAccent1.g, oscillatingAccent1.b, opacityValue);
-p.rect(-cloudBaseSize2 / 2, -cloudBaseSize2 / 2, cloudBaseSize2, cloudBaseSize2);
-p.pop();
-
-      // Cloud 3
-      p.push();
-      p.translate(p.width * 0.01 * widthScale3, p.height * -0.2 * heightScale3);
-      const { x: offsetX3, y: offsetY3 } = applySquareWaveOffset();
-      p.translate(offsetX3, offsetY3);
-      const cloudBaseSize3 = size * 1;
-      const scale3 = applySquareWaveScale();
-      p.scale(scale3);
-      p.fill(mixedAccent2.r, mixedAccent2.g, mixedAccent2.b, opacityValue);
-      p.rect(-cloudBaseSize3 / 4, -cloudBaseSize3 / 4, cloudBaseSize3 / 2, cloudBaseSize3 / 2);
-      p.pop();
-
-// Cloud 4
-p.push();
-p.translate(p.width * -0.04 * widthScale3, p.height * -0.36 * heightScale3);
-const { x: offsetX4, y: offsetY4 } = applySquareWaveOffset();
-p.translate(offsetX4, offsetY4);
-const cloudBaseSize4 = size * 1.1;
-const scale4 = applySquareWaveScale();
-p.scale(scale4);
-p.fill(oscillatingAccent3.r, oscillatingAccent2.g, oscillatingAccent1.b, opacityValue);
-p.rect(-cloudBaseSize4 / 3, -cloudBaseSize4 / 3, cloudBaseSize4 * 0.75, cloudBaseSize4 * 0.75);
-p.pop();
-
-      // Cloud 5
-      p.push();
-      p.translate(p.width * -0.1 * widthScale3, p.height * -0.32 * heightScale3);
-      const { x: offsetX5, y: offsetY5 } = applySquareWaveOffset();
-      p.translate(offsetX5, offsetY5);
-      const cloudBaseSize5 = size * 0.6;
-      const scale5 = applySquareWaveScale();
-      p.scale(scale5);
-      p.fill(oscillatingBlended.r, oscillatingBlended.g, oscillatingBlended.b, opacityValue);
-      p.rect(-cloudBaseSize5 / 3, -cloudBaseSize5 / 3, cloudBaseSize5 * 1.2, cloudBaseSize5 * 1.2);
-      p.pop();
-
-      } else if (shape === 'lush-environment') {
-        // Placeholder: More trees, denser clouds
-      } else if (shape === 'fewer-trees') {
-        // Placeholder: Fewer trees, some squares appearing
-      } else if (shape === 'chimneys') {
-        // Placeholder: Chimneys emitting particles
-
-        // Tree 1   
-p.push();
-p.translate(p.width * -0.4 * widthScale, p.height * 0.2 * heightScale2);
-const treeBaseSize1 = size * 0.8; //Smaller tree   
-const treeHeightFactor = 0.8;     
-const verticalSpacing1 = treeBaseSize1 * 0.55;
-
-p.fill(oscillatingAccent1.r, oscillatingAccent2.g, oscillatingAccent3.b);
-p.triangle(-treeBaseSize1 / 2, treeBaseSize1 / 2, treeBaseSize1 / 2, treeBaseSize1 / 2, 0, -treeBaseSize1 / 2);
-p.fill(mixedAccent1.r, oscillatingAccent1.g, oscillatingAccent1.b);
-p.triangle(-treeBaseSize1 / 2 * treeHeightFactor, treeBaseSize1 / 2 - verticalSpacing1, treeBaseSize1 / 2 * treeHeightFactor, treeBaseSize1 / 2 - verticalSpacing1, 0, -treeBaseSize1 / 2 * treeHeightFactor - verticalSpacing1);
-p.fill(oscillatingAccent2.r, mixedAccent1.g, mixedAccent3.b);
-p.triangle(-treeBaseSize1 / 2 * treeHeightFactor * 0.8, treeBaseSize1 / 2 - 2 * verticalSpacing1, treeBaseSize1 / 2 * treeHeightFactor * 0.8, treeBaseSize1 / 2 - 2 * verticalSpacing1, 0, -treeBaseSize1 / 2 * treeHeightFactor * 0.8 - 2 * verticalSpacing1);
-p.pop();
-
-    // Tree 2 (Large)
-    p.push();
-    p.translate(p.width * 0.4 * widthScale2, p.height * 0.2 * heightScale2);
-    const treeBaseSize2 = size * 1.1; // Smaller tree
-    const verticalSpacing2 = treeBaseSize2 * 0.62;
-
-    p.fill(oscillatingAccent2.r, mixedAccent3.g, oscillatingAccent1.b);
-    p.triangle(-treeBaseSize2 / 2, treeBaseSize2 / 2, treeBaseSize2 / 2, treeBaseSize2 / 2, 0, -treeBaseSize2 / 2);
-    p.fill(mixedAccent2.r, oscillatingAccent1.g, oscillatingAccent1.b);
-    p.triangle(-treeBaseSize2 / 2 * treeHeightFactor, treeBaseSize2 / 2 - verticalSpacing2, treeBaseSize2 / 2 * treeHeightFactor, treeBaseSize2 / 2 - verticalSpacing2, 0, -treeBaseSize2 / 2 * treeHeightFactor - verticalSpacing2);
-    p.fill(oscillatingAccent2.r, mixedAccent1.g, mixedAccent3.b);
-    p.triangle(-treeBaseSize2 / 2 * treeHeightFactor * 0.8, treeBaseSize2 / 2 - 2 * verticalSpacing2, treeBaseSize2 / 2 * treeHeightFactor * 0.8, treeBaseSize2 / 2 - 2 * verticalSpacing2, 0, -treeBaseSize2 / 2 * treeHeightFactor * 0.8 - 2 * verticalSpacing2);
-    p.pop();
-
-// Tree 3 (Medium)
-p.push();
-p.translate(p.width * -0.2 * widthScale, p.height * 0.1 * heightScale2);
-const treeBaseSize3 = size * 1.2; // Default size
-const verticalSpacing3 = treeBaseSize3 * 0.35;
-
-p.fill(mixedAccent1.r, mixedAccent3.g, mixedAccent2.b);
-p.triangle(-treeBaseSize3 / 2, treeBaseSize3 / 2, treeBaseSize3 / 2, treeBaseSize3 / 2, 0, -treeBaseSize3 / 2);
-p.fill(oscillatingAccent2.r, oscillatingAccent2.g, oscillatingAccent1.b);
-p.triangle(-treeBaseSize3 / 2 * treeHeightFactor, treeBaseSize3 / 2 - verticalSpacing3, treeBaseSize3 / 2 * treeHeightFactor, treeBaseSize3 / 2 - verticalSpacing3, 0, -treeBaseSize3 / 2 * treeHeightFactor - verticalSpacing3);
-p.fill(oscillatingAccent1.r, mixedAccent2.g, mixedAccent1.b);
-p.triangle(-treeBaseSize3 / 2 * treeHeightFactor * 0.8, treeBaseSize3 / 2 - 2 * verticalSpacing3, treeBaseSize3 / 2 * treeHeightFactor * 0.8, treeBaseSize3 / 2 - 2 * verticalSpacing3, 0, -treeBaseSize3 / 2 * treeHeightFactor * 0.8 - 2 * verticalSpacing3);
-p.pop();
-
-    // Tree 4 (Large)
-    p.push();
-    p.translate(p.width * -0.3 * widthScale2, p.height * 0.2 * heightScale);
-    const treeBaseSize4 = size * 2; // Slightly larger
-    const verticalSpacing4 = treeBaseSize4 * 0.42;
-
-    p.fill(oscillatingAccent1.r, mixedAccent3.g, mixedAccent1.b);
-    p.triangle(-treeBaseSize4 / 2, treeBaseSize4 / 2, treeBaseSize4 / 2, treeBaseSize4 / 2, 0, -treeBaseSize4 / 2);
-    p.fill(mixedAccent2.r, oscillatingAccent3.g, oscillatingAccent3.b);
-    p.triangle(-treeBaseSize4 / 2 * treeHeightFactor, treeBaseSize4 / 2 - verticalSpacing4, treeBaseSize4 / 2 * treeHeightFactor, treeBaseSize4 / 2 - verticalSpacing4, 0, -treeBaseSize4 / 2 * treeHeightFactor - verticalSpacing4);
-    p.fill(oscillatingAccent3.r, mixedAccent2.g, mixedAccent1.b);
-    p.triangle(-treeBaseSize4 / 2 * treeHeightFactor * 0.8, treeBaseSize4 / 2 - 2 * verticalSpacing4, treeBaseSize4 / 2 * treeHeightFactor * 0.8, treeBaseSize4 / 2 - 2 * verticalSpacing4, 0, -treeBaseSize4 / 2 * treeHeightFactor * 0.8 - 2 * verticalSpacing4);
-    p.pop();
-
-// Tree 5 (Large)
-p.push();
-p.translate(p.width * 0.3 * widthScale2, p.height * 0.2 * heightScale);
-const treeBaseSize5 = size * 2.4; // Larger tree
-const verticalSpacing5 = treeBaseSize5 * 0.48;
-
-p.fill(oscillatingAccent3.r, mixedAccent3.g, mixedAccent2.b);
-p.triangle(-treeBaseSize5 / 2, treeBaseSize5 / 2, treeBaseSize5 / 2, treeBaseSize5 / 2, 0, -treeBaseSize5 / 2);
-p.fill(oscillatingAccent1.r, mixedAccent2.g, mixedAccent2.b);
-p.triangle(-treeBaseSize5 / 2 * treeHeightFactor, treeBaseSize5 / 2 - verticalSpacing5, treeBaseSize5 / 2 * treeHeightFactor, treeBaseSize5 / 2 - verticalSpacing5, 0, -treeBaseSize5 / 2 * treeHeightFactor - verticalSpacing5);
-p.fill(mixedAccent1.r, oscillatingAccent1.g, oscillatingAccent1.b);
-p.triangle(-treeBaseSize5 / 2 * treeHeightFactor * 0.8, treeBaseSize5 / 2 - 2 * verticalSpacing5, treeBaseSize5 / 2 * treeHeightFactor * 0.8, treeBaseSize5 / 2 - 2 * verticalSpacing5, 0, -treeBaseSize5 / 2 * treeHeightFactor * 0.8 - 2 * verticalSpacing5);
-p.pop();
-
-    // Cloud 1
-    p.push();
-    p.translate(p.width * 0.1 * widthScale3, p.height * -0.4 * heightScale3);
-    const { x: offsetX1, y: offsetY1 } = applySquareWaveOffset();
-    p.translate(offsetX1, offsetY1);
-    const cloudBaseSize1 = size * 1.1;
-    const scale1 = applySquareWaveScale();
-    p.scale(scale1);
-    p.fill(oscillatingBlended.r, oscillatingBlended.g, oscillatingBlended.b, opacityValue);
-    p.rect(-cloudBaseSize1 / 3, -cloudBaseSize1 / 3, cloudBaseSize1 / 3 * 2, cloudBaseSize1 / 3 * 2);
-    p.pop();
-
-// Cloud 2
-p.push();
-p.translate(p.width * 0.05 * widthScale3, p.height * -0.3 * heightScale3);
-const { x: offsetX2, y: offsetY2 } = applySquareWaveOffset();
-p.translate(offsetX2, offsetY2);
-const cloudBaseSize2 = size * 1;
-const scale2 = applySquareWaveScale();
-p.scale(scale2);
-p.fill(oscillatingAccent1.r, oscillatingAccent1.g, oscillatingAccent1.b, opacityValue);
-p.rect(-cloudBaseSize2 / 2, -cloudBaseSize2 / 2, cloudBaseSize2, cloudBaseSize2);
-p.pop();
-
-      // Cloud 3
-      p.push();
-      p.translate(p.width * 0.01 * widthScale3, p.height * -0.2 * heightScale3);
-      const { x: offsetX3, y: offsetY3 } = applySquareWaveOffset();
-      p.translate(offsetX3, offsetY3);
-      const cloudBaseSize3 = size * 1;
-      const scale3 = applySquareWaveScale();
-      p.scale(scale3);
-      p.fill(mixedAccent2.r, mixedAccent2.g, mixedAccent2.b, opacityValue);
-      p.rect(-cloudBaseSize3 / 4, -cloudBaseSize3 / 4, cloudBaseSize3 / 2, cloudBaseSize3 / 2);
-      p.pop();
-
-// Cloud 4
-p.push();
-p.translate(p.width * -0.04 * widthScale3, p.height * -0.36 * heightScale3);
-const { x: offsetX4, y: offsetY4 } = applySquareWaveOffset();
-p.translate(offsetX4, offsetY4);
-const cloudBaseSize4 = size * 1.1;
-const scale4 = applySquareWaveScale();
-p.scale(scale4);
-p.fill(oscillatingAccent3.r, oscillatingAccent2.g, oscillatingAccent1.b, opacityValue);
-p.rect(-cloudBaseSize4 / 3, -cloudBaseSize4 / 3, cloudBaseSize4 * 0.75, cloudBaseSize4 * 0.75);
-p.pop();
-
-      // Cloud 5
-      p.push();
-      p.translate(p.width * -0.1 * widthScale3, p.height * -0.32 * heightScale3);
-      const { x: offsetX5, y: offsetY5 } = applySquareWaveOffset();
-      p.translate(offsetX5, offsetY5);
-      const cloudBaseSize5 = size * 0.6;
-      const scale5 = applySquareWaveScale();
-      p.scale(scale5);
-      p.fill(oscillatingBlended.r, oscillatingBlended.g, oscillatingBlended.b, opacityValue);
-      p.rect(-cloudBaseSize5 / 3, -cloudBaseSize5 / 3, cloudBaseSize5 * 1.2, cloudBaseSize5 * 1.2);
-      p.pop();
-      } else if (shape === 'acid-rain') {
-        // Placeholder: Dark clouds, acid rain effect
-      } else if (shape === 'fireworld') {
-        // Placeholder: Balanced environment (some trees, some clouds)
-// Tree 1   
-p.push();
-p.translate(p.width * -0.4 * widthScale, p.height * 0.2 * heightScale2);
-const treeBaseSize1 = size * 0.8; //Smaller tree   
-const treeHeightFactor = 0.8;     
-const verticalSpacing1 = treeBaseSize1 * 0.55;
-
-p.fill(oscillatingAccent1.r, oscillatingAccent2.g, oscillatingAccent3.b);
-p.triangle(-treeBaseSize1 / 2, treeBaseSize1 / 2, treeBaseSize1 / 2, treeBaseSize1 / 2, 0, -treeBaseSize1 / 2);
-p.fill(mixedAccent1.r, oscillatingAccent1.g, oscillatingAccent1.b);
-p.triangle(-treeBaseSize1 / 2 * treeHeightFactor, treeBaseSize1 / 2 - verticalSpacing1, treeBaseSize1 / 2 * treeHeightFactor, treeBaseSize1 / 2 - verticalSpacing1, 0, -treeBaseSize1 / 2 * treeHeightFactor - verticalSpacing1);
-p.fill(oscillatingAccent2.r, mixedAccent1.g, mixedAccent3.b);
-p.triangle(-treeBaseSize1 / 2 * treeHeightFactor * 0.8, treeBaseSize1 / 2 - 2 * verticalSpacing1, treeBaseSize1 / 2 * treeHeightFactor * 0.8, treeBaseSize1 / 2 - 2 * verticalSpacing1, 0, -treeBaseSize1 / 2 * treeHeightFactor * 0.8 - 2 * verticalSpacing1);
-p.pop();
-
-    // Tree 2 (Large)
-    p.push();
-    p.translate(p.width * 0.4 * widthScale2, p.height * 0.2 * heightScale2);
-    const treeBaseSize2 = size * 1.1; // Smaller tree
-    const verticalSpacing2 = treeBaseSize2 * 0.62;
-
-    p.fill(oscillatingAccent2.r, mixedAccent3.g, oscillatingAccent1.b);
-    p.triangle(-treeBaseSize2 / 2, treeBaseSize2 / 2, treeBaseSize2 / 2, treeBaseSize2 / 2, 0, -treeBaseSize2 / 2);
-    p.fill(mixedAccent2.r, oscillatingAccent1.g, oscillatingAccent1.b);
-    p.triangle(-treeBaseSize2 / 2 * treeHeightFactor, treeBaseSize2 / 2 - verticalSpacing2, treeBaseSize2 / 2 * treeHeightFactor, treeBaseSize2 / 2 - verticalSpacing2, 0, -treeBaseSize2 / 2 * treeHeightFactor - verticalSpacing2);
-    p.fill(oscillatingAccent2.r, mixedAccent1.g, mixedAccent3.b);
-    p.triangle(-treeBaseSize2 / 2 * treeHeightFactor * 0.8, treeBaseSize2 / 2 - 2 * verticalSpacing2, treeBaseSize2 / 2 * treeHeightFactor * 0.8, treeBaseSize2 / 2 - 2 * verticalSpacing2, 0, -treeBaseSize2 / 2 * treeHeightFactor * 0.8 - 2 * verticalSpacing2);
-    p.pop();
-
-// Tree 3 (Medium)
-p.push();
-p.translate(p.width * -0.2 * widthScale, p.height * 0.1 * heightScale2);
-const treeBaseSize3 = size * 1.2; // Default size
-const verticalSpacing3 = treeBaseSize3 * 0.35;
-
-p.fill(mixedAccent1.r, mixedAccent3.g, mixedAccent2.b);
-p.triangle(-treeBaseSize3 / 2, treeBaseSize3 / 2, treeBaseSize3 / 2, treeBaseSize3 / 2, 0, -treeBaseSize3 / 2);
-p.fill(oscillatingAccent2.r, oscillatingAccent2.g, oscillatingAccent1.b);
-p.triangle(-treeBaseSize3 / 2 * treeHeightFactor, treeBaseSize3 / 2 - verticalSpacing3, treeBaseSize3 / 2 * treeHeightFactor, treeBaseSize3 / 2 - verticalSpacing3, 0, -treeBaseSize3 / 2 * treeHeightFactor - verticalSpacing3);
-p.fill(oscillatingAccent1.r, mixedAccent2.g, mixedAccent1.b);
-p.triangle(-treeBaseSize3 / 2 * treeHeightFactor * 0.8, treeBaseSize3 / 2 - 2 * verticalSpacing3, treeBaseSize3 / 2 * treeHeightFactor * 0.8, treeBaseSize3 / 2 - 2 * verticalSpacing3, 0, -treeBaseSize3 / 2 * treeHeightFactor * 0.8 - 2 * verticalSpacing3);
-p.pop();
-
-    // Tree 4 (Large)
-    p.push();
-    p.translate(p.width * -0.3 * widthScale2, p.height * 0.2 * heightScale);
-    const treeBaseSize4 = size * 2; // Slightly larger
-    const verticalSpacing4 = treeBaseSize4 * 0.42;
-
-    p.fill(oscillatingAccent1.r, mixedAccent3.g, mixedAccent1.b);
-    p.triangle(-treeBaseSize4 / 2, treeBaseSize4 / 2, treeBaseSize4 / 2, treeBaseSize4 / 2, 0, -treeBaseSize4 / 2);
-    p.fill(mixedAccent2.r, oscillatingAccent3.g, oscillatingAccent3.b);
-    p.triangle(-treeBaseSize4 / 2 * treeHeightFactor, treeBaseSize4 / 2 - verticalSpacing4, treeBaseSize4 / 2 * treeHeightFactor, treeBaseSize4 / 2 - verticalSpacing4, 0, -treeBaseSize4 / 2 * treeHeightFactor - verticalSpacing4);
-    p.fill(oscillatingAccent3.r, mixedAccent2.g, mixedAccent1.b);
-    p.triangle(-treeBaseSize4 / 2 * treeHeightFactor * 0.8, treeBaseSize4 / 2 - 2 * verticalSpacing4, treeBaseSize4 / 2 * treeHeightFactor * 0.8, treeBaseSize4 / 2 - 2 * verticalSpacing4, 0, -treeBaseSize4 / 2 * treeHeightFactor * 0.8 - 2 * verticalSpacing4);
-    p.pop();
-
-// Tree 5 (Large)
-p.push();
-p.translate(p.width * 0.3 * widthScale2, p.height * 0.2 * heightScale);
-const treeBaseSize5 = size * 2.4; // Larger tree
-const verticalSpacing5 = treeBaseSize5 * 0.48;
-
-p.fill(oscillatingAccent3.r, mixedAccent3.g, mixedAccent2.b);
-p.triangle(-treeBaseSize5 / 2, treeBaseSize5 / 2, treeBaseSize5 / 2, treeBaseSize5 / 2, 0, -treeBaseSize5 / 2);
-p.fill(oscillatingAccent1.r, mixedAccent2.g, mixedAccent2.b);
-p.triangle(-treeBaseSize5 / 2 * treeHeightFactor, treeBaseSize5 / 2 - verticalSpacing5, treeBaseSize5 / 2 * treeHeightFactor, treeBaseSize5 / 2 - verticalSpacing5, 0, -treeBaseSize5 / 2 * treeHeightFactor - verticalSpacing5);
-p.fill(mixedAccent1.r, oscillatingAccent1.g, oscillatingAccent1.b);
-p.triangle(-treeBaseSize5 / 2 * treeHeightFactor * 0.8, treeBaseSize5 / 2 - 2 * verticalSpacing5, treeBaseSize5 / 2 * treeHeightFactor * 0.8, treeBaseSize5 / 2 - 2 * verticalSpacing5, 0, -treeBaseSize5 / 2 * treeHeightFactor * 0.8 - 2 * verticalSpacing5);
-p.pop();
-
-    // Cloud 1
-    p.push();
-    p.translate(p.width * 0.1 * widthScale3, p.height * -0.4 * heightScale3 + heightOffset);
-    const { x: offsetX1, y: offsetY1 } = applySquareWaveOffset();
-    p.translate(offsetX1, offsetY1);
-    const cloudBaseSize1 = size * 1.1;
-    const scale1 = applySquareWaveScale();
-    p.scale(scale1);
-    p.fill(oscillatingBlended.r, oscillatingBlended.g, oscillatingBlended.b, opacityValue);
-    p.rect(-cloudBaseSize1 / 3, -cloudBaseSize1 / 3, cloudBaseSize1 / 3 * 2, cloudBaseSize1 / 3 * 2);
-    p.pop();
-
+if (elementsVisibility.cloud2Visible) {
 // Cloud 2
 p.push();
 p.translate(p.width * 0.05 * widthScale3, p.height * -0.3 * heightScale3 + heightOffset);
@@ -750,19 +519,23 @@ p.scale(scale2);
 p.fill(oscillatingAccent1.r, oscillatingAccent1.g, oscillatingAccent1.b, opacityValue);
 p.rect(-cloudBaseSize2 / 2, -cloudBaseSize2 / 2, cloudBaseSize2, cloudBaseSize2);
 p.pop();
+}
 
-      // Cloud 3
-      p.push();
-      p.translate(p.width * 0.01 * widthScale3, p.height * -0.2 * heightScale3 + heightOffset);
-      const { x: offsetX3, y: offsetY3 } = applySquareWaveOffset();
-      p.translate(offsetX3, offsetY3);
-      const cloudBaseSize3 = size * 1;
-      const scale3 = applySquareWaveScale();
-      p.scale(scale3);
-      p.fill(mixedAccent2.r, mixedAccent2.g, mixedAccent2.b, opacityValue);
-      p.rect(-cloudBaseSize3 / 4, -cloudBaseSize3 / 4, cloudBaseSize3 / 2, cloudBaseSize3 / 2);
-      p.pop();
+if (elementsVisibility.cloud3Visible) {
+    // Cloud 3
+    p.push();
+    p.translate(p.width * 0.01 * widthScale3, p.height * -0.2 * heightScale3 + heightOffset);
+    const { x: offsetX3, y: offsetY3 } = applySquareWaveOffset();
+    p.translate(offsetX3, offsetY3);
+    const cloudBaseSize3 = size * 1;
+    const scale3 = applySquareWaveScale();
+    p.scale(scale3);
+    p.fill(mixedAccent2.r, mixedAccent2.g, mixedAccent2.b, opacityValue);
+    p.rect(-cloudBaseSize3 / 4, -cloudBaseSize3 / 4, cloudBaseSize3 / 2, cloudBaseSize3 / 2);
+    p.pop();
+}
 
+if (elementsVisibility.cloud4Visible) {
 // Cloud 4
 p.push();
 p.translate(p.width * -0.04 * widthScale3, p.height * -0.36 * heightScale3 + heightOffset);
@@ -774,21 +547,153 @@ p.scale(scale4);
 p.fill(oscillatingAccent3.r, oscillatingAccent2.g, oscillatingAccent1.b, opacityValue);
 p.rect(-cloudBaseSize4 / 3, -cloudBaseSize4 / 3, cloudBaseSize4 * 0.75, cloudBaseSize4 * 0.75);
 p.pop();
+}
 
-      // Cloud 5
-      p.push();
-      p.translate(p.width * -0.1 * widthScale3, p.height * -0.32 * heightScale3 + heightOffset);
-      const { x: offsetX5, y: offsetY5 } = applySquareWaveOffset();
-      p.translate(offsetX5, offsetY5);
-      const cloudBaseSize5 = size * 0.6;
-      const scale5 = applySquareWaveScale();
-      p.scale(scale5);
-      p.fill(oscillatingBlended.r, oscillatingBlended.g, oscillatingBlended.b, opacityValue);
-      p.rect(-cloudBaseSize5 / 3, -cloudBaseSize5 / 3, cloudBaseSize5 * 1.2, cloudBaseSize5 * 1.2);
-      p.pop();
-      }
-    });
-  };
+if (elementsVisibility.cloud5Visible) {
+    // Cloud 5
+    p.push();
+    p.translate(p.width * -0.1 * widthScale3, p.height * -0.32 * heightScale3 + heightOffset);
+    const { x: offsetX5, y: offsetY5 } = applySquareWaveOffset();
+    p.translate(offsetX5, offsetY5);
+    const cloudBaseSize5 = size * 0.6;
+    const scale5 = applySquareWaveScale();
+    p.scale(scale5);
+    p.fill(oscillatingBlended.r, oscillatingBlended.g, oscillatingBlended.b, opacityValue);
+    p.rect(-cloudBaseSize5 / 3, -cloudBaseSize5 / 3, cloudBaseSize5 * 1.2, cloudBaseSize5 * 1.2);
+    p.pop();
+}
+
+if (elementsVisibility.tree2Visible) {
+// Tree 1   
+p.push();
+p.translate(p.width * -0.4 * widthScale, p.height * 0.2 * heightScale2);
+const treeBaseSize1 = size * 1.1; //Smaller tree        
+const verticalSpacing1 = treeBaseSize1 * 0.55;
+
+// Draw shadow
+p.fill(oscillatingAccent1.r, oscillatingAccent2.g, oscillatingAccent3.b, 100);
+const shadowWidth = treeBaseSize1 * 0.8; // Shadow width
+const shadowHeight = treeBaseSize1 * 0.2; // More compressed for natural look
+p.ellipse(0, treeBaseSize1 / 2 + verticalSpacing1 * 0.2, shadowWidth, shadowHeight);
+
+p.fill(oscillatingAccent1.r, oscillatingAccent2.g, oscillatingAccent3.b);
+p.triangle(-treeBaseSize1 / 2, treeBaseSize1 / 2, treeBaseSize1 / 2, treeBaseSize1 / 2, 0, -treeBaseSize1 / 2);
+p.fill(mixedAccent1.r, oscillatingAccent1.g, oscillatingAccent1.b);
+p.triangle(-treeBaseSize1 / 2 * treeHeightFactor, treeBaseSize1 / 2 - verticalSpacing1, treeBaseSize1 / 2 * treeHeightFactor, treeBaseSize1 / 2 - verticalSpacing1, 0, -treeBaseSize1 / 2 * treeHeightFactor - verticalSpacing1);
+p.fill(oscillatingAccent2.r, mixedAccent1.g, mixedAccent3.b);
+p.triangle(-treeBaseSize1 / 2 * treeHeightFactor * 0.8, treeBaseSize1 / 2 - 2 * verticalSpacing1, treeBaseSize1 / 2 * treeHeightFactor * 0.8, treeBaseSize1 / 2 - 2 * verticalSpacing1, 0, -treeBaseSize1 / 2 * treeHeightFactor * 0.8 - 2 * verticalSpacing1);
+p.pop();
+}
+
+if (elementsVisibility.tree2Visible) {
+    // Tree 2 (Large)
+    p.push();
+    p.translate(p.width * 0.4 * widthScale2, p.height * 0.2 * heightScale2);
+    const treeBaseSize2 = size * 1.1; // Smaller tree
+    const verticalSpacing2 = treeBaseSize2 * 0.62;
+
+    // Draw shadow
+    p.fill(oscillatingAccent1.r, oscillatingAccent2.g, oscillatingAccent3.b, 90);
+    const shadowWidth2 = treeBaseSize2 * 0.8; // Shadow width
+    const shadowHeight2 = treeBaseSize2 * 0.2; // More compressed for natural look
+    p.ellipse(0, treeBaseSize2 / 2 + verticalSpacing2 * 0.2, shadowWidth2, shadowHeight2);
+
+    p.fill(oscillatingAccent2.r, mixedAccent3.g, oscillatingAccent1.b);
+    p.triangle(-treeBaseSize2 / 2, treeBaseSize2 / 2, treeBaseSize2 / 2, treeBaseSize2 / 2, 0, -treeBaseSize2 / 2);
+    p.fill(mixedAccent2.r, oscillatingAccent1.g, oscillatingAccent1.b);
+    p.triangle(-treeBaseSize2 / 2 * treeHeightFactor, treeBaseSize2 / 2 - verticalSpacing2, treeBaseSize2 / 2 * treeHeightFactor, treeBaseSize2 / 2 - verticalSpacing2, 0, -treeBaseSize2 / 2 * treeHeightFactor - verticalSpacing2);
+    p.fill(oscillatingAccent2.r, mixedAccent1.g, mixedAccent3.b);
+    p.triangle(-treeBaseSize2 / 2 * treeHeightFactor * 0.8, treeBaseSize2 / 2 - 2 * verticalSpacing2, treeBaseSize2 / 2 * treeHeightFactor * 0.8, treeBaseSize2 / 2 - 2 * verticalSpacing2, 0, -treeBaseSize2 / 2 * treeHeightFactor * 0.8 - 2 * verticalSpacing2);
+    p.pop();
+}
+
+if (elementsVisibility.tree3Visible) {
+// Tree 3 (Medium)
+p.push();
+p.translate(p.width * -0.2 * widthScale, p.height * 0.1 * heightScale2);
+const treeBaseSize3 = size * 0.9; // Default size
+const verticalSpacing3 = treeBaseSize3 * 0.42;
+
+// Draw shadow
+p.fill(oscillatingAccent1.r, oscillatingAccent2.g, oscillatingAccent3.b, 70);
+const shadowWidth3 = treeBaseSize3 * 0.8; // Shadow width
+const shadowHeight3 = treeBaseSize3 * 0.2; // More compressed for natural look
+p.ellipse(0, treeBaseSize3 / 1.87 + verticalSpacing3 * 0.2, shadowWidth3, shadowHeight3);
+
+p.fill(mixedAccent1.r, mixedAccent3.g, mixedAccent2.b);
+p.triangle(-treeBaseSize3 / 2, treeBaseSize3 / 2, treeBaseSize3 / 2, treeBaseSize3 / 2, 0, -treeBaseSize3 / 2);
+p.fill(oscillatingAccent2.r, oscillatingAccent2.g, oscillatingAccent1.b);
+p.triangle(-treeBaseSize3 / 2 * treeHeightFactor, treeBaseSize3 / 2 - verticalSpacing3, treeBaseSize3 / 2 * treeHeightFactor, treeBaseSize3 / 2 - verticalSpacing3, 0, -treeBaseSize3 / 2 * treeHeightFactor - verticalSpacing3);
+p.fill(oscillatingAccent1.r, mixedAccent2.g, mixedAccent1.b);
+p.triangle(-treeBaseSize3 / 2 * treeHeightFactor * 0.8, treeBaseSize3 / 2 - 2 * verticalSpacing3, treeBaseSize3 / 2 * treeHeightFactor * 0.8, treeBaseSize3 / 2 - 2 * verticalSpacing3, 0, -treeBaseSize3 / 2 * treeHeightFactor * 0.8 - 2 * verticalSpacing3);
+p.pop();
+}
+
+if (elementsVisibility.tree4Visible) {
+    // Tree 4 (Large)
+    p.push();
+    p.translate(p.width * -0.3 * widthScale2, p.height * 0.2 * heightScale);
+    const treeBaseSize4 = size * 2; // Slightly larger
+    const verticalSpacing4 = treeBaseSize4 * 0.42;
+
+    // Draw shadow
+    p.fill(oscillatingAccent1.r, oscillatingAccent2.g, oscillatingAccent2.b, 120);
+    const shadowWidth4 = treeBaseSize4 * 0.8; // Shadow width
+    const shadowHeight4 = treeBaseSize4 * 0.2; // More compressed for natural look
+    p.ellipse(0, treeBaseSize4 / 1.9 + verticalSpacing4 * 0.2, shadowWidth4, shadowHeight4);
+
+    p.fill(oscillatingAccent1.r, mixedAccent3.g, mixedAccent1.b);
+    p.triangle(-treeBaseSize4 / 2, treeBaseSize4 / 2, treeBaseSize4 / 2, treeBaseSize4 / 2, 0, -treeBaseSize4 / 2);
+    p.fill(mixedAccent2.r, oscillatingAccent3.g, oscillatingAccent3.b);
+    p.triangle(-treeBaseSize4 / 2 * treeHeightFactor, treeBaseSize4 / 2 - verticalSpacing4, treeBaseSize4 / 2 * treeHeightFactor, treeBaseSize4 / 2 - verticalSpacing4, 0, -treeBaseSize4 / 2 * treeHeightFactor - verticalSpacing4);
+    p.fill(oscillatingAccent3.r, mixedAccent2.g, mixedAccent1.b);
+    p.triangle(-treeBaseSize4 / 2 * treeHeightFactor * 0.8, treeBaseSize4 / 2 - 2 * verticalSpacing4, treeBaseSize4 / 2 * treeHeightFactor * 0.8, treeBaseSize4 / 2 - 2 * verticalSpacing4, 0, -treeBaseSize4 / 2 * treeHeightFactor * 0.8 - 2 * verticalSpacing4);
+    p.pop();
+}
+
+if (elementsVisibility.tree5Visible) {
+// Tree 5 (Large)
+p.push();
+p.translate(p.width * 0.3 * widthScale2, p.height * 0.2 * heightScale);
+const treeBaseSize5 = size * 2.4; // Larger tree
+const verticalSpacing5 = treeBaseSize5 * 0.48;
+
+// Draw shadow
+p.fill(mixedAccent3.r, oscillatingAccent2.g, oscillatingAccent2.b, 145);
+const shadowWidth5 = treeBaseSize5 * 0.8; // Shadow width
+const shadowHeight5 = treeBaseSize5 * 0.2; // More compressed for natural look
+p.ellipse(0, treeBaseSize5 / 1.95 + verticalSpacing5 * 0.2, shadowWidth5, shadowHeight5);
+
+p.fill(oscillatingAccent3.r, mixedAccent3.g, mixedAccent2.b);
+p.triangle(-treeBaseSize5 / 2, treeBaseSize5 / 2, treeBaseSize5 / 2, treeBaseSize5 / 2, 0, -treeBaseSize5 / 2);
+p.fill(oscillatingAccent1.r, mixedAccent2.g, mixedAccent2.b);
+p.triangle(-treeBaseSize5 / 2 * treeHeightFactor, treeBaseSize5 / 2 - verticalSpacing5, treeBaseSize5 / 2 * treeHeightFactor, treeBaseSize5 / 2 - verticalSpacing5, 0, -treeBaseSize5 / 2 * treeHeightFactor - verticalSpacing5);
+p.fill(mixedAccent1.r, oscillatingAccent1.g, oscillatingAccent1.b);
+p.triangle(-treeBaseSize5 / 2 * treeHeightFactor * 0.8, treeBaseSize5 / 2 - 2 * verticalSpacing5, treeBaseSize5 / 2 * treeHeightFactor * 0.8, treeBaseSize5 / 2 - 2 * verticalSpacing5, 0, -treeBaseSize5 / 2 * treeHeightFactor * 0.8 - 2 * verticalSpacing5);
+p.pop();
+}
+
+/* if (shapesRef.current.includes('neutral-land')) {
+  const centerX = p.width / 2;
+  const centerY = p.height / 2;
+
+  // Adjust this value if needed
+  const adjustedCenterY = centerY + 100;
+
+  const lakeWidth = p.width * 0.2; // 40% of the width
+  const lakeHeight = p.height * 0.1; // 10% of the height
+
+  const opacityValue = applyOpacityToggle(255, 1, 100); // Ensure opacity range is correct
+
+  // Lake color (blue)
+  p.fill(0, 128, 255, 255);
+
+  // Render the lake
+  p.ellipse(centerX, adjustedCenterY, lakeWidth, lakeHeight);
+  console.log("CenterX:", centerX, "CenterY:", centerY, "AdjustedCenterY:", adjustedCenterY);
+} */
+});
+};
 };
 
   const q5Instance = new q5(sketch, canvasRef.current);

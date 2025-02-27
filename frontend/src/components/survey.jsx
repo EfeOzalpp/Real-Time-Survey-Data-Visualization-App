@@ -56,7 +56,7 @@ const handleSubmit = async () => {
 
   try {
     await client.create({
-      _type: 'userResponse',
+      _type: 'userResponseTest',
       ...answers,
       submittedAt: new Date().toISOString(),
     });

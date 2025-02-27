@@ -22,7 +22,7 @@ const normalizeAnswers = (response) => {
 // Fetch and process survey data from Sanity
 export const fetchSurveyData = (callback) => {
   const query = `
-    *[_type == "userResponse"] | order(_createdAt desc) {
+    *[_type == "userResponseTest"] | order(_createdAt desc) {
       _id,
       question1,
       question2,

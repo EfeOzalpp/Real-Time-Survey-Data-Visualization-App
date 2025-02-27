@@ -5,7 +5,7 @@ const GamificationGeneral = ({ dotId, percentage, color }) => {
   const textCache = useRef({}); 
   const [currentText, setCurrentText] = useState({ title: '', description: '' });
 
-  // ✅ Load cache from localStorage on mount
+  // Load cache from localStorage on mount
   useEffect(() => {
     const storedCache = localStorage.getItem('gamificationDotCache');
     if (storedCache) {
@@ -16,7 +16,7 @@ const GamificationGeneral = ({ dotId, percentage, color }) => {
   useEffect(() => {
     if (!dotId || percentage === undefined) return;
 
-    // ✅ Check if this specific dot already has a cached title/description
+    // Check if this specific dot already has a cached title/description
     if (textCache.current[dotId]) {
       setCurrentText(textCache.current[dotId]);
       return;
@@ -68,8 +68,55 @@ const GamificationGeneral = ({ dotId, percentage, color }) => {
 
   if (!dotId || percentage === undefined || color === undefined) return null;
 
+  // Color of knob to match the gradient 
   const { title, description } = currentText;
-
+  const cubicBezier = (t, p0, p1, p2, p3) => {
+    const c = (1 - t), c2 = c * c, c3 = c2 * c;
+    const t2 = t * t, t3 = t2 * t;
+    return (c3 * p0) + (3 * c2 * t * p1) + (3 * c * t2 * p2) + (t3 * p3);
+  };
+  
+  const skewPercentage = (percentage) => {
+    return cubicBezier(percentage / 100, 0, 0.6, 0.85, 1) * 100;
+  };
+  
+  const interpolateColor = (t, color1, color2) => {
+    return {
+      r: Math.round(color1.r + (color2.r - color1.r) * t),
+      g: Math.round(color1.g + (color2.g - color1.g) * t),
+      b: Math.round(color1.b + (color2.b - color1.b) * t),
+    };
+  };
+  
+  const getSkewedColor = (percentage) => {
+    const skewedT = skewPercentage(percentage) / 100;
+  
+    const colorStops = [
+      { stop: 0.0, color: { r: 249, g: 14, b: 33 } },      // Red
+      { stop: 0.46, color: { r: 252, g: 159, b: 29 } },   // Orange
+      { stop: 0.64, color: { r: 245, g: 252, b: 95 } },    // Yellow
+      { stop: 0.8, color: { r: 0, g: 253, b: 156 } },   // Lime-Yellow
+      { stop: 1.0, color: { r: 1, g: 238, b: 0 } }       // Green
+    ];
+  
+    let lower = colorStops[0], upper = colorStops[colorStops.length - 1];
+  
+    for (let i = 0; i < colorStops.length - 1; i++) {
+      if (skewedT >= colorStops[i].stop && skewedT <= colorStops[i + 1].stop) {
+        lower = colorStops[i];
+        upper = colorStops[i + 1];
+        break;
+      }
+    }
+  
+    const range = upper.stop - lower.stop;
+    const t = range === 0 ? 0 : (skewedT - lower.stop) / range;
+  
+    const finalColor = interpolateColor(t, lower.color, upper.color);
+    return `rgb(${finalColor.r}, ${finalColor.g}, ${finalColor.b})`;
+  };
+  
+  const skewedColor = getSkewedColor(percentage);
   return (
     <div className="generalized-result">
       <h4 className="gam-general-title">This person is:</h4>
@@ -80,7 +127,10 @@ const GamificationGeneral = ({ dotId, percentage, color }) => {
           </div>
           <div className="gam-description-text">
             <p>
-              {description} <strong>{percentage}%</strong> of other people.
+              {description} <strong
+                style={{ 
+            textShadow: `0px 0px 12px ${color}, 0px 0px 22px ${skewedColor}`
+          }}>{percentage}%</strong> of other people.
             </p>
           </div>
         </div>
@@ -91,7 +141,7 @@ const GamificationGeneral = ({ dotId, percentage, color }) => {
               className="gam-knob-arrow"
               style={{
                 bottom: `${percentage}%`, 
-                borderBottom: `15px solid ${color}`,
+                borderBottom: `15px solid ${skewedColor}`,
               }}
             ></div>
           </div>
