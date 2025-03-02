@@ -4,7 +4,7 @@ Gamification includes playfulness and specific feedback directly based on their 
 Within this project: 
 ### Bridging the Gap Between Three.js 3D Context and React DOM
 
-When working with Three.js and React Three/Drei, the `Html` component provides a powerful way to anchor 2D elements (like tooltips, popups, or labels) to 3D objects in a scene. 
+When working with Three.js and React Three Fiber, the `Html` component provides a powerful way to anchor 2D elements (like tooltips, popups, or labels) to 3D objects in a scene. 
 However, this approach falls short in dynamic scenarios, such as:
 
 - Zooming in and out of the 3D visualization.
