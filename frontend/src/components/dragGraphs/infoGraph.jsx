@@ -3,28 +3,28 @@ const SimpleComponent = () => {
     <div>
       <div className="text-divider">
         <h1 className="title-divider">Where Do You Belong?</h1>
-        <p>Governments set policies. Activists push for urgency. But real <u>change</u>? It happens where our choices shape the future.</p>
+        <p>Governments may set policies. But <u>change</u> happens in the choices we make every day.</p>
         </div>
       <div className="main-graph-divider">
       <div className="divider">
         <div className="dot dot-red"></div>
         <div className="dot-text">
           <h4>Red</h4>
-          <p>Living large, wasting more—believe it or not, this adds up.</p>
+          <p>Maybe there's room to throw in a little green?</p>
         </div>
       </div>
       <div className="divider">
         <div className="dot dot-yellow"></div>
         <div className="dot-text">
           <h4>Yellow</h4>
-          <p>Trying, but still stuck in old habits-believe in you.</p>
+          <p>Old habits die hard. It's realistic thought.</p>
         </div>
       </div>
       <div className="divider">
         <div className="dot dot-green"></div>
         <div className="dot-text">
           <h4>Green</h4>
-          <p>Making moves that actually matter, thanks for being mindful.</p>
+          <p>Well, you're a natural, keep at it.</p>
         </div>
       </div>
     </div>

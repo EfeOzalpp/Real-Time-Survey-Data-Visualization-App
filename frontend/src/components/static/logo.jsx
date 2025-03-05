@@ -10,13 +10,13 @@ const CenteredLogo = () => {
         alt="Butterfly Habits Logo"
         className="logo-image" />
         </div><div className="feedback">
-        <a
+        <p><a
           href="https://docs.google.com/document/d/1lBKllYBu-OS34sMtGmJuJjTZlcN09QRPo5EdhCTQueM/edit?usp=sharing"
           target="_blank"
           rel="noopener noreferrer"
         >
-          Provide Feedback
-        </a>
+          Write feedback x 
+        </a></p>
       </div></div></>
   );
 };

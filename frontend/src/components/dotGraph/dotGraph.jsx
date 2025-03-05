@@ -55,7 +55,14 @@ const [radius, setRadius] = useState(20); // Start small (e.g., 20)
 
 // Target values based on screen size
 const targetRadius = isSmallScreen ? 100 : 200;
-const scalingFactor = 0.5;
+// Dynamic scaling factor based on number of data points
+const minFactor = 2.5; // Minimum scaling factor
+const maxFactor = 0.5;   // Maximum scaling factor
+const minPoints = 10;  // Lower limit for scaling to start
+const maxPoints = 330; // Upper limit where it maxes out
+
+const scalingFactor = minFactor + (maxFactor - minFactor) * Math.min(1, Math.max(0, (data.length - minPoints) / (maxPoints - minPoints)));
+
 const dynamicRadius = targetRadius + data.length * scalingFactor;
 const finalRadius = Math.max(minRadius, Math.min(maxRadius, dynamicRadius));
 

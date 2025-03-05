@@ -56,7 +56,7 @@ const handleSubmit = async () => {
 
   try {
     await client.create({
-      _type: 'userResponseTest',
+      _type: 'userResponse',
       ...answers,
       submittedAt: new Date().toISOString(),
     });
@@ -77,7 +77,7 @@ setTimeout(() => {
 
 const questions = [
   {
-    question: 'How do you usually travel?',
+    question: 'Do you visit natural reserves?',
     options: [
       { label: 'Public Transportation, walking or biking.', value: 'A' },
       { label: 'Electric or hybrid vehicle', value: 'B' },

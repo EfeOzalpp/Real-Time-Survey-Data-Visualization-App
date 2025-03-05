@@ -266,7 +266,7 @@ return (
       else setIsBarGraphVisible2((prev) => !prev);
     }}
   >
-    <p>{id === 'bar1' ? (isBarGraphVisible1 ? '-' : '+') : (isBarGraphVisible2 ? '-' : '+')}</p>
+    <p>{id === 'bar1' ? (isBarGraphVisible1 ? 'close' : 'open') : (isBarGraphVisible2 ? 'close' : 'open')}</p>
   </div>
 
   {(id === 'bar1' ? isBarGraphVisible1 : isBarGraphVisible2) && (

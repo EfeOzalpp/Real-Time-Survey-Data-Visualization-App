@@ -4,8 +4,9 @@ import '../styles/global-styles.css';
 import RadialBackground from '../components/static/radialBackground';
 import Survey from '../components/survey.jsx';
 import Logo from '../components/static/logo';
-import Canvas from '../components/Canvas';
-import DataVisualization from '../components/dataVisualization'; 
+import Canvas from '../components/canvas';
+import DataVisualization from '../components/dataVisualization';
+import GrungeTexture from "../components/grunge.tsx"; 
 import { useDynamicMargin } from '../utils/dynamicMargin.ts';
 
 const FrontPage = () => {
@@ -51,6 +52,7 @@ if (animationVisible) {
   
   return (
     <div className="app-content">
+      <GrungeTexture />
       <div className="logo-divider">
         <Logo />
       </div>
