@@ -50,28 +50,28 @@ if (animationVisible) {
 }
 }, [animationVisible]);
   
-  return (
-    <div className="app-content">
-      <GrungeTexture />
-      <div className="logo-divider">
-        <Logo />
-      </div>
-        {!animationVisible && <Canvas answers={answers} />} {/* Render Canvas only when animationVisible is true */}
-      {/* Graph always renders, visibility controlled by class */}
-      <div className={`graph-wrapper ${graphVisible ? 'visible' : ''}`}>
-        <DataVisualization />
-      </div>
-      <div className={`survey-section-wrapper3 ${surveyWrapperClass}`}>
-        <Survey
-          setAnimationVisible={setAnimationVisible}
-          setGraphVisible={setGraphVisible}
-          setSurveyWrapperClass={setSurveyWrapperClass}
-          onAnswersUpdate={setAnswers}
-        />
-      </div>
-      <RadialBackground />
+return (
+  <div className="app-content">
+    <GrungeTexture />
+    <div className="logo-divider">
+      <Logo />
     </div>
-  );
+      {!animationVisible && <Canvas answers={answers} />} {/* Render Canvas only when animationVisible is true */}
+    {/* Graph always renders, visibility controlled by class */}
+    <div className={`graph-wrapper ${graphVisible ? 'visible' : ''}`}>
+      <DataVisualization />
+    </div>
+    <div className={`survey-section-wrapper3 ${surveyWrapperClass}`}>
+      <Survey
+        setAnimationVisible={setAnimationVisible}
+        setGraphVisible={setGraphVisible}
+        setSurveyWrapperClass={setSurveyWrapperClass}
+        onAnswersUpdate={setAnswers}
+      />
+    </div>
+    <RadialBackground />
+  </div>
+ );
 };
 
 export default FrontPage;

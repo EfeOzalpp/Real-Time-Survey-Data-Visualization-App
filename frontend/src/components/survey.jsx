@@ -168,7 +168,7 @@ if (currentQuestion === 0) {
         <h3 className="begin-title1">Welcome</h3>
         <h1 className="begin-title2">Butterfly Effect</h1>
         <button className="begin-button" onClick={handleStart}>
-          <h4>BEGIN</h4>
+          <h4>Jump In</h4>
         </button>
       </div>
     </div>

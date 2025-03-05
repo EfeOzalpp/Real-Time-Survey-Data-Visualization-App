@@ -66,18 +66,18 @@ button { padding-inline: 0; padding-block: 0; }
 
 /* Desktop */
 @media screen and (min-width: 1025px) {
-  h1, h2, h3, h4, p { font-family: Heebo, sans-serif; padding: 0; margin: 0; }
-  h1 { font-size: 1.8vw; line-height: 1.204em; font-weight: 500; letter-spacing: -0.23px; }
+  h2, h3, h4, p { font-family: Bungee, sans-serif; padding: 0; margin: 0; }
+  h1 { color: rgb(0, 0, 0); font-family: Bungee Shade; padding: 0; margin: 0; font-size: 2.1vw; line-height: 1.204em; letter-spacing: 0.1px; }
   h2 { font-size: 1.6vw; font-weight: 500; line-height: 1.2em; }
   .number-part h2 { line-height: 1.6em; }
   h3 { font-size: 1.22vw; font-weight: 200; }
-  h4, p { font-family: Poppins, sans-serif; }
-  h4 { font-size: 1.05vw; font-weight: 500; letter-spacing: -0.2px; line-height: 1.2em; }
+  h4, p { font-family: Patrick Hand, sans-serif; }
+  h4 { font-size: 1.45vw; font-weight: 500; letter-spacing: -0.2px; line-height: 1.2em; }
   p { font-size: 0.95vw; font-weight: 400; }
   .bar-graph-label p { font-weight: 600; line-height: 1.2em; font-size: 0.9vw; }
 
-  .radial-background, .radial-gradient { position: absolute; bottom: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
-  .radial-gradient { background: radial-gradient(circle at center bottom, rgb(238,239,240) 0%, rgba(243,243,243,0.75) 40%, rgba(0,0,0,0) 60%); }
+  .radial-background, .radial-gradient { position: absolute; bottom: 0; width: 100%; height: 100%; pointer-events: none; z-index: 3; }
+  .radial-gradient { background: radial-gradient(circle at center bottom, rgb(178, 200, 223) 0%, rgba(229, 243, 247, 0.75) 10%, rgba(0,0,0,0) 30%); }
 
   .logo-container {
     position: absolute; width: auto; height: 46px; margin: 24px 0 0 32px;
